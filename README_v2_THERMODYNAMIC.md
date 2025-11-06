@@ -6,13 +6,6 @@
 
 ---
 
-> **📦 Repository Scope**  
-> This repository contains the **physics implementation** using Dawn Field Theory. It integrates SEC operators, Möbius topology, thermodynamic coupling, and time emergence to simulate reality from first principles.
->
-> For the reusable **SDK/language primitives** (RecursiveEngine, MemoryField, PAC), see the separate [fracton](https://github.com/dawnfield-institute/fracton) repository.
-
----
-
 ## What Is This?
 
 Reality Engine v2 is a **physics discovery platform** where fundamental laws emerge from three simple principles:
@@ -91,67 +84,70 @@ pip install -r requirements.txt
 ### Run Your First Universe
 
 ```python
-from core.reality_engine import RealityEngine
-from emergence import StructureAnalyzer
+from substrate import MobiusManifold
+from conservation import ThermodynamicPAC
+from dynamics import SECOperator, TimeEmergence, ConfluenceOperator
+from emergence import ParticleDetector
+from laws import LawDetector
 
-# 1. Initialize Reality Engine
-engine = RealityEngine(size=(128, 32), dt=0.1, device='cuda')
-engine.initialize(mode='big_bang')  # Maximum entropy start
+# 1. Initialize Möbius substrate
+substrate = MobiusManifold(size=128)
+P, A, M = substrate.initialize_fields(mode='big_bang')  # Max entropy!
 
-# 2. Set up structure detection
-analyzer = StructureAnalyzer(engine, min_atom_stability=0.65)
+# 2. Initialize temperature field
+T = compute_temperature_field(A)  # T emerges from variance
 
-# 3. Evolution loop - watch structures emerge!
-for step in range(1500):
-    engine.step()
+# 3. Set up operators
+thermo_pac = ThermodynamicPAC(landauer_constant=2.87e-21)
+sec = SECOperator(alpha=1.0, beta=0.6, thermal=True)
+time_engine = TimeEmergence()
+confluence = ConfluenceOperator(substrate)
+
+# 4. Evolution loop
+for step in range(10000):
+    # Compute disequilibrium (drives everything!)
+    pressure = compute_disequilibrium(P, A)
     
-    # Analyze periodically
-    if step % 100 == 0:
-        structures = analyzer.analyze_step(step)
-        
-        print(f"\nStep {step}:")
-        print(f"  Atoms: {len(structures['atoms'])}")
-        print(f"  Molecules: {len(structures['molecules'])}")
-        print(f"  Gravity wells: {len(structures['gravity_wells'])}")
-        print(f"  Stellar regions: {len(structures['stellar_regions'])}")
-        
-        # Check what elements formed
-        if structures['atoms']:
-            elements = [a.element for a in structures['atoms']]
-            print(f"  Elements: {', '.join(set(elements))}")
+    # SEC with thermal coupling
+    A, heat_delta = sec.evolve(A, P, T)
+    T += heat_delta  # Collapse heats the field!
+    
+    # PAC with Landauer costs
+    P, A, M, erasure_heat = thermo_pac.enforce(P, A, M, T)
+    T += erasure_heat  # Information erasure costs energy!
+    
+    # Heat diffusion (prevents cold spots)
+    T = diffuse_heat(T)
+    
+    # Time emerges from interaction density
+    time_rate = time_engine.compute_rate(pressure, interactions)
+    
+    # Confluence (Möbius time step)
+    P = confluence.step(A)
+    
+    # Detect emergence
+    particles = particle_detector.find(M)
+    laws = law_detector.update(P, A, M, T, time_rate)
+    
+    # Report discoveries
+    if laws:
+        print(f"Step {step}: Discovered {laws}")
+```
+
+### Example: Watch Physics Emerge
+
+```bash
+python examples/big_bang.py
 ```
 
 Expected output:
 ```
-Step 0:
-  Atoms: 0, Molecules: 0, Gravity wells: 0, Stellar regions: 0
-
-Step 100:
-  Atoms: 2, Molecules: 0, Gravity wells: 0, Stellar regions: 1
-  Elements: H
-
-Step 200:
-  Atoms: 4, Molecules: 1, Gravity wells: 1, Stellar regions: 2
-  Elements: H
-  H₂ molecule formed!
-
-Step 400:
-  Atoms: 6, Molecules: 1, Gravity wells: 1, Stellar regions: 4
-  Elements: H
-  Gravity well stable at (45, 18)
-```
-
-### Quick Example Scripts
-
-```bash
-# Watch atoms and molecules emerge (1500 steps)
-python spikes/universe_evolution/universe_evolution.py --steps 1500
-
-# Visualize field dynamics
-python examples/field_visualizer.py
-
-# Validate heat generation (info→heat discovery)
-python spikes/thermal_validation/heat_spike_verification.py
+Step 100: Landauer principle discovered! E = I * k_T * ln(2)
+Step 500: Quantum discretization emerged from minimum info unit
+Step 1000: Particles formed at interaction density peaks
+Step 2000: Time dilation detected in dense regions (relativity!)
+Step 5000: Inverse square gravity discovered! F ∝ 1/r²
+Step 8000: 2nd law confirmed: Entropy increased monotonically
 ```
 
 ---
@@ -354,97 +350,18 @@ See [LICENSE](LICENSE) for details.
 
 ---
 
-## Repository Structure
-
-```
-reality-engine/
-├── core/              # Core field operators (SEC, PAC, Time)
-├── substrate/         # Möbius manifold substrate
-├── conservation/      # Conservation laws (ThermodynamicPAC)
-├── dynamics/          # Evolution operators (SEC, Confluence, Time)
-├── emergence/         # Structure detection (particles, atoms)
-├── laws/              # Physics law discovery
-├── tools/             # Analysis tools (AtomicAnalyzer, etc.)
-├── examples/          # Production-ready demonstrations
-│   └── field_visualizer.py  # Basic field visualization
-├── spikes/            # Research experiments (organized by topic)
-│   ├── thermal_validation/    # Info→Heat discovery validation
-│   ├── atomic_emergence/      # H, H₂ detection experiments
-│   ├── law_discovery/         # Automated physics discovery
-│   ├── universe_evolution/    # Long-term structure formation
-│   └── big_bang/              # Initialization experiments
-├── tests/             # Test suite
-├── docs/              # Full documentation
-├── ARCHITECTURE.md    # System design
-├── STATUS.md          # Implementation progress (detailed!)
-├── ROADMAP.md         # Phase 2-5 development plan
-└── README.md          # This file
-```
-
-### Spike Folders (Research Experiments)
-
-Each spike folder contains focused experiments exploring specific phenomena:
-
-- **thermal_validation/** - Validates "Without information, there can be no heat"
-  - Heat spike verification (T increases 51× as M grows 293×)
-  - Temperature-memory correlation (r=0.920)
-
-- **atomic_emergence/** - Atoms and molecules from pure dynamics
-  - 6 H atoms detected, 1 H₂ molecule formed
-  - No atomic physics programmed!
-  - Quantum states from radial patterns
-
-- **law_discovery/** - Automated physics law extraction
-  - 300-step runs analyzing field correlations
-  - Conservation law validation (PAC < 1e-12)
-  - Spatial pattern detection (1/r², exponential)
-
-- **universe_evolution/** - Long-term simulations (500-1500 steps)
-  - Gravity wells, stellar regions, dark matter detection
-  - Periodic table builder
-  - Structure formation tracking
-
-- **big_bang/** - Initialization mode comparison
-  - Pure entropy vs density perturbations vs info seeds
-  - Info seeds → 2.7× faster atom formation!
-
-Each spike has its own README with detailed results and next steps.
-
 ## Documentation
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) - Complete system design
-- [STATUS.md](STATUS.md) - Implementation progress with Phase 2-5 roadmap
-- [ROADMAP.md](ROADMAP.md) - Detailed development plan (6+ months)
+- [STATUS.md](STATUS.md) - Implementation progress
 - [docs/theory/](docs/theory/) - Theoretical foundations
-- [examples/](examples/) - Production-ready demonstrations
-- [spikes/*/README.md](spikes/) - Research experiment documentation
-
-## Current Status (Nov 6, 2025)
-
-**Phase**: Structure Emergence - Atoms & Molecules Detected! ✨
-
-**Achievements**:
-- ✅ Foundation complete (7 production steps, Nov 1-5)
-- ✅ Hydrogen atoms emerge naturally (mass ~0.14, stability 0.67-0.73)
-- ✅ H₂ molecules form via proximity bonding
-- ✅ Gravity wells detected from density clustering
-- ✅ Heat generation validated (info→heat correlation r=0.920)
-- ✅ PAC conservation at machine precision (<1e-12)
-- ✅ 2nd law compliance: 98.3%
-
-**Next**: Phase 2 - Structure Stabilization (6 weeks, Nov 6 - Dec 15)
-- Make atoms persist >1000 steps
-- Detect heavier elements (He, Li, C)
-- Complete periodic table (first 10 elements)
-- Implement energy wells for stability
-
-See [STATUS.md](STATUS.md) for weekly task breakdown and [ROADMAP.md](ROADMAP.md) for full vision.
+- [examples/](examples/) - Usage examples
 
 ---
 
-**Last Updated**: November 6, 2025  
-**Version**: 2.0.0-alpha (thermodynamic rebuild complete)  
-**Status**: Foundation complete, atoms & molecules detected, Phase 2 beginning
+**Last Updated**: November 4, 2025  
+**Version**: 2.0.0-alpha (thermodynamic rebuild)  
+**Status**: Architecture complete, implementation starting
 
 ---
 
