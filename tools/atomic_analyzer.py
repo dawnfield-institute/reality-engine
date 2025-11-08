@@ -23,35 +23,32 @@ class Atom:
     temperature: float
 
 class AtomicAnalyzer:
-    """Detect and classify atomic structures in the reality field."""
+    """
+    Detect atomic structures in the reality field.
     
-    # Approximate element classification by mass ranges
-    ELEMENT_MAP = {
-        (0, 1.5): ('H', 1),      # Hydrogen
-        (1.5, 4.5): ('He', 2),    # Helium  
-        (4.5, 7.5): ('Li', 3),    # Lithium
-        (7.5, 10.5): ('Be', 4),   # Beryllium
-        (10.5, 12.5): ('B', 5),   # Boron
-        (12.5, 14.5): ('C', 6),   # Carbon
-        (14.5, 16.5): ('N', 7),   # Nitrogen
-        (16.5, 19.5): ('O', 8),   # Oxygen
-        (19.5, 21.5): ('F', 9),   # Fluorine
-        (21.5, 24.5): ('Ne', 10), # Neon
-        (24.5, 28.5): ('Na', 11), # Sodium
-        (28.5, 32.5): ('Mg', 12), # Magnesium
-        (32.5, 36.5): ('Al', 13), # Aluminum
-        (36.5, 40.5): ('Si', 14), # Silicon
-    }
+    NOTE: This analyzer is being phased out in favor of emergence_observer.py
+    which discovers patterns without predefined assumptions.
+    
+    The ELEMENT_MAP has been removed - let the periodic table emerge naturally!
+    """
     
     def __init__(self, min_stability: float = 0.65):
         self.min_stability = min_stability
+        self.discovered_patterns = {}  # Track emergent pattern types
         
     def detect_atoms(self, state) -> List[Atom]:
         """Detect atomic structures in the field state."""
-        M = state.M.cpu().numpy()
-        A = state.A.cpu().numpy()
-        T = state.T.cpu().numpy()
-        P = state.P.cpu().numpy()
+        # Handle both FieldState and custom state objects
+        if hasattr(state, 'memory'):
+            M = state.memory.cpu().numpy()
+            A = state.actual.cpu().numpy()
+            T = state.temperature.cpu().numpy()
+            P = state.potential.cpu().numpy()
+        else:
+            M = state.M.cpu().numpy()
+            A = state.A.cpu().numpy()
+            T = state.T.cpu().numpy()
+            P = state.P.cpu().numpy()
         
         # Find stable, localized structures
         atoms = []
@@ -59,9 +56,9 @@ class AtomicAnalyzer:
         # Smooth the field slightly
         M_smooth = ndimage.gaussian_filter(M, sigma=0.5)
         
-        # Find local maxima
+        # Find local maxima (lowered threshold for emergent structures)
         local_max = ndimage.maximum_filter(M_smooth, size=3)
-        maxima = (M_smooth == local_max) & (M_smooth > 0.1)
+        maxima = (M_smooth == local_max) & (M_smooth > 0.02)  # Lowered from 0.1
         
         # Label connected regions
         labeled, num_features = ndimage.label(maxima)
@@ -93,8 +90,9 @@ class AtomicAnalyzer:
             if stability < self.min_stability:
                 continue
             
-            # Classify element
-            element, atomic_number = self._classify_element(mass)
+            # Let mass quantization emerge - no predefined elements
+            # Classify by observed properties, not assumptions
+            element, atomic_number = self._classify_by_observation(mass, stability)
             
             # Detect quantum states from oscillation patterns
             quantum_states = self._detect_quantum_states(A, pos, mass)
@@ -120,15 +118,36 @@ class AtomicAnalyzer:
         
         return atoms
     
-    def _classify_element(self, mass: float) -> Tuple[str, int]:
-        """Classify element based on mass."""
-        for mass_range, (element, z) in self.ELEMENT_MAP.items():
-            if mass_range[0] <= mass < mass_range[1]:
-                return element, z
+    def _classify_by_observation(self, mass: float, stability: float) -> Tuple[str, int]:
+        """
+        Classify structures by observed properties, not predefined assumptions.
+        Let natural quantization emerge from the data.
+        """
+        # Round mass to nearest 0.5 to find natural clustering
+        mass_bin = round(mass * 2) / 2
         
-        # Unknown heavy element
-        z_estimate = int(mass / 2) + 1
-        return f'X{z_estimate}', z_estimate
+        # Create pattern signature from mass
+        pattern_key = f"M{mass_bin:.1f}"
+        
+        if pattern_key not in self.discovered_patterns:
+            # New pattern discovered!
+            pattern_id = len(self.discovered_patterns) + 1
+            self.discovered_patterns[pattern_key] = {
+                'id': pattern_id,
+                'mass_range': (mass_bin - 0.25, mass_bin + 0.25),
+                'observations': 0,
+                'avg_stability': stability,
+            }
+        
+        pattern = self.discovered_patterns[pattern_key]
+        pattern['observations'] += 1
+        
+        # Update running average
+        n = pattern['observations']
+        pattern['avg_stability'] = (pattern['avg_stability'] * (n-1) + stability) / n
+        
+        # Label with discovered pattern
+        return pattern_key, pattern['id']
     
     def _detect_quantum_states(self, A: np.ndarray, position: Tuple, mass: float) -> List[int]:
         """
@@ -190,6 +209,211 @@ class AtomicAnalyzer:
         ionization = local_M / (local_T + 0.01)
         
         return ionization
+    
+    def track_atom_lifecycle(self, history: List[Dict], atom_id: Optional[int] = None) -> Dict:
+        """
+        Track lifecycle of atoms across simulation history.
+        
+        Analyzes why atoms form and disappear to identify stability issues.
+        
+        Args:
+            history: List of simulation states (dicts with 'A', 'P', 'M', 'T' fields)
+            atom_id: Specific atom to track (None = track all)
+            
+        Returns:
+            Dictionary with lifecycle statistics and instability causes
+        """
+        lifecycle_data = {
+            'formation_events': [],
+            'dissolution_events': [],
+            'average_lifetime': 0,
+            'max_lifetime': 0,
+            'instability_causes': {
+                'thermal_fluctuation': 0,  # High T disrupts structure
+                'memory_decay': 0,         # M field dissipates
+                'field_divergence': 0,     # A and P separate
+                'neighbor_collision': 0    # Merger with another atom
+            },
+            'stability_correlations': {}
+        }
+        
+        # Track atoms across time
+        atom_tracks = {}  # atom_id -> list of (step, atom_dict)
+        
+        for step, state_dict in enumerate(history):
+            # Convert state to object-like structure
+            class StateWrapper:
+                def __init__(self, d):
+                    for k, v in d.items():
+                        setattr(self, k, torch.tensor(v) if isinstance(v, np.ndarray) else v)
+            
+            state = StateWrapper(state_dict)
+            current_atoms = self.detect_atoms(state)
+            
+            # Convert atoms to dicts for tracking
+            atom_dicts = []
+            for atom in current_atoms:
+                atom_dicts.append({
+                    'element': atom.element,
+                    'mass': atom.mass,
+                    'position': atom.position,
+                    'stability': atom.stability,
+                    'temperature': atom.temperature,
+                    'ionization_energy': atom.ionization_energy,
+                    'memory_density': state_dict['M'][int(atom.position[0]), int(atom.position[1])],
+                    'equilibrium': 1.0 - abs(state_dict['A'][int(atom.position[0]), int(atom.position[1])] - 
+                                            state_dict['P'][int(atom.position[0]), int(atom.position[1])])
+                })
+            
+            # Match atoms between steps (simple nearest neighbor)
+            for atom in atom_dicts:
+                matched_id = self._find_matching_atom(atom, atom_tracks, step)
+                if matched_id not in atom_tracks:
+                    atom_tracks[matched_id] = []
+                    lifecycle_data['formation_events'].append({
+                        'step': step,
+                        'atom_id': matched_id,
+                        'initial_mass': atom['mass'],
+                        'initial_temp': atom['temperature']
+                    })
+                atom_tracks[matched_id].append((step, atom))
+        
+        # Analyze dissolution events
+        for aid, track in atom_tracks.items():
+            last_step = track[-1][0]
+            lifetime = len(track)
+            
+            if last_step < len(history) - 1:
+                # Atom disappeared - analyze why
+                last_atom = track[-1][1]
+                dissolution_cause = self._analyze_dissolution(
+                    last_atom, 
+                    history[last_step],
+                    history[min(last_step + 1, len(history) - 1)]
+                )
+                
+                lifecycle_data['dissolution_events'].append({
+                    'step': last_step,
+                    'atom_id': aid,
+                    'lifetime': lifetime,
+                    'cause': dissolution_cause,
+                    'final_mass': last_atom['mass']
+                })
+                
+                lifecycle_data['instability_causes'][dissolution_cause] += 1
+            
+            lifecycle_data['max_lifetime'] = max(lifecycle_data['max_lifetime'], lifetime)
+        
+        # Calculate statistics
+        if atom_tracks:
+            lifetimes = [len(track) for track in atom_tracks.values()]
+            lifecycle_data['average_lifetime'] = float(np.mean(lifetimes))
+            lifecycle_data['lifetime_std'] = float(np.std(lifetimes))
+        
+        # Correlate stability with field properties
+        lifecycle_data['stability_correlations'] = self._compute_stability_correlations(
+            atom_tracks, history
+        )
+        
+        return lifecycle_data
+    
+    def _find_matching_atom(self, atom: Dict, tracks: Dict, step: int, 
+                           max_distance: float = 2.0) -> int:
+        """Find closest atom from previous step or assign new ID."""
+        if not tracks:
+            return 0
+        
+        min_dist = float('inf')
+        best_match = None
+        
+        for atom_id, track in tracks.items():
+            if track and track[-1][0] == step - 1:
+                prev_atom = track[-1][1]
+                dist = np.linalg.norm(
+                    np.array(atom['position']) - np.array(prev_atom['position'])
+                )
+                if dist < min_dist and dist < max_distance:
+                    min_dist = dist
+                    best_match = atom_id
+        
+        return best_match if best_match is not None else max(tracks.keys()) + 1
+    
+    def _analyze_dissolution(self, atom: Dict, state: Dict, next_state: Dict) -> str:
+        """Determine primary cause of atom dissolution."""
+        # Check thermal disruption
+        local_temp = atom['temperature']
+        if local_temp > atom['mass'] * 0.5:  # High T/M ratio
+            return 'thermal_fluctuation'
+        
+        # Check memory decay
+        if 'memory_density' in atom and atom['memory_density'] < 0.1:
+            return 'memory_decay'
+        
+        # Check field divergence
+        if 'equilibrium' in atom and atom['equilibrium'] < 0.5:
+            return 'field_divergence'
+        
+        # Default to collision
+        return 'neighbor_collision'
+    
+    def _compute_stability_correlations(self, tracks: Dict, history: List[Dict]) -> Dict:
+        """Compute correlations between atom stability and field properties."""
+        correlations = {}
+        
+        stable_atoms = []
+        unstable_atoms = []
+        
+        for atom_id, track in tracks.items():
+            lifetime = len(track)
+            avg_props = self._average_atom_properties(track)
+            
+            if lifetime > 50:  # Stable threshold
+                stable_atoms.append(avg_props)
+            else:
+                unstable_atoms.append(avg_props)
+        
+        if stable_atoms and unstable_atoms:
+            # Compare average properties
+            stable_avg = self._average_dict_list(stable_atoms)
+            unstable_avg = self._average_dict_list(unstable_atoms)
+            
+            correlations['mass_ratio'] = stable_avg.get('mass', 0) / max(unstable_avg.get('mass', 1), 0.01)
+            correlations['temp_ratio'] = stable_avg.get('temperature', 0) / max(unstable_avg.get('temperature', 1), 0.01)
+            correlations['memory_ratio'] = stable_avg.get('memory_density', 0) / max(unstable_avg.get('memory_density', 1), 0.01)
+        
+        return correlations
+    
+    def _average_atom_properties(self, track: List[Tuple]) -> Dict:
+        """Compute average properties over atom lifetime."""
+        if not track:
+            return {}
+        
+        props = ['mass', 'temperature', 'memory_density', 'equilibrium']
+        averages = {}
+        
+        for prop in props:
+            values = [atom.get(prop, 0) for _, atom in track if prop in atom]
+            if values:
+                averages[prop] = float(np.mean(values))
+        
+        return averages
+    
+    def _average_dict_list(self, dict_list: List[Dict]) -> Dict:
+        """Average dictionary values across list."""
+        if not dict_list:
+            return {}
+        
+        result = {}
+        all_keys = set()
+        for d in dict_list:
+            all_keys.update(d.keys())
+        
+        for key in all_keys:
+            values = [d.get(key, 0) for d in dict_list if key in d]
+            if values:
+                result[key] = float(np.mean(values))
+        
+        return result
 
 def build_periodic_table(atoms_list: List[List[Atom]]) -> Dict:
     """
