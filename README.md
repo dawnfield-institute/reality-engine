@@ -1,21 +1,79 @@
-# Reality Engine v2
+# Reality Engine
 
-**Emergent Physics from Thermodynamic-Information Duality**
+**A computational framework where physics emerges from information dynamics**
 
-*Watch Reality Crystallize from Equilibrium-Seeking Dynamics*
-
----
-
-> **📦 Repository Scope**  
-> This repository contains the **physics implementation** using Dawn Field Theory. It integrates SEC operators, Möbius topology, thermodynamic coupling, and time emergence to simulate reality from first principles.
->
-> For the reusable **SDK/language primitives** (RecursiveEngine, MemoryField, PAC), see the separate [fracton](https://github.com/dawnfield-institute/fracton) repository.
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
+[![Status: Research](https://img.shields.io/badge/status-research-yellow.svg)](STATUS.md)
 
 ---
 
-## What Is This?
+## What Emerges (Without Being Programmed)
 
-Reality Engine v2 is a **physics discovery platform** where fundamental laws emerge from three simple principles:
+From just **3 fields** (energy, potential, information) and **local rules**, Reality Engine generates:
+
+| Phenomenon | Detection Rate | Confidence | Status |
+|------------|---------------|------------|--------|
+| ⚛️ **Quantum mechanics** | 2,081 events | 79.1% | Superposition, tunneling, entanglement |
+| 🌌 **Modified gravity** | 41,606 orbits | 90.1% | F ∝ r^0.029 (explains galaxies without dark matter) |
+| 📊 **Periodic table** | 24 mass levels | 85.0% | Discrete quantization like real elements |
+| ⏱️ **Relativity** | 5000 steps | 99.7% | Time dilation from interaction density |
+| 🔥 **Thermodynamics** | — | 98.3% | 2nd law compliance, Landauer principle |
+
+**[→ See full physics catalog](docs/PHYSICS_DISCOVERIES.md)**
+
+---
+
+## ⚠️ Important Context
+
+This is **early research software** (v0.1.0):
+
+- ✅ Results are preliminary and need peer review
+- ✅ Not a "theory of everything" - an exploration framework  
+- ✅ Based on [Dawn Field Theory](https://github.com/dawnfield-institute/dawn-field-theory) information-theoretic principles
+- ✅ See [LIMITATIONS.md](docs/LIMITATIONS.md) for known issues and boundaries
+
+**For researchers**: See [theory/](docs/theory/) for mathematical foundations  
+**For developers**: See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details
+
+---
+
+## Quick Start
+
+### Installation
+
+```bash
+git clone https://github.com/dawnfield-institute/reality-engine.git
+cd reality-engine
+pip install -r requirements.txt
+```
+
+### Run Your First Universe (30 seconds)
+
+```bash
+# Watch atoms form, gravity emerge, quantum effects manifest
+python examples/field_visualizer.py
+
+# Test all 6 analyzers (gravity, conservation, atoms, quantum, stars, galaxies)
+python scripts/test_analyzers.py
+
+# Run physics discovery pipeline (5000 steps)
+python scripts/discover_physics.py --steps 5000
+```
+
+---
+
+## Core Principles
+
+Reality Engine is a **physics discovery platform** where fundamental laws emerge from three simple principles:
+
+1. **Möbius Geometry**: Self-referential topology with anti-periodic boundaries
+2. **Thermodynamic-Information Duality**: Energy ↔ Information (two views of one field)
+3. **Equilibrium-Seeking**: Universe drives toward balance from disequilibrium
+
+## Core Principles
+
+Reality Engine is a **physics discovery platform** where fundamental laws emerge from three simple principles:
 
 1. **Möbius Geometry**: Self-referential topology with anti-periodic boundaries
 2. **Thermodynamic-Information Duality**: Energy ↔ Information (two views of one field)
@@ -23,7 +81,26 @@ Reality Engine v2 is a **physics discovery platform** where fundamental laws eme
 
 **We don't program physics - we discover it!**
 
-### The Core Insight
+---
+
+## Table of Contents
+
+- [What Emerges](#what-emerges-without-being-programmed) - Observed phenomena
+- [Quick Start](#quick-start) - Run in 30 seconds
+- [Core Principles](#core-principles) - How it works
+- [Key Insights](#key-insights) - Theoretical foundations
+- [Example Code](#example-code) - Full walkthrough
+- [Validation](#validation-criteria) - Testing framework
+- [Architecture](#architecture) - System design
+- [Documentation](#documentation) - Deep dives
+- [Contributing](#contributing) - Get involved
+- [Citation](#citation) - Academic use
+
+---
+
+## Key Insights
+
+### The Universe as Equilibrium-Seeking Engine
 
 > The universe is an equilibrium-seeking engine. Time emerges from the pressure to balance. Matter emerges from information crystallizing. Gravity emerges from interaction density. Quantum mechanics emerges from discrete collapse events.
 >
@@ -42,53 +119,30 @@ The universe has **full thermodynamic-information duality**:
 
 The "hot-cold balance" creates the edge where complex structures emerge!
 
----
-
-## How Time Emerges
+### How Time Emerges
 
 **Time is NOT fundamental** - it emerges from disequilibrium:
 
-### The Big Bang as Maximum Disequilibrium
 ```
-Big Bang State:
-- Pure entropy (maximum information disorder)
-- No structure (zero matter)
-- Maximum disequilibrium → intense pressure
-```
-
-### Equilibrium-Seeking Creates Reality
-```
-Disequilibrium → Pressure → SEC Collapses → Interactions
-                                                ↓
-                                            Time Ticks!
+Big Bang State:           Equilibrium-Seeking:              Result:
+- Pure entropy        →   Disequilibrium → Pressure    →    Time crystallizes
+- No structure        →   SEC Collapses → Interactions →    Matter forms
+- Maximum pressure    →   Dense regions = more events  →    Relativity emerges
 ```
 
-### Relativity Emerges Naturally
-- **Dense regions** = More interactions per volume
-- **More interactions** = More SEC collapses
-- **More collapses** = Slower local time
+**Why time slows near mass:**
+- Dense regions = More interactions per volume
+- More interactions = More SEC collapses  
+- More collapses = Slower local time
 - **Result**: Time dilation without programming GR!
 
-```python
-# Time rate depends on interaction density
-time_rate = 1 / sqrt(1 + interaction_density / c²)
-
-# c (speed of light) emerges as max interaction propagation!
-```
+**Speed of light emerges** as maximum interaction propagation rate.
 
 ---
 
-## Quick Start
+## Example Code
 
-### Installation
-
-```bash
-git clone https://github.com/dawnfield-institute/reality-engine.git
-cd reality-engine
-pip install -r requirements.txt
-```
-
-### Run Your First Universe
+### Full Physics Simulation
 
 ```python
 from core.reality_engine import RealityEngine
@@ -154,27 +208,26 @@ print(f"Total structures: {mass_dist['total_structures']}")
 print(f"Distinct mass levels: {mass_dist['num_mass_levels']}")
 ```
 
-### Quick Example Scripts
+### Quick Scripts
 
 ```bash
-# Test all 6 analyzers (gravity, conservation, atoms, stars, quantum, galaxies)
-python scripts/test_analyzers.py
-
 # Watch atoms and molecules emerge (1500 steps)
 python spikes/universe_evolution/universe_evolution.py --steps 1500
 
-# Visualize field dynamics
+# Visualize field dynamics in real-time
 python examples/field_visualizer.py
 
-# Run physics discovery pipeline
+# Run comprehensive physics discovery (5000 steps)
 python scripts/discover_physics.py --steps 5000 --width 96 --height 24
 ```
 
 ---
 
-## What Emerges (Without Programming!)
+## Detailed Discoveries
 
-### ✅ Modular Analyzer System (NEW!)
+### ✅ Modular Analyzer System
+
+Reality Engine includes **6 independent analyzers** that observe and quantify emergent physics:
 Reality Engine now includes **6 independent analyzers** that observe and quantify emergent physics:
 
 1. **GravityAnalyzer**: Measures forces, compares to Newton's law, detects orbital motion
@@ -380,17 +433,71 @@ See [STATUS.md](STATUS.md) for detailed implementation status.
 
 ---
 
+## FAQ
+
+**Q: Is this claiming to replace established physics?**  
+A: No. This explores how physics-like behavior can emerge from computational principles. It's a research tool, not a replacement for tested theories.
+
+**Q: Has this been peer-reviewed?**  
+A: Not yet. This is v0.1.0 research software. We welcome academic collaboration and independent verification.
+
+**Q: Why should I trust results from a simulation?**  
+A: You shouldn't blindly. Download it, run it yourself, vary parameters, test predictions. Science requires reproducibility.
+
+**Q: How is this different from cellular automata or Wolfram Physics?**  
+A: Key differences: thermodynamic coupling, Möbius topology, emergent conservation laws, and multi-scale analyzer framework.
+
+**Q: What about the modified gravity (F ∝ r^0.029)?**  
+A: This is a preliminary observation that needs validation. If it holds, it could explain galaxy rotation without dark matter, but requires extensive testing.
+
+**Q: Can I use this in my research?**  
+A: Yes! It's AGPL3 licensed. Please cite appropriately and share your findings.
+
+---
+
+## Contributing
+
+This is research software in active development. We welcome contributions focused on:
+
+- 🔬 **Scientific validation** - Independent verification of results
+- 📊 **Analysis tools** - New analyzers for different phenomena
+- 🧮 **Theoretical framework** - Mathematical foundations and proofs
+- 💻 **Computational optimization** - Performance improvements, GPU support
+- 📚 **Documentation** - Tutorials, examples, explanations
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+- Code standards and testing requirements
+- Research contribution process
+- How to propose new analyzers
+- Communication channels
+
+**Current Priorities:**
+- Validation of gravity law across different scales
+- Comparison with standard model predictions
+- Performance profiling and optimization
+- Extended simulation runs (100k+ steps)
+
+---
+
 ## Citation
 
+If you use Reality Engine in your research, please cite:
+
 ```bibtex
-@software{reality_engine_v2,
-  title = {Reality Engine v2: Thermodynamic-Information Emergence Platform},
-  author = {Dawn Field Institute},
+@software{reality_engine,
+  title = {Reality Engine: A Computational Framework for Emergent Physics},
+  author = {Groom, Peter Lorne},
   year = {2025},
-  version = {2.0.0-alpha},
-  url = {https://github.com/dawnfield-institute/reality-engine}
+  version = {0.1.0},
+  license = {AGPL-3.0},
+  url = {https://github.com/dawnfield-institute/reality-engine},
+  note = {Based on Dawn Field Theory principles}
 }
 ```
+
+**Related Work:**
+- Dawn Field Theory: [github.com/dawnfield-institute/dawn-field-theory](https://github.com/dawnfield-institute/dawn-field-theory)
+- Fracton SDK: [github.com/dawnfield-institute/fracton](https://github.com/dawnfield-institute/fracton)
 
 ---
 
