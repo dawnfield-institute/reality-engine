@@ -130,8 +130,8 @@ class ThermodynamicPAC:
         if len(self.history) > 0:
             prev_entropy = self.history[-1].entropy
             if metrics.entropy < prev_entropy:
-                print(f"WARNING: 2nd law violated! "
-                      f"ΔS = {metrics.entropy - prev_entropy:.6e}")
+                delta_s = metrics.entropy - prev_entropy
+                print(f"WARNING: 2nd law violated! dS = {delta_s:.6e}")
         
         self.history.append(metrics)
         
