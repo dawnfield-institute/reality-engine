@@ -1,0 +1,44 @@
+cff-version: 1.2.0
+message: "If you use Reality Engine in your research, please cite it as below."
+authors:
+  - family-names: "Groom"
+    given-names: "Peter Lorne"
+    orcid: "https://orcid.org/0009-0007-2217-8255"
+title: "Reality Engine: A Computational Framework for Emergent Physics"
+version: pre-alpha
+date-released: 2025-11-08
+url: "https://github.com/dawnfield-institute/reality-engine"
+repository-code: "https://github.com/dawnfield-institute/reality-engine"
+license: AGPL-3.0
+keywords:
+  - computational-physics
+  - emergence
+  - information-theory
+  - quantum-mechanics
+  - gravity
+  - thermodynamics
+  - digital-physics
+  - complex-systems
+abstract: >
+  Reality Engine is a computational framework that explores how
+  recognizable physical laws emerge from fundamental information-theoretic
+  principles. Using three primitive fields (energy, potential, information)
+  governed by simple local rules on a Möbius topology, the system generates
+  quantum phenomena, modified gravitational dynamics, mass quantization,
+  and thermodynamic laws without explicit programming. This pre-alpha
+  research software is based on Dawn Field Theory and demonstrates
+  potential alternative explanations for dark matter through emergent
+  non-Newtonian gravity (F ∝ r^0.029).
+references:
+  - type: software
+    title: "Dawn Field Theory"
+    authors:
+      - family-names: "Groom"
+        given-names: "Peter Lorne"
+    url: "https://github.com/dawnfield-institute/dawn-field-theory"
+  - type: software
+    title: "Fracton: Recursive Field SDK"
+    authors:
+      - family-names: "Groom"
+        given-names: "Peter Lorne"
+    url: "https://github.com/dawnfield-institute/fracton"

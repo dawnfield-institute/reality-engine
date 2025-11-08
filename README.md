@@ -4,6 +4,7 @@
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](LICENSE)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://python.org)
+[![Version](https://img.shields.io/badge/version-pre--alpha-orange.svg)](STATUS.md)
 [![Status: Research](https://img.shields.io/badge/status-research-yellow.svg)](STATUS.md)
 
 ---
@@ -26,15 +27,16 @@ From just **3 fields** (energy, potential, information) and **local rules**, Rea
 
 ## ⚠️ Important Context
 
-This is **early research software** (v0.1.0):
+This is **pre-alpha research software**:
 
 - ✅ Results are preliminary and need peer review
 - ✅ Not a "theory of everything" - an exploration framework  
 - ✅ Based on [Dawn Field Theory](https://github.com/dawnfield-institute/dawn-field-theory) information-theoretic principles
-- ✅ See [LIMITATIONS.md](docs/LIMITATIONS.md) for known issues and boundaries
+- ✅ Core architecture still evolving - breaking changes expected
 
 **For researchers**: See [theory/](docs/theory/) for mathematical foundations  
-**For developers**: See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details
+**For developers**: See [ARCHITECTURE.md](ARCHITECTURE.md) for implementation details  
+**Not accepting contributions yet**: See [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ---
 
@@ -457,25 +459,19 @@ A: Yes! It's AGPL3 licensed. Please cite appropriately and share your findings.
 
 ## Contributing
 
-This is research software in active development. We welcome contributions focused on:
+**Status: Not accepting contributions yet.**
 
-- 🔬 **Scientific validation** - Independent verification of results
-- 📊 **Analysis tools** - New analyzers for different phenomena
-- 🧮 **Theoretical framework** - Mathematical foundations and proofs
-- 💻 **Computational optimization** - Performance improvements, GPU support
-- 📚 **Documentation** - Tutorials, examples, explanations
+This is pre-alpha research software with an evolving architecture. Code contributions are not being accepted at this time.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
-- Code standards and testing requirements
-- Research contribution process
-- How to propose new analyzers
-- Communication channels
+However, we **welcome**:
+- 🐛 Bug reports and issue tracking
+- 💬 Feedback on results and observations
+- � Independent verification and validation
+- � Theoretical suggestions and discussions
 
-**Current Priorities:**
-- Validation of gravity law across different scales
-- Comparison with standard model predictions
-- Performance profiling and optimization
-- Extended simulation runs (100k+ steps)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full details on how to engage with the project.
+
+**Contributions will open** once the core framework stabilizes (tentatively Q2 2026).
 
 ---
 
@@ -488,7 +484,7 @@ If you use Reality Engine in your research, please cite:
   title = {Reality Engine: A Computational Framework for Emergent Physics},
   author = {Groom, Peter Lorne},
   year = {2025},
-  version = {0.1.0},
+  version = {pre-alpha},
   license = {AGPL-3.0},
   url = {https://github.com/dawnfield-institute/reality-engine},
   note = {Based on Dawn Field Theory principles}
