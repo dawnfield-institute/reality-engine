@@ -1,0 +1,41 @@
+# Dashboard logs
+logs/
+*.jsonl
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Node modules (anywhere in the tree)
+node_modules/
+**/node_modules/
+
+# React build outputs
+frontend/build/
+frontend/.cache/
+
+# Distribution
+dist/
+build/
+*.egg-info/
+
+# Environment
+.env
+.venv
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Package locks (optional - some teams track these)
+# package-lock.json
+# yarn.lock

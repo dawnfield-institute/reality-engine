@@ -1,0 +1,16 @@
+{
+  "name": "reality-engine",
+  "version": "0.1.0",
+  "description": "Reality Engine - Physics emergence from information-energy dynamics",
+  "scripts": {
+    "dashboard": "powershell -ExecutionPolicy Bypass -File start-dashboard.ps1"
+  },
+  "keywords": [
+    "physics",
+    "simulation",
+    "emergence",
+    "dawn-field-theory"
+  ],
+  "author": "Dawn Field Institute",
+  "license": "SEE LICENSE FILE"
+}

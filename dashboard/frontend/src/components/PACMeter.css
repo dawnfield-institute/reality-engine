@@ -1,0 +1,114 @@
+.pac-meter {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  padding: 20px;
+}
+
+.pac-display {
+  text-align: center;
+}
+
+.pac-value {
+  font-size: 4em;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 20px currentColor;
+  margin-bottom: 10px;
+}
+
+.pac-target {
+  font-size: 1em;
+  color: #a0a0a0;
+}
+
+.pac-gauge {
+  margin: 20px 0;
+}
+
+.gauge-track {
+  position: relative;
+  height: 30px;
+  background: rgba(15, 52, 96, 0.5);
+  border-radius: 15px;
+  overflow: hidden;
+  border: 2px solid #0f3460;
+}
+
+.gauge-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 15px;
+  box-shadow: 0 0 15px currentColor;
+}
+
+.gauge-target-marker {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 3px;
+  background: #ffffff;
+  box-shadow: 0 0 10px #ffffff;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.gauge-target-marker::before {
+  content: '▼';
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: #ffffff;
+  font-size: 14px;
+}
+
+.gauge-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: 0.85em;
+  color: #a0a0a0;
+  font-family: 'Courier New', monospace;
+}
+
+.pac-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(15, 52, 96, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.stat-item .label {
+  font-size: 0.85em;
+  color: #a0a0a0;
+  margin-bottom: 5px;
+}
+
+.stat-item .value {
+  font-size: 1.2em;
+  font-weight: 600;
+  font-family: 'Courier New', monospace;
+}
+
+.pac-explanation {
+  background: rgba(15, 52, 96, 0.2);
+  border-left: 3px solid #00d4ff;
+  border-radius: 4px;
+  padding: 12px 15px;
+}
+
+.explanation-text {
+  margin: 0;
+  font-size: 0.9em;
+  color: #b0b0b0;
+  line-height: 1.5;
+}

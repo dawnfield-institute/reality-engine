@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reality Engine - Advanced Dashboard</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.18.0.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            overflow-x: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 20px 40px;
+            border-bottom: 2px solid #0f3460;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(90deg, #00d4ff, #7000ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        
+        .status-bar {
+            display: flex;
+            gap: 30px;
+            font-size: 0.9em;
+            color: #a0a0a0;
+        }
+        
+        .connected { color: #00ff88; }
+        .disconnected { color: #ff4444; }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            padding: 15px 40px;
+            background: #16213e;
+            border-bottom: 1px solid #0f3460;
+        }
+        
+        button {
+            padding: 10px 25px;
+            font-size: 1em;
+            font-weight: 600;
+            border: 2px solid;
+            border-radius: 6px;
+            cursor: pointer;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        
+        button:hover { transform: translateY(-2px); }
+        .start-btn { border-color: #00ff88; color: #00ff88; }
+        .stop-btn { border-color: #ff4444; color: #ff4444; }
+        .reset-btn { border-color: #00d4ff; color: #00d4ff; }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .panel {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid #0f3460;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .panel h2 {
+            font-size: 1.3em;
+            color: #00d4ff;
+            border-bottom: 2px solid #0f3460;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .full-width { grid-column: 1 / -1; }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: rgba(15, 52, 96, 0.3);
+            border-radius: 6px;
+            margin: 5px 0;
+        }
+        
+        .metric-label { color: #a0a0a0; }
+        .metric-value { color: #00ff88; font-weight: bold; }
+        
+        .pac-display {
+            text-align: center;
+            font-size: 3em;
+            font-weight: 700;
+            padding: 20px;
+            color: #00ff88;
+            text-shadow: 0 0 20px currentColor;
+        }
+        
+        .star-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .star-item {
+            background: rgba(15, 52, 96, 0.3);
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 6px;
+            border-left: 3px solid #00d4ff;
+        }
+        
+        .atom-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 10px;
+        }
+        
+        .atom-card {
+            background: rgba(15, 52, 96, 0.3);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .atom-card:hover {
+            border-color: #00d4ff;
+            transform: scale(1.05);
+        }
+        
+        .element-symbol {
+            font-size: 2em;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(15, 52, 96, 0.2); }
+        ::-webkit-scrollbar-thumb { background: #0f3460; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00d4ff; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Reality Engine - Advanced Dashboard</h1>
+        <div class="status-bar">
+            <span id="connection" class="disconnected">○ Disconnected</span>
+            <span>Iteration: <span id="iteration">0</span></span>
+            <span>Time: <span id="time">0</span></span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="start-btn" onclick="startEngine()">▶ Start</button>
+        <button class="stop-btn" onclick="stopEngine()">■ Stop</button>
+        <button class="reset-btn" onclick="resetEngine()">↻ Reset</button>
+        <button class="reset-btn" onclick="toggleDebugPanel()">🐛 Debug Logs</button>
+    </div>
+
+    <!-- Debug Panel -->
+    <div id="debug-panel" style="display: none; position: fixed; top: 0; right: 0; width: 400px; height: 100vh; background: rgba(10, 10, 10, 0.95); border-left: 2px solid #0f3460; z-index: 1000; overflow-y: auto; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color: #00d4ff; margin: 0;">Debug Logs</h2>
+            <button onclick="toggleDebugPanel()" style="padding: 5px 15px; border: 1px solid #ff4444; color: #ff4444; background: transparent; cursor: pointer;">✕</button>
+        </div>
+        <div style="margin-bottom: 15px;">
+            <button onclick="downloadCurrentLog()" style="width: 100%; padding: 10px; margin-bottom: 10px;">💾 Download Current Session</button>
+            <button onclick="refreshLogsList()" style="width: 100%; padding: 10px;">🔄 Refresh Logs List</button>
+        </div>
+        <div id="log-files-list" style="margin-top: 15px;"></div>
+        <div id="log-viewer" style="margin-top: 15px; background: #0a0a0a; padding: 10px; border-radius: 4px; font-size: 0.75em; max-height: 400px; overflow-y: auto;">
+            <p style="color: #666;">Start simulation to see logs...</p>
+        </div>
+    </div>
+
+    <div class="dashboard">
+        <!-- CMB Evolution Heatmap -->
+        <div class="panel full-width">
+            <h2>🌌 Cosmic Microwave Background Evolution (Möbius Manifold)</h2>
+            <div style="font-size: 0.85em; color: #a0a0a0; margin-bottom: 10px;">
+                ∞ Non-orientable topology with continuous field flow and periodic reconnection ∞
+            </div>
+            <div id="cmb-heatmap" style="height: 400px;"></div>
+        </div>
+
+        <!-- Temperature Field -->
+        <div class="panel">
+            <h2>🌡️ Temperature Field</h2>
+            <div id="temp-heatmap" style="height: 350px;"></div>
+        </div>
+
+        <!-- Pressure Field -->
+        <div class="panel">
+            <h2>💨 Pressure Field</h2>
+            <div id="pressure-heatmap" style="height: 350px;"></div>
+        </div>
+
+        <!-- PAC Conservation -->
+        <div class="panel">
+            <h2>⚖️ PAC Conservation</h2>
+            <div class="pac-display" id="pac-value">1.0571</div>
+            <div id="pac-chart" style="height: 200px;"></div>
+        </div>
+
+        <!-- Matter Distribution -->
+        <div class="panel">
+            <h2>🕸️ Matter Distribution (Cosmic Web)</h2>
+            <div id="matter-heatmap" style="height: 350px;"></div>
+        </div>
+
+        <!-- Stellar Masses -->
+        <div class="panel">
+            <h2>⭐ Stellar Mass Detection</h2>
+            <div id="stellar-count" class="metric">
+                <span class="metric-label">Stars Detected:</span>
+                <span class="metric-value">0</span>
+            </div>
+            <div id="stellar-list" class="star-list"></div>
+        </div>
+
+        <!-- Periodic Table -->
+        <div class="panel full-width">
+            <h2>⚛️ Periodic Table - Emerged Elements</h2>
+            <div id="periodic-stats" style="margin-bottom: 15px;">
+                <span class="metric">
+                    <span class="metric-label">Elements:</span>
+                    <span class="metric-value" id="element-count">0</span>
+                </span>
+            </div>
+            <div id="periodic-table" class="atom-grid"></div>
+        </div>
+
+        <!-- Atomic Structures -->
+        <div class="panel full-width">
+            <h2>🔬 Atomic & Molecular Structures</h2>
+            <div id="atomic-structures"></div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:5000');
+        let pacHistory = [];
+        let currentLogFile = null;
+        let recentLogs = [];
+        
+        // Throttle heavy visualizations to prevent UI lag
+        let lastFieldUpdate = 0;
+        let lastMatterUpdate = 0;
+        const FIELD_THROTTLE = 100; // ms between field updates
+        const MATTER_THROTTLE = 500; // ms between matter distribution updates
+        
+        // Connection handlers
+        socket.on('connect', () => {
+            document.getElementById('connection').textContent = '● Connected';
+            document.getElementById('connection').className = 'connected';
+            socket.emit('request_snapshot');
+        });
+        
+        socket.on('disconnect', () => {
+            document.getElementById('connection').textContent = '○ Disconnected';
+            document.getElementById('connection').className = 'disconnected';
+        });
+        
+        // Data handlers with throttling for smooth performance
+        socket.on('field_update', (data) => {
+            const now = Date.now();
+            document.getElementById('iteration').textContent = data.iteration.toLocaleString();
+            if (data.field.time !== undefined) {
+                document.getElementById('time').textContent = data.field.time.toLocaleString();
+            }
+            
+            // Throttle expensive heatmap updates
+            if (now - lastFieldUpdate > FIELD_THROTTLE) {
+                updateCMBHeatmap(data.field);
+                updateTemperatureField(data.field);
+                updatePressureField(data.field);
+                lastFieldUpdate = now;
+            }
+        });
+        
+        socket.on('pac_update', (data) => {
+            const pacEl = document.getElementById('pac-value');
+            pacEl.textContent = data.value.toFixed(6);
+            pacEl.style.color = Math.abs(data.value - 1.0571) < 0.001 ? '#00ff88' : '#ffaa00';
+            
+            pacHistory.push({x: data.iteration, y: data.value});
+            if (pacHistory.length > 100) pacHistory.shift();
+            
+            // Update chart less frequently
+            if (data.iteration % 10 === 0) {
+                updatePACChart();
+            }
+        });
+        
+        socket.on('periodic_table_update', (data) => {
+            updatePeriodicTable(data);
+        });
+        
+        socket.on('atomic_structures_update', (data) => {
+            updateAtomicStructures(data);
+        });
+        
+        socket.on('stellar_masses_update', (data) => {
+            updateStellarMasses(data);
+        });
+        
+        socket.on('matter_distribution_update', (data) => {
+            const now = Date.now();
+            if (now - lastMatterUpdate > MATTER_THROTTLE) {
+                updateMatterDistribution(data);
+                lastMatterUpdate = now;
+            }
+        });
+        
+        socket.on('snapshot', (data) => {
+            updateCMBHeatmap(data.field);
+            updateTemperatureField(data.field);
+            updatePressureField(data.field);
+            updatePeriodicTable(data.periodic_table);
+            updateAtomicStructures(data.atomic_structures);
+            updateStellarMasses(data.stellar_masses);
+            updateMatterDistribution(data.matter_distribution);
+        });
+        
+        // Visualization functions using Plotly.react for smooth updates
+        function updateCMBHeatmap(field) {
+            if (!field.energy) return;
+            const update = {
+                z: [field.energy]
+            };
+            Plotly.react('cmb-heatmap', [{
+                z: field.energy,
+                type: 'heatmap',
+                colorscale: 'Hot',
+                showscale: true
+            }], {
+                title: 'Energy Field Evolution',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' },
+                margin: { l: 50, r: 50, t: 40, b: 40 }
+            }, {responsive: true});
+        }
+        
+        function updateTemperatureField(field) {
+            if (!field.temperature) return;
+            Plotly.react('temp-heatmap', [{
+                z: field.temperature,
+                type: 'heatmap',
+                colorscale: 'Jet',
+                showscale: true,
+                colorbar: { title: 'K' }
+            }], {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' },
+                margin: { l: 50, r: 50, t: 30, b: 40 }
+            }, {responsive: true});
+        }
+        
+        function updatePressureField(field) {
+            if (!field.pressure) return;
+            Plotly.react('pressure-heatmap', [{
+                z: field.pressure,
+                type: 'heatmap',
+                colorscale: 'Viridis',
+                showscale: true,
+                colorbar: { title: 'Pa' }
+            }], {
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' },
+                margin: { l: 50, r: 50, t: 30, b: 40 }
+            }, {responsive: true});
+        }
+        
+        function updatePACChart() {
+            Plotly.react('pac-chart', [{
+                x: pacHistory.map(d => d.x),
+                y: pacHistory.map(d => d.y),
+                type: 'scatter',
+                mode: 'lines',
+                line: { color: '#00ff88', width: 2 }
+            }], {
+                yaxis: { title: 'PAC Value', range: [1.055, 1.060] },
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' },
+                margin: { l: 50, r: 30, t: 10, b: 40 }
+            }, {responsive: true});
+        }
+        
+        function updatePeriodicTable(elements) {
+            const count = Object.keys(elements).length;
+            document.getElementById('element-count').textContent = count;
+            
+            const container = document.getElementById('periodic-table');
+            container.innerHTML = '';
+            
+            for (const [symbol, data] of Object.entries(elements)) {
+                const card = document.createElement('div');
+                card.className = 'atom-card';
+                card.innerHTML = `
+                    <div class="element-symbol">${symbol}</div>
+                    <div style="font-size: 0.8em; color: #a0a0a0;">${data.count} atoms</div>
+                    <div style="font-size: 0.75em; color: ${data.stability > 0.9 ? '#00ff88' : '#ffaa00'};">
+                        ${(data.stability * 100).toFixed(1)}% stable
+                    </div>
+                    <div style="font-size: 0.7em; color: #666; margin-top: 5px;">
+                        ${data.avg_energy ? data.avg_energy.toFixed(2) + ' eV' : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            }
+        }
+        
+        function updateAtomicStructures(structures) {
+            const container = document.getElementById('atomic-structures');
+            container.innerHTML = '';
+            
+            if (!structures || structures.length === 0) {
+                container.innerHTML = '<p style="color: #666;">No atomic structures detected yet...</p>';
+                return;
+            }
+            
+            structures.forEach(struct => {
+                const div = document.createElement('div');
+                div.style.cssText = 'background: rgba(15, 52, 96, 0.3); padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 3px solid #00d4ff;';
+                
+                if (struct.type === 'atom') {
+                    div.innerHTML = `
+                        <strong style="color: #00d4ff; font-size: 1.2em;">${struct.element} Atom</strong><br>
+                        Protons: ${struct.protons}, Neutrons: ${struct.neutrons}, Electrons: ${struct.electrons}<br>
+                        Energy Level: ${struct.energy_level.toFixed(2)} eV<br>
+                        Position: [${struct.position.map(p => p.toFixed(2)).join(', ')}]
+                    `;
+                } else if (struct.type === 'molecule') {
+                    div.innerHTML = `
+                        <strong style="color: #00d4ff; font-size: 1.2em;">${struct.formula} Molecule</strong><br>
+                        Atoms: ${struct.atoms.length}<br>
+                        Bonds: ${struct.bonds.length} (${struct.bonds[0].type})<br>
+                        Total Energy: ${struct.total_energy.toFixed(2)} eV
+                    `;
+                }
+                container.appendChild(div);
+            });
+        }
+        
+        function updateStellarMasses(stars) {
+            document.querySelector('#stellar-count .metric-value').textContent = stars.length;
+            
+            const container = document.getElementById('stellar-list');
+            container.innerHTML = '';
+            
+            stars.forEach(star => {
+                const div = document.createElement('div');
+                div.className = 'star-item';
+                div.innerHTML = `
+                    <strong style="color: #00d4ff;">Star #${star.id} - ${star.type}</strong><br>
+                    Mass: ${star.mass.toFixed(2)} M☉ | Temp: ${star.temperature.toFixed(0)} K<br>
+                    Luminosity: ${star.luminosity.toFixed(2)} L☉ | Radius: ${star.radius.toFixed(2)} R☉<br>
+                    Age: ${star.age.toLocaleString()} iterations<br>
+                    <small>H: ${(star.composition.H * 100).toFixed(1)}%, He: ${(star.composition.He * 100).toFixed(1)}%, Metals: ${(star.composition.metals * 100).toFixed(2)}%</small>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function updateMatterDistribution(data) {
+            if (!data.density) return;
+            Plotly.react('matter-heatmap', [{
+                z: data.density,
+                type: 'heatmap',
+                colorscale: 'Portland',
+                showscale: true,
+                colorbar: { title: 'ρ' }
+            }], {
+                title: `Scale: ${data.scale}`,
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                font: { color: '#ffffff' },
+                margin: { l: 50, r: 50, t: 40, b: 40 }
+            }, {responsive: true});
+        }
+        
+        // Control functions
+        async function startEngine() {
+            const response = await fetch('http://localhost:5000/api/control/start', { method: 'POST' });
+            const data = await response.json();
+            currentLogFile = data.log_file;
+            addLogEntry('System', `Started - Logging to ${data.log_file}`);
+        }
+        
+        async function stopEngine() {
+            await fetch('http://localhost:5000/api/control/stop', { method: 'POST' });
+            addLogEntry('System', 'Stopped');
+        }
+        
+        async function resetEngine() {
+            await fetch('http://localhost:5000/api/control/reset', { method: 'POST' });
+            pacHistory = [];
+            recentLogs = [];
+            addLogEntry('System', 'Reset');
+        }
+        
+        // Debug panel functions
+        function toggleDebugPanel() {
+            const panel = document.getElementById('debug-panel');
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            if (panel.style.display === 'block') {
+                refreshLogsList();
+            }
+        }
+        
+        function addLogEntry(type, message) {
+            const timestamp = new Date().toISOString().split('T')[1].slice(0, -1);
+            const logViewer = document.getElementById('log-viewer');
+            const entry = document.createElement('div');
+            entry.style.cssText = 'margin: 5px 0; padding: 5px; border-left: 2px solid #00d4ff;';
+            entry.innerHTML = `<span style="color: #666;">[${timestamp}]</span> <span style="color: #00d4ff;">${type}:</span> <span style="color: #fff;">${message}</span>`;
+            logViewer.insertBefore(entry, logViewer.firstChild);
+            recentLogs.unshift({timestamp, type, message});
+            if (recentLogs.length > 100) recentLogs.pop();
+        }
+        
+        async function refreshLogsList() {
+            const response = await fetch('http://localhost:5000/api/logs');
+            const data = await response.json();
+            const listDiv = document.getElementById('log-files-list');
+            listDiv.innerHTML = '<h3 style="color: #00d4ff; font-size: 1em;">Available Logs:</h3>';
+            data.log_files.forEach(file => {
+                const fileDiv = document.createElement('div');
+                fileDiv.style.cssText = 'padding: 8px; margin: 5px 0; background: rgba(15, 52, 96, 0.3); border-radius: 4px; cursor: pointer;';
+                fileDiv.innerHTML = `<a href="/api/logs/${file}" download style="color: #00ff88; text-decoration: none;">${file}</a>`;
+                listDiv.appendChild(fileDiv);
+            });
+        }
+        
+        async function downloadCurrentLog() {
+            if (currentLogFile) {
+                const filename = currentLogFile.split('/').pop().split('\\').pop();
+                window.open(`/api/logs/${filename}`, '_blank');
+            } else {
+                addLogEntry('Error', 'No active log file');
+            }
+        }
+        
+        // Listen for all socket events and log them
+        const originalEmit = socket.emit;
+        socket.emit = function(...args) {
+            addLogEntry('Socket Out', args[0]);
+            return originalEmit.apply(socket, args);
+        };
+        
+        // Log incoming events
+        ['field_update', 'pac_update', 'periodic_table_update', 'atomic_structures_update', 
+         'stellar_masses_update', 'matter_distribution_update', 'emergence_event'].forEach(event => {
+            socket.on(event, () => {
+                addLogEntry('Socket In', event);
+            });
+        });
+    </script>
+</body>
+</html>

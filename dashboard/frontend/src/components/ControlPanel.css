@@ -1,0 +1,122 @@
+.control-panel {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-bottom: 1px solid #0f3460;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.control-buttons {
+  display: flex;
+  gap: 15px;
+}
+
+.control-btn {
+  padding: 10px 25px;
+  font-size: 1em;
+  font-weight: 600;
+  border: 2px solid;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(0, 0, 0, 0.3);
+  color: #ffffff;
+  font-family: inherit;
+}
+
+.control-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.start-btn {
+  border-color: #00ff88;
+  color: #00ff88;
+}
+
+.start-btn:hover:not(:disabled) {
+  background: rgba(0, 255, 136, 0.2);
+  box-shadow: 0 0 15px rgba(0, 255, 136, 0.5);
+  transform: translateY(-2px);
+}
+
+.stop-btn {
+  border-color: #ff4444;
+  color: #ff4444;
+}
+
+.stop-btn:hover:not(:disabled) {
+  background: rgba(255, 68, 68, 0.2);
+  box-shadow: 0 0 15px rgba(255, 68, 68, 0.5);
+  transform: translateY(-2px);
+}
+
+.reset-btn {
+  border-color: #00d4ff;
+  color: #00d4ff;
+}
+
+.reset-btn:hover:not(:disabled) {
+  background: rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-light {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  animation: pulse-light 2s ease-in-out infinite;
+}
+
+.status-light.running {
+  background: #00ff88;
+  box-shadow: 0 0 10px #00ff88;
+}
+
+.status-light.stopped {
+  background: #666;
+  animation: none;
+}
+
+@keyframes pulse-light {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-text {
+  font-weight: 600;
+  font-size: 0.95em;
+  letter-spacing: 0.5px;
+  color: #a0a0a0;
+}
+
+.status-indicator .status-light.running ~ .status-text {
+  color: #00ff88;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .control-panel {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 20px;
+  }
+  
+  .control-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+}
