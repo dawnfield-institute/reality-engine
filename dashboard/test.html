@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reality Engine Dashboard Test</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .status { padding: 10px; margin: 10px 0; background: #1a1a2e; border-radius: 5px; }
+        .connected { color: #00ff88; }
+        .disconnected { color: #ff4444; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Reality Engine Dashboard - Backend Test</h1>
+    
+    <div class="status">
+        <h2>Connection Status: <span id="connection" class="disconnected">Disconnected</span></h2>
+    </div>
+    
+    <div class="status">
+        <h2>Controls</h2>
+        <button onclick="startEngine()">Start</button>
+        <button onclick="stopEngine()">Stop</button>
+        <button onclick="resetEngine()">Reset</button>
+    </div>
+    
+    <div class="status">
+        <h2>Status</h2>
+        <div id="status">Waiting for data...</div>
+    </div>
+    
+    <div class="status">
+        <h2>PAC Value</h2>
+        <div id="pac" style="font-size: 2em;">--</div>
+    </div>
+    
+    <div class="status">
+        <h2>Latest Events</h2>
+        <div id="events"></div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:5000');
+        const connectionEl = document.getElementById('connection');
+        const statusEl = document.getElementById('status');
+        const pacEl = document.getElementById('pac');
+        const eventsEl = document.getElementById('events');
+        
+        socket.on('connect', () => {
+            connectionEl.textContent = 'Connected';
+            connectionEl.className = 'connected';
+            console.log('Connected to Reality Engine');
+            socket.emit('request_snapshot');
+        });
+        
+        socket.on('disconnect', () => {
+            connectionEl.textContent = 'Disconnected';
+            connectionEl.className = 'disconnected';
+        });
+        
+        socket.on('initial_state', (data) => {
+            statusEl.innerHTML = `Iteration: ${data.iteration}<br>PAC: ${data.pac_value}`;
+        });
+        
+        socket.on('pac_update', (data) => {
+            pacEl.textContent = data.value.toFixed(6);
+            pacEl.style.color = Math.abs(data.value - 1.0571) < 0.001 ? '#00ff88' : '#ffaa00';
+        });
+        
+        socket.on('emergence_event', (event) => {
+            const eventDiv = document.createElement('div');
+            eventDiv.textContent = `[${event.iteration}] ${event.type.toUpperCase()} - Energy: ${event.energy.toFixed(2)}`;
+            eventDiv.style.cssText = 'padding: 5px; margin: 2px 0; background: #0f3460; border-left: 3px solid #00d4ff;';
+            eventsEl.insertBefore(eventDiv, eventsEl.firstChild);
+            if (eventsEl.children.length > 10) eventsEl.lastChild.remove();
+        });
+        
+        async function startEngine() {
+            const response = await fetch('http://localhost:5000/api/control/start', { method: 'POST' });
+            const data = await response.json();
+            alert('Started: ' + data.status);
+        }
+        
+        async function stopEngine() {
+            const response = await fetch('http://localhost:5000/api/control/stop', { method: 'POST' });
+            const data = await response.json();
+            alert('Stopped: ' + data.status);
+        }
+        
+        async function resetEngine() {
+            const response = await fetch('http://localhost:5000/api/control/reset', { method: 'POST' });
+            const data = await response.json();
+            alert('Reset: ' + data.status);
+        }
+    </script>
+</body>
+</html>

@@ -9,6 +9,14 @@ dist/
 build/
 *.egg
 
+# Node.js
+node_modules/
+**/node_modules/
+package-lock.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
 # Virtual environments
 venv/
 env/
@@ -31,6 +39,8 @@ output/
 results/
 temp_output.txt
 *.log
+*.jsonl
+dashboard/logs/
 
 # Testing
 .pytest_cache/

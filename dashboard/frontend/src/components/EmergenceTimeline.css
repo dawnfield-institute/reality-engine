@@ -1,0 +1,220 @@
+.timeline-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.timeline-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: #666;
+}
+
+.pulse-indicator {
+  width: 20px;
+  height: 20px;
+  background: #00d4ff;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  margin-top: 15px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.5);
+  }
+}
+
+.timeline-chart {
+  background: rgba(15, 52, 96, 0.2);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.event-stats {
+  background: rgba(15, 52, 96, 0.2);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.event-stats h3,
+.recent-events h3 {
+  margin: 0 0 12px 0;
+  font-size: 1em;
+  color: #00d4ff;
+  border-bottom: 1px solid #0f3460;
+  padding-bottom: 8px;
+}
+
+.event-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.event-type-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(15, 52, 96, 0.3);
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.event-type-item:hover {
+  background: rgba(15, 52, 96, 0.5);
+}
+
+.event-icon {
+  font-size: 1.5em;
+  width: 30px;
+  text-align: center;
+}
+
+.event-icon.particle {
+  color: #00ff88;
+}
+
+.event-icon.atom {
+  color: #00d4ff;
+}
+
+.event-icon.molecule {
+  color: #ffaa00;
+}
+
+.event-type-name {
+  flex: 1;
+  font-size: 0.95em;
+  color: #ffffff;
+  text-transform: capitalize;
+}
+
+.event-type-count {
+  font-weight: 600;
+  color: #00d4ff;
+  font-family: 'Courier New', monospace;
+  font-size: 1.1em;
+}
+
+.recent-events {
+  background: rgba(15, 52, 96, 0.2);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.events-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.events-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.events-list::-webkit-scrollbar-track {
+  background: rgba(15, 52, 96, 0.2);
+  border-radius: 3px;
+}
+
+.events-list::-webkit-scrollbar-thumb {
+  background: #0f3460;
+  border-radius: 3px;
+}
+
+.events-list::-webkit-scrollbar-thumb:hover {
+  background: #00d4ff;
+}
+
+.event-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(15, 52, 96, 0.3);
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.event-item:hover {
+  background: rgba(15, 52, 96, 0.5);
+  transform: translateX(3px);
+}
+
+.event-marker {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.event-marker.particle {
+  background: #00ff88;
+  box-shadow: 0 0 8px #00ff88;
+}
+
+.event-marker.atom {
+  background: #00d4ff;
+  box-shadow: 0 0 8px #00d4ff;
+}
+
+.event-marker.molecule {
+  background: #ffaa00;
+  box-shadow: 0 0 8px #ffaa00;
+}
+
+.event-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-type {
+  font-weight: 600;
+  font-size: 0.85em;
+  color: #ffffff;
+  letter-spacing: 0.5px;
+}
+
+.event-iteration {
+  font-size: 0.8em;
+  color: #a0a0a0;
+  font-family: 'Courier New', monospace;
+}
+
+.event-energy {
+  font-size: 0.8em;
+  color: #b0b0b0;
+}
