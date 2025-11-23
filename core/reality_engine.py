@@ -203,143 +203,39 @@ class RealityEngine:
         # 4. Memory evolves from collapse events (emerges naturally!)
         #    dM/dt = α||E-I||² (memory accumulates where information collapses)
         disequilibrium = E - I
-        # Adaptive memory boost: scale based on grid size to prevent runaway
-        # Smaller grids need more boost; larger grids self-organize better
-        grid_size = E.numel()
-        base_boost = 10.0
-        memory_boost = base_boost * (4096 / grid_size) ** 0.5  # Scale with 1/√N
-        memory_boost = max(1.0, min(memory_boost, 10.0))  # Clamp 1-10x
-        dM_dt = memory_boost * self.rbf.alpha_collapse * (disequilibrium ** 2)
+        dM_dt = self.rbf.alpha_collapse * (disequilibrium ** 2)
         
-        # CRITICAL: Prevent memory overflow in long simulations
-        # Once structures form and grow massive (M > 100), we need to slow accumulation
-        # This prevents the NaN cascade at 3500+ steps from unbounded M growth
-        M_max = M.max()
-        M_mean = M.mean()
-        
-        # AGGRESSIVE multi-stage overflow prevention:
-        # The key insight: once M > 50, we're in late-stage collapse
-        # Need to STRONGLY limit further growth to prevent runaway
-        if M_max > 200:
-            # EMERGENCY: structures critically massive
-            # At this point, we're seeing 200+ mass - gravity has won
-            # Just maintain current state, no more growth
-            overflow_factor = 200 / (M_max + 1e-10)
-            dM_dt = dM_dt * overflow_factor * 0.05  # 95% brake!
-        elif M_max > 100:
-            # STRONG brake for large structures (100-200 range)
-            # This is where previous runs started failing
-            overflow_factor = 100 / (M_max + 1e-10)
-            dM_dt = dM_dt * overflow_factor * 0.2  # 80% brake
-        elif M_max > 50:
-            # MODERATE brake (50-100 range)
-            # Start slowing growth significantly
-            overflow_factor = 1.0 / (1.0 + (M_max - 50) / 25.0)
-            dM_dt = dM_dt * overflow_factor * 0.5  # 50% reduction
-        elif M_max > 20:
-            # GENTLE brake (20-50 range)
-            overflow_factor = 1.0 / (1.0 + (M_max - 20) / 30.0)
-            dM_dt = dM_dt * overflow_factor
-        
-        # Also prevent runaway in high-density regions (local dampening)
-        M_threshold = M_mean + 3 * M.std()  # 3-sigma outliers
-        high_density_mask = M > M_threshold
-        if high_density_mask.any():
-            # Reduce growth rate in already-dense regions
-            local_damping = torch.ones_like(dM_dt)
-            local_damping[high_density_mask] = 0.3  # 70% slower in dense regions
-            dM_dt = dM_dt * local_damping
-        
-        # 5. Evolve fields using RBF+QBE dynamics
+        # 5. Evolve fields using pure RBF+QBE dynamics
         E_new = E + self.dt * dE_dt_qbe
         I_new = I + self.dt * dI_dt_qbe
         M_new = M + self.dt * dM_dt
         
-        # CRITICAL: Direct field magnitude control to prevent runaway oscillations
-        # The core issue: E and I can oscillate to extreme values even with M braking
-        # MUST preserve PAC conservation: E + I = constant
-        # Solution: Scale BOTH fields by the SAME factor to limit max while preserving sum
-        E_magnitude = torch.abs(E_new).max()
-        I_magnitude = torch.abs(I_new).max()
-        max_magnitude = max(E_magnitude, I_magnitude)
-        
-        # Apply soft clamping when fields get large (> 1000)
-        # Use SAME scaling for both E and I to preserve E+I conservation
-        if max_magnitude > 1000:
-            # Soft clamp: scale down gradually as we exceed threshold
-            scale_factor = 1000 / max_magnitude
-            # Use smooth transition: blend between no scaling and full scaling
-            blend = min(1.0, (max_magnitude - 1000) / 1000)  # 0 at 1000, 1 at 2000
-            unified_scale = (1.0 - blend + blend * scale_factor)
-            
-            # Apply SAME scale to both fields - this preserves E+I sum!
-            E_new = E_new * unified_scale
-            I_new = I_new * unified_scale
-        
-        # CRITICAL: Field overflow detection and prevention
-        # Monitor field magnitudes to catch catastrophic issues
-        E_max = torch.abs(E_new).max()
-        I_max = torch.abs(I_new).max()
-        M_max_new = M_new.max()
-        
-        # Emergency threshold - if we hit this, something went very wrong
-        overflow_threshold = 1e5
-        needs_rescale = False
-        
-        if E_max > overflow_threshold or I_max > overflow_threshold or M_max_new > overflow_threshold:
-            print(f"  [EMERGENCY] Catastrophic overflow: E_max={E_max:.1e}, I_max={I_max:.1e}, M_max={M_max_new:.1e}")
-            needs_rescale = True
-        
-        # Emergency rescaling as last resort
-        if needs_rescale:
-            max_magnitude = max(E_max, I_max, M_max_new)
-            scale_factor = 500.0 / max_magnitude
-            
-            print(f"  [EMERGENCY RESCALE] Applying scale factor {scale_factor:.2e}")
-            
-            E_new = E_new * scale_factor
-            I_new = I_new * scale_factor
-            M_new = M_new * scale_factor
-            
-            # Also rescale current state for consistency
-            self.current_state.actual = self.current_state.actual * scale_factor
-            self.current_state.potential = self.current_state.potential * scale_factor
-            self.current_state.memory = self.current_state.memory * scale_factor
-        
-        # 6. CONFLUENCE: Ξ-Balance Through Geometric Actualization
-        #    From PAC papers: Confluence IS the Ξ=1.0571072 balance operator
-        #    
+        # 6. CONFLUENCE: Geometric actualization via Möbius topology
         #    P_{t+1} = Ξ · A_t(u+π, 1-v)
-        #    
-        #    This transformation maintains the universal conservation ratio
-        #    between hierarchical levels. It's not arbitrary geometry - it's
-        #    the mathematical manifestation of PAC functional conservation.
-        #    
-        #    The Möbius topology + Ξ-scaling ensures:
-        #        PAC = P + Ξ·A + α·M = constant
+        #    Blend to avoid shocking the system
         I_actualized = self.confluence.step(E_new, enforce_antiperiodicity=True)
-        
-        # Blend QBE dynamics with Ξ-balanced confluence
-        # Weight determines how strongly Ξ-balance stabilizes the dynamics
-        # Start gentle (let structures form) → increase (stabilize long-term)
-        confluence_weight = 0.3  # 30% Ξ-balance maintains conservation without over-damping
+        confluence_weight = 0.3  # 30% blend for stability
         I_new = (1.0 - confluence_weight) * I_new + confluence_weight * I_actualized
         
-        # 7. Temperature EMERGES from disequilibrium (not manually computed!)
-        #    T = ||E-I|| in Dawn Field Theory
+        # 7. Temperature EMERGES from disequilibrium
         T_new = torch.abs(E_new - I_new)
         
-        # Minimal safety: only prevent actual numerical errors
-        # (NO arbitrary clamping or artificial stability!)
+        # Only check for numerical errors (NaN/Inf)
         had_nan = torch.isnan(E_new).any() or torch.isnan(I_new).any() or torch.isnan(M_new).any()
-        if had_nan:
-            print("WARNING: NaN detected in fields - REVERTING to previous state!")
-            # Don't corrupt the state - return previous
-            # This triggers adaptive controller to increase gamma significantly
+        had_inf = torch.isinf(E_new).any() or torch.isinf(I_new).any() or torch.isinf(M_new).any()
+        
+        if had_nan or had_inf:
+            print("WARNING: NaN/Inf detected - adjusting adaptive parameters")
+            # Return previous state and let adaptive controller fix it
             return self._record_state()
         
         # 8. Create new state
         from substrate.field_types import FieldState
+        
+        # PAC conservation should EMERGE from RBF+QBE+Confluence geometry
+        # NOT be enforced by rescaling. The Möbius topology and balance
+        # dynamics naturally conserve PAC if equations are correct.
+        
         new_state = FieldState(
             potential=I_new,
             actual=E_new,
@@ -756,6 +652,236 @@ class RealityEngine:
             f"  Time: {self.time_elapsed:.6f}\n"
             f"  History: {len(self.history)} states"
         )
+
+
+class AnalogExtension:
+    """
+    Analog Tensor Architecture Extension for Reality Engine.
+    
+    This wraps the existing tensor-based RealityEngine and adds hierarchical
+    analog field centers that spawn dynamically from herniations.
+    
+    Key features:
+    - Maintains existing engine as "macro" scale
+    - Spawns finer-scale AnalogFieldCenters at intense herniations
+    - PAC-couples scales via Xi operator
+    - Computes fields on-demand using continuous equations
+    
+    Usage:
+        engine = RealityEngine(size=(256, 128))
+        engine.initialize('big_bang')
+        
+        # Wrap with analog extension
+        analog = AnalogExtension(engine, enable_spawning=True)
+        
+        # Step as normal - analog centers spawn automatically
+        analog.step()
+    """
+    
+    def __init__(
+        self,
+        base_engine: RealityEngine,
+        enable_spawning: bool = True,
+        spawn_threshold: float = 0.5,
+        max_centers: int = 10
+    ):
+        """
+        Initialize analog extension around existing engine.
+        
+        Args:
+            base_engine: Existing RealityEngine (becomes "macro" scale)
+            enable_spawning: Whether to auto-spawn centers at herniations
+            spawn_threshold: Herniation intensity threshold for spawning
+            max_centers: Maximum number of analog centers
+        """
+        from core.analog_field_center import AnalogFieldCenter, create_quantum_center_at_herniation
+        
+        self.base_engine = base_engine
+        self.enable_spawning = enable_spawning
+        self.spawn_threshold = spawn_threshold
+        self.max_centers = max_centers
+        
+        # Create macro-scale analog center wrapping base engine
+        # Base engine operates at ~meter scale
+        self.macro_center = AnalogFieldCenter(
+            characteristic_scale=1.0,  # 1 meter
+            bounds=(-100, 100, -100, 100),
+            device=base_engine.device
+        )
+        
+        # Child centers (finer scales) spawned from herniations
+        self.child_centers: list = []
+        
+        # Statistics
+        self.total_centers_spawned = 0
+        self.coupling_events = 0
+        
+        print("🔬 Analog Architecture Extension activated")
+        print(f"   Base engine: {base_engine.size}")
+        print(f"   Spawning enabled: {enable_spawning}")
+        print(f"   Spawn threshold: {spawn_threshold}")
+    
+    def step(self, herniation_data: Optional[Dict] = None) -> Dict:
+        """
+        Step the multi-scale system.
+        
+        1. Step base engine (macro scale)
+        2. Check for herniation spawning
+        3. Evolve child centers
+        4. PAC-couple scales
+        
+        Args:
+            herniation_data: Optional herniation info from HerniationDetector
+            
+        Returns:
+            Combined state dictionary
+        """
+        # Step base engine
+        base_state = self.base_engine.step()
+        
+        # Check for new center spawning
+        if self.enable_spawning and herniation_data:
+            self._check_spawn_centers(herniation_data)
+        
+        # Evolve child centers
+        for center in self.child_centers:
+            center.evolve(self.base_engine.dt)
+        
+        # Remove dead centers (energy depleted)
+        self._remove_dead_centers()
+        
+        # PAC couple scales
+        self._couple_scales()
+        
+        # Combine statistics
+        state = base_state.copy()
+        state['analog_stats'] = {
+            'num_child_centers': len(self.child_centers),
+            'total_spawned': self.total_centers_spawned,
+            'coupling_events': self.coupling_events,
+            'child_scales': [c.scale for c in self.child_centers]
+        }
+        
+        return state
+    
+    def _check_spawn_centers(self, herniation_data: Dict):
+        """
+        Check if any herniations are intense enough to spawn new centers.
+        Also dissipates herniation energy even if we can't spawn.
+        
+        Args:
+            herniation_data: Dict with 'sites', 'intensity', 'count'
+        """
+        from core.analog_field_center import create_quantum_center_at_herniation
+        
+        if herniation_data['count'] == 0:
+            return
+        
+        intensity = herniation_data.get('intensity', 0.0)
+        
+        # Intense enough to warrant action?
+        if intensity > self.spawn_threshold:
+            sites = herniation_data['sites']
+            if len(sites) > 0:
+                # Get first herniation site
+                y, x = sites[0][0].item(), sites[0][1].item()
+                
+                # Herniations are natural - don't dissipate artificially
+                # Let the RBF+QBE dynamics handle them
+                
+                # Try to spawn if under max
+                if len(self.child_centers) < self.max_centers:
+                    # Normalize to ±1 range
+                    nu, nv = self.base_engine.size
+                    norm_x = (x / nv) * 2 - 1
+                    norm_y = (y / nu) * 2 - 1
+                    
+                    # Spawn quantum center
+                    new_center = create_quantum_center_at_herniation(
+                        herniation_position=(norm_x, norm_y),
+                        herniation_intensity=intensity,
+                        parent_center=self.macro_center,
+                        device=self.base_engine.device
+                    )
+                    
+                    self.child_centers.append(new_center)
+                    self.total_centers_spawned += 1
+                    
+                    print(f"✨ Spawned analog center #{self.total_centers_spawned}")
+                    print(f"   Position: ({norm_x:.3f}, {norm_y:.3f})")
+                    print(f"   Scale: {new_center.scale:.2e} m")
+                else:
+                    print(f"⚠️  Max centers reached ({self.max_centers})")
+    
+    def _remove_dead_centers(self):
+        """
+        Remove centers that have decayed below viability threshold.
+        This frees up slots for new centers to spawn.
+        """
+        initial_count = len(self.child_centers)
+        
+        # Debug: Show ages before filtering
+        if initial_count > 0 and self.base_engine.step_count % 500 == 0:
+            ages = [c.age for c in self.child_centers]
+            energies = [c.total_energy for c in self.child_centers]
+            print(f"📊 Center lifecycle check (step {self.base_engine.step_count}):")
+            print(f"   Ages: {[f'{a:.1f}s' for a in ages]}")
+            print(f"   Energies: {[f'{e:.3f}' for e in energies]}")
+        
+        # Filter out dead centers (energy < 1%)
+        self.child_centers = [
+            center for center in self.child_centers
+            if center.total_energy > 0.01
+        ]
+        
+        removed = initial_count - len(self.child_centers)
+        if removed > 0:
+            print(f"💀 Removed {removed} decayed analog center(s)")
+            print(f"   Active centers: {len(self.child_centers)}/{self.max_centers}")
+    
+    def _couple_scales(self):
+        """
+        PAC-couple child centers to parent via Xi operator.
+        
+        This transfers conserved quantities between scales while
+        maintaining PAC conservation.
+        """
+        xi_operator = 1.0571  # PAC balance constant
+        
+        for center in self.child_centers:
+            center.couple_to_parent(xi_operator=xi_operator)
+            self.coupling_events += 1
+    
+    def get_all_centers(self) -> list:
+        """Get all field centers (macro + children)"""
+        return [self.macro_center] + self.child_centers
+    
+    def get_statistics(self) -> Dict:
+        """Get comprehensive statistics about analog system"""
+        stats = {
+            'macro_center': self.macro_center.get_statistics(),
+            'child_centers': [c.get_statistics() for c in self.child_centers],
+            'total_spawned': self.total_centers_spawned,
+            'coupling_events': self.coupling_events,
+            'total_memory_mb': sum(c._estimate_memory_usage() for c in self.get_all_centers())
+        }
+        return stats
+    
+    def cleanup_inactive_centers(self):
+        """Remove centers that have become inactive"""
+        active = []
+        removed = 0
+        
+        for center in self.child_centers:
+            if center.num_active_points > 10:  # Keep if still active
+                active.append(center)
+            else:
+                removed += 1
+        
+        self.child_centers = active
+        
+        if removed > 0:
+            print(f"🗑️  Removed {removed} inactive analog centers")
 
 
 def create_reality(

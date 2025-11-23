@@ -40,15 +40,15 @@ class PACRescaler:
         P: torch.Tensor, 
         A: torch.Tensor, 
         M: torch.Tensor,
-        drift_threshold: float = 0.05  # Only rescale if >5% drift
+        drift_threshold: float = 0.001  # Strict: rescale if >0.1% drift
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         """
-        Rescale fields to conserve PAC - but ONLY when drift exceeds threshold.
+        Rescale fields to conserve PAC strictly from the beginning.
         
-        This allows natural dynamics until PAC drifts too far, then corrects.
+        PAC conservation is a FUNDAMENTAL LAW - enforce it tightly.
         
         Args:
-            drift_threshold: Only rescale if PAC drift exceeds this (default 5%)
+            drift_threshold: Only rescale if PAC drift exceeds this (default 0.1%)
         
         Returns:
             (P_rescaled, A_rescaled, M_rescaled)
@@ -62,9 +62,9 @@ class PACRescaler:
         # Compute drift
         drift = abs(current_pac - self.initial_pac) / abs(self.initial_pac + 1e-10)
         
-        # Only rescale if drift is significant
+        # Enforce strict conservation
         if drift < drift_threshold:
-            return P, A, M  # Let natural dynamics continue!
+            return P, A, M  # Already conserved!
         
         # Compute rescaling factor
         if abs(current_pac) < 1e-10:

@@ -93,6 +93,7 @@ class ParticleAnalyzer:
         
         # Find local maxima in Memory field (stable structures)
         from scipy.ndimage import maximum_filter, generate_binary_structure
+        # Use 3D structure for 3D actualized space
         structure = generate_binary_structure(3, 2)
         local_max = maximum_filter(M_np, footprint=structure) == M_np
         
