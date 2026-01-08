@@ -1,0 +1,17 @@
+schema_version: "2.0"
+description: "POC testing emergent gravity from recursive memory field (dark matter as field effect)"
+semantic_scope: "validation"
+proficiency_level: "research"
+status: "complete"
+hypothesis: "Dark matter effects emerge from recursive memory field, not as separate substance"
+success_criteria:
+  - "c² within 15% of πφ/Ξ target"
+  - "Effective gravity ratio approaching 5:1 cosmological"
+  - "Fibonacci patterns in shell structure"
+files:
+  - "[exp_01_field_analysis.py]": "Integrated field analysis: c², recursive gravity, shells, clusters"
+  - "[exp_02_dark_matter_atoms.py]": "Dark matter and atomic shell structure analysis"
+  - "[exp_03_force_hydrogen.py]": "Force laws and hydrogen spectrum comparison"
+related_experiments:
+  - "recursive_gravity (dawn-field-theory)"
+  - "entropy_information_polarity_field (dawn-field-theory)"

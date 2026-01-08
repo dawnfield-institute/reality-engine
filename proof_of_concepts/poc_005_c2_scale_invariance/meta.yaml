@@ -1,0 +1,11 @@
+schema_version: "2.0"
+description: "POC testing if c² = πφ/Ξ holds across different grid sizes (scale invariance)"
+semantic_scope: "validation"
+proficiency_level: "research"
+status: "complete"
+hypothesis: "The emergent c² relationship should be scale-invariant across grid sizes"
+success_criteria:
+  - "c² deviation < 20% across all tested grid sizes"
+  - "Correlation r(dE,dM) > 0.9"
+files:
+  - "[exp_01_scale_invariance.py]": "Main experiment testing c² across grid sizes 32x16 to 96x48"
