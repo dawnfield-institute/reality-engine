@@ -1,0 +1,7 @@
+schema_version: "2.0"
+description: "Experiment scripts for stellar formation via Jeans collapse"
+semantic_scope: "implementation"
+proficiency_level: "research"
+
+files:
+  - "[exp_01_jeans_collapse.py]": "Jeans criterion gravitational collapse test"

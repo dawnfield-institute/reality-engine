@@ -1,0 +1,19 @@
+schema_version: "2.0"
+description: "Proof of Concept experiments for Reality Engine architecture validation"
+semantic_scope: "research"
+proficiency_level: "experimental"
+estimated_context_weight: 0.9
+validation_type: "automated"
+
+files:
+  - "[POC_REGISTRY.md]": "Central index of all POC experiments and status"
+
+child_directories:
+  - name: "poc_001_pac_lazy_field"
+    description: "PAC-Lazy hierarchical field substrate"
+  - name: "poc_002_feigenbaum_detection"
+    description: "Feigenbaum-Möbius constant integration"
+  - name: "poc_003_premass_dynamics"
+    description: "MAS equation and herniation testing"
+  - name: "poc_004_stellar_formation"
+    description: "Gravitational collapse and structure formation"
