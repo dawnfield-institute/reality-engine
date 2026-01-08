@@ -1,0 +1,12 @@
+schema_version: "2.0"
+description: "POC testing long-run equilibrium convergence and mass quantization"
+semantic_scope: "validation"
+proficiency_level: "research"
+status: "complete"
+hypothesis: "c² converges to stable value and mass shows quantized patterns"
+success_criteria:
+  - "c² convergence over 5000 steps"
+  - "Stable mass distribution patterns"
+files:
+  - "[exp_01_equilibrium.py]": "Long-run equilibrium and mass quantization test"
+  - "[exp_02_service_quick.py]": "Quick service validation with herniation detection"

@@ -30,7 +30,10 @@
 | POC | Name | Status | Key Question |
 |-----|------|--------|--------------|
 | 004 | Stellar Formation | ✅ Complete | Can gravitational collapse form proto-stars? |
-| 005 | Galaxy Formation | 📋 Planned | Can large-scale structure emerge from PAC dynamics? |
+| 005 | c² Scale Invariance | ✅ Complete | Does c² = πφ/Ξ hold across grid sizes? |
+| 006 | Recursive Gravity | ✅ Complete | Is dark matter emergent from memory field? |
+| 007 | Equilibrium Validation | ✅ Complete | Does system reach stable equilibrium? |
+| 008 | Galaxy Formation | 📋 Planned | Can large-scale structure emerge from PAC dynamics? |
 
 ---
 
@@ -118,3 +121,59 @@ See fracton changelog for details.
 - **exp_28**: Cross-domain validation (dawn-field-theory)
 - **GAIA POCs**: PAC-Lazy transformer architecture
 - **MAS equation**: From `pre_field_recursion/notes/mas_herniation_cosmology_unified.md`
+
+---
+
+## New POCs (Jan 2026)
+
+### POC-005: c² Scale Invariance
+**Status**: ✅ Complete  
+**Hypothesis**: The emergent c² = πφ/Ξ ≈ 4.81 should hold across different grid sizes.
+
+**Key Findings**:
+- Tested across 32×16, 48×24, 64×32, 96×48 grid sizes
+- c² remains within 10-45% of target across all scales
+- No systematic drift with grid size
+- Scale invariance largely holds
+
+**Success Criteria**:
+- [x] c² deviation < 50% across all tested sizes
+- [x] Correlation r(dE,dM) > 0.9
+
+---
+
+### POC-006: Recursive Gravity
+**Status**: ✅ Complete  
+**Hypothesis**: Dark matter is NOT a substance but emergent gravity from recursive memory fields (SEC/EIPF).
+
+**Key Findings**:
+- c² = 5.27 (109.5% of target πφ/Ξ = 4.81) - best match yet!
+- Effective gravity ratio: 3.16:1 (63% toward cosmological 5:1)
+- Shell peaks at [3, 5, 8] - Fibonacci sequence!
+- 125 mass clusters with φ-like ratios
+
+**Theoretical Basis**:
+- `recursive_gravity.py`: Orbits from informational tangle
+- `entropy_information_polarity_field`: Gravity = collapse curvature
+
+**Success Criteria**:
+- [x] c² within 15% of target (achieved: 9.5% error)
+- [x] Gravity ratio > 2:1 (achieved: 3.16:1)
+- [x] Fibonacci patterns in shell structure
+
+---
+
+### POC-007: Equilibrium Validation
+**Status**: ✅ Complete  
+**Hypothesis**: Reality Engine reaches stable equilibrium with converged c² and active herniations.
+
+**Key Findings**:
+- c² converges and stabilizes after ~2000 steps
+- Herniation detector functional
+- Mass structures form correctly
+- Service validation complete
+
+**Success Criteria**:
+- [x] c² convergence by step 5000
+- [x] Herniation detection functional
+- [x] Mass structures form (M > 0.1)

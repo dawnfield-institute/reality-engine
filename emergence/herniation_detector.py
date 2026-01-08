@@ -100,7 +100,10 @@ class HerniationDetector:
             
             # Herniation potential: where pressure + gradients exceed boundary strength
             # (1-M) factor: already-collapsed regions less likely to herniate again
-            herniation_potential = pressure * gradient_magnitude * (1.0 - memory)
+            # Normalize components to prevent explosion
+            pressure_normalized = torch.tanh(pressure / 10.0)  # Bound to [-1, 1]
+            gradient_normalized = torch.tanh(gradient_magnitude / 10.0)  # Bound to [0, 1]
+            herniation_potential = pressure_normalized * gradient_normalized * (1.0 - memory / 100.0)
             
             # Dynamic threshold based on field statistics
             mean_potential = herniation_potential.mean()
@@ -228,7 +231,8 @@ class HerniationDetector:
                 
                 # 3. TEMPERATURE INCREASE
                 # Collapses add energy, raising local temperature
-                state.temperature.add_(collapse_kernel * 5.0)
+                # Use small increment to prevent thermal runaway
+                state.temperature.add_(collapse_kernel * 0.1)
                 
                 # 4. TURBULENCE INJECTION
                 # Add random perturbations to maintain field gradients
