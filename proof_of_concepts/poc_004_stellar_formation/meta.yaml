@@ -1,0 +1,17 @@
+schema_version: "2.0"
+description: "Stellar formation via gravitational collapse"
+semantic_scope: "research"
+proficiency_level: "experimental"
+estimated_context_weight: 0.8
+validation_type: "automated"
+
+files:
+  - "[README.md]": "POC hypothesis, Jeans criterion, test results"
+
+child_directories:
+  - name: "journals"
+    description: "Daily research logs"
+  - name: "scripts"
+    description: "Experiment scripts (exp_NN_name.py)"
+  - name: "results"
+    description: "JSON experiment outputs"

@@ -38,6 +38,10 @@ class PACMetrics:
     max_level_deviation: float  # Worst individual level error
     levels_in_tolerance: int  # How many levels satisfy PAC
     total_levels: int
+    # Resonance tracking (Phase 1 addition)
+    resonance_frequency: Optional[float] = None  # Detected natural frequency
+    resonance_confidence: float = 0.0  # Detection confidence (0-1)
+    resonance_locked: bool = False  # Whether timestep is locked to resonance
 
 
 class PACRecursion:
@@ -59,24 +63,44 @@ class PACRecursion:
         tolerance: float = 1e-6,
         phi_tolerance: float = 0.01,
         correction_rate: float = 0.1,
-        device: str = 'cpu'
+        device: str = 'cpu',
+        enable_resonance: bool = True,
+        resonance_check_interval: int = 10
     ):
         """
         Initialize PAC recursion enforcer.
-        
+
         Args:
             tolerance: Maximum allowed recursion error
             phi_tolerance: Maximum allowed φ ratio deviation (1% default)
             correction_rate: How fast to correct violations (0-1)
             device: Compute device
+            enable_resonance: Enable resonance detection for speedup (Phase 1)
+            resonance_check_interval: Iterations between resonance checks
         """
         self.tolerance = tolerance
         self.phi_tolerance = phi_tolerance
         self.correction_rate = correction_rate
         self.device = device
-        
+
         self.history: List[PACMetrics] = []
         self.initial_total: Optional[float] = None
+
+        # Phase 1: Resonance detection
+        self.enable_resonance = enable_resonance
+        self.resonance_check_interval = resonance_check_interval
+        self.resonance_detector = None
+        self.pac_residual_history: List[float] = []
+        self.current_resonance = None
+        self.iterations_since_check = 0
+
+        if enable_resonance:
+            try:
+                from dynamics.resonance_detector import ResonanceDetector
+                self.resonance_detector = ResonanceDetector(min_window=20, max_window=100)
+            except ImportError:
+                print("Warning: ResonanceDetector not available, continuing without resonance detection")
+                self.enable_resonance = False
     
     def compute_pac_solution(self, depth: int, initial_value: float = 1.0) -> torch.Tensor:
         """
@@ -200,16 +224,49 @@ class PACRecursion:
         # Compute final metrics
         _, final_recursion_errors = self.verify_recursion(totals)
         _, final_phi_errors = self.verify_phi_ratios(totals)
-        
+
+        # Phase 1: Track PAC residual for resonance detection
+        pac_residual = final_recursion_errors.abs().mean().item() if len(final_recursion_errors) > 0 else 0.0
+
+        # Resonance detection (if enabled)
+        resonance_freq = None
+        resonance_conf = 0.0
+        resonance_locked = False
+
+        if self.enable_resonance and self.resonance_detector is not None:
+            # Track residual history
+            self.pac_residual_history.append(pac_residual)
+            self.iterations_since_check += 1
+
+            # Periodic resonance check
+            if self.iterations_since_check >= self.resonance_check_interval:
+                self.current_resonance = self.resonance_detector.analyze_oscillations(
+                    self.pac_residual_history
+                )
+                self.iterations_since_check = 0
+
+            # Extract resonance info if available
+            if self.current_resonance is not None:
+                resonance_freq = self.current_resonance.get('frequency')
+                resonance_conf = self.current_resonance.get('confidence', 0.0)
+                resonance_locked = self.resonance_detector.should_lock(
+                    self.current_resonance,
+                    stability_threshold=0.5
+                )
+
         metrics = PACMetrics(
-            recursion_error=final_recursion_errors.abs().mean().item() if len(final_recursion_errors) > 0 else 0.0,
+            recursion_error=pac_residual,
             phi_ratio_error=final_phi_errors.mean().item() if len(final_phi_errors) > 0 else 0.0,
             total_conserved=totals.sum().item(),
             max_level_deviation=final_recursion_errors.abs().max().item() if len(final_recursion_errors) > 0 else 0.0,
             levels_in_tolerance=int((final_recursion_errors.abs() < self.tolerance).sum().item()) if len(final_recursion_errors) > 0 else len(field_hierarchy),
-            total_levels=len(field_hierarchy)
+            total_levels=len(field_hierarchy),
+            # Phase 1: Resonance metrics
+            resonance_frequency=resonance_freq,
+            resonance_confidence=resonance_conf,
+            resonance_locked=resonance_locked
         )
-        
+
         self.history.append(metrics)
         return corrected, metrics
     
@@ -326,12 +383,12 @@ class PACRecursion:
         """Get summary of PAC convergence over history."""
         if not self.history:
             return {'status': 'no_history'}
-        
+
         recursion_errors = [m.recursion_error for m in self.history]
         phi_errors = [m.phi_ratio_error for m in self.history]
         totals = [m.total_conserved for m in self.history]
-        
-        return {
+
+        report = {
             'steps': len(self.history),
             'final_recursion_error': recursion_errors[-1],
             'final_phi_error': phi_errors[-1],
@@ -341,6 +398,50 @@ class PACRecursion:
             'mean_recursion_error': np.mean(recursion_errors),
             'mean_phi_error': np.mean(phi_errors)
         }
+
+        # Phase 1: Add resonance info if enabled
+        if self.enable_resonance and self.current_resonance is not None:
+            report['resonance_frequency'] = self.current_resonance.get('frequency')
+            report['resonance_period'] = self.current_resonance.get('period')
+            report['resonance_confidence'] = self.current_resonance.get('confidence', 0.0)
+            report['resonance_locked'] = self.history[-1].resonance_locked if self.history else False
+            if self.resonance_detector is not None:
+                report['resonance_stability'] = self.resonance_detector.get_detection_stability()
+
+        return report
+
+    def get_suggested_timestep(self, base_dt: float = 0.1) -> Optional[float]:
+        """
+        Get suggested timestep based on detected resonance.
+
+        Phase 1 addition: Uses resonance detection to suggest optimal timestep
+        for resonance-locked convergence (5× speedup).
+
+        Args:
+            base_dt: Current timestep
+
+        Returns:
+            Suggested timestep, or None if no resonance detected
+        """
+        if not self.enable_resonance or self.resonance_detector is None:
+            return None
+
+        if self.current_resonance is None:
+            return None
+
+        return self.resonance_detector.suggest_timestep(self.current_resonance, base_dt)
+
+    def is_resonance_locked(self) -> bool:
+        """
+        Check if PAC evolution is currently locked to resonance.
+
+        Returns:
+            True if resonance is detected and locked
+        """
+        if not self.enable_resonance or not self.history:
+            return False
+
+        return self.history[-1].resonance_locked
 
 
 def test_pac_recursion():

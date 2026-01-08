@@ -1,0 +1,7 @@
+schema_version: "2.0"
+description: "Experiment scripts for PAC-Lazy field validation"
+semantic_scope: "implementation"
+proficiency_level: "research"
+
+files:
+  - "[exp_01_hierarchical_validation.py]": "Basic field validation and PAC convergence"
