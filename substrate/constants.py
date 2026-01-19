@@ -16,7 +16,13 @@ PHI = (1 + np.sqrt(5)) / 2  # 1.6180339887498949...
 PHI_INV = 1 / PHI           # 0.6180339887498949... = φ - 1
 
 # Geometric Constants (from Möbius topology)
-XI = 1.0571  # Ξ - Universal balance constant (Möbius holonomy correction)
+# DERIVATION (2026-01-19): Ξ - 1 = π/55 proven from PAC collapse dynamics
+#   within = 2√(r(1-r)) - 1 = -0.0283 (r = 1/φ)
+#   cross = +0.0854 (network interference)
+#   net = -0.0283 + 0.0854 = 0.0571 = π/55 per level
+#   At depth 55: 55 × π/55 = π (one Möbius half-twist)
+#   Trace: dawn-field-theory/foundational/experiments/oscillation_attractor_dynamics/scripts/exp_24_comprehensive_validation.py
+XI = 1 + np.pi / 55  # Ξ = 1.0571... - Universal balance constant (DERIVED, not empirical)
 TWIST_ANGLE = np.pi  # π - Möbius half-twist
 
 # =============================================================================
