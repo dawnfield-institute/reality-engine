@@ -1,0 +1,52 @@
+# Reality Engine v2 — default configuration
+# See .spec/phase1.spec.md for documentation
+
+manifold:
+  n_u: 128          # Angular resolution (must be even)
+  n_v: 64           # Cross-section resolution
+  device: cuda      # cpu or cuda
+
+sec:
+  kappa: 0.1        # Diffusion coefficient
+  gamma: 1.0        # Collapse coupling
+  beta_0: 1.0       # Base collapse rate
+  sigma_0: 0.1      # Source strength (balances collapse at S_ss ≈ 0.11)
+  dt: 0.01          # Integration timestep
+  xi_gain: 2.0      # Bidirectional Ξ modulation sensitivity
+  rho: 1.0          # Topological reinforcement strength
+  phi_source: 0.618 # Anti-periodic source ratio (1/φ, topology-natural)
+  # --- RBF (Recursive Balance Field) ---
+  alpha_rbf: 5.0    # Memory dampening: gain halved when M ≈ 0.2
+  rbf_decay: 0.995  # Memory half-life ≈ 138 steps
+  ki_rbf: 1.0       # Integral gain (eliminates proportional droop)
+  integral_clamp: 1.0  # Anti-windup clamp
+  rbf_omega: 0.2    # Fibonacci harmonic base frequency
+  low_k_mix: 0.382  # Low-k anti mode mix (≈ φ⁻², topology-natural)
+  # CFL STABILITY: kappa * dt / h² < 0.5
+  # At 128x64: h = 2π/128 ≈ 0.049, so 0.1 * 0.01 / 0.049² ≈ 0.42 (OK)
+  # At 256x128: h = 2π/256 ≈ 0.025, so 0.1 * 0.01 / 0.025² = 1.6 (UNSTABLE!)
+  # → For 256+, use dt=0.002 or switch to implicit integration
+
+actualization:
+  rate: 0.1           # Crystallisation/dissolution rate
+  scale: 1.0          # Laplacian curvature → coherence scale
+  memory: 0.9         # EMA smoothing for A dynamics
+
+pac:
+  mode: enforce       # enforce or measure
+  log_interval: 100   # Steps between diagnostic logs
+
+init:
+  seed: 42
+  P_mean: 0.1         # Initial potential level (near SEC equilibrium S_ss ≈ 0.12)
+  P_noise: 0.01       # Perturbation amplitude
+  A_mean: 0.1         # Low initial level keeps field in responsive collapse regime
+  A_noise: 0.01
+  antiperiodic_amp: 0.01  # Möbius-natural seed: sin(u)·sin(πv) + cos(u)
+
+run:
+  n_steps: 10000
+  vis: true
+  vis_fps: 30
+  log_interval: 100
+  save_interval: 1000   # Steps between state snapshots
