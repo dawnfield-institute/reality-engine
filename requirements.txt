@@ -8,6 +8,10 @@ torch>=2.0.0
 
 # Visualization
 matplotlib>=3.7.0
+pygame>=2.5.0
+
+# Config
+pyyaml>=6.0
 
 # Dashboard server
 flask>=2.3.0
