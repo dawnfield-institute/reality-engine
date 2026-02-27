@@ -391,7 +391,7 @@ reality-engine/
 
 ```bash
 # Start with Phase 1
-cd c:\Users\peter\repos\Dawn Field Institute\reality-engine
+cd c:\Users\peter\repos\core_workspace\reality-engine
 python -c "from conservation.pac_recursion import PACRecursion; print('Ready')"
 ```
 
