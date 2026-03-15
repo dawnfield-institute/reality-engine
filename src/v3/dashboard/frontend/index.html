@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reality Engine v3</title>
+  <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #0a0a1a;
+      color: #e0e0f0;
+      overflow-x: hidden;
+    }
+    header {
+      background: linear-gradient(135deg, #0d1117 0%, #161b22 100%);
+      padding: 12px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #30363d;
+    }
+    header h1 { font-size: 18px; font-weight: 600; color: #58a6ff; }
+    .status { font-size: 13px; color: #8b949e; }
+    .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+    .dot.connected { background: #3fb950; }
+    .dot.disconnected { background: #f85149; }
+
+    .controls {
+      display: flex;
+      gap: 8px;
+      padding: 12px 24px;
+      background: #0d1117;
+      border-bottom: 1px solid #21262d;
+    }
+    .controls button {
+      padding: 6px 16px;
+      border: 1px solid #30363d;
+      border-radius: 6px;
+      background: #21262d;
+      color: #c9d1d9;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .controls button:hover { background: #30363d; border-color: #58a6ff; }
+    .controls button.active { background: #1f6feb; border-color: #1f6feb; color: #fff; }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: auto auto;
+      gap: 12px;
+      padding: 12px 24px;
+    }
+    .panel {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 8px 12px;
+      background: #161b22;
+      font-size: 13px;
+      font-weight: 600;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .panel-body { padding: 8px; }
+    .cosmic-view { grid-column: 1 / 3; min-height: 350px; }
+    .cosmic-view .panel-body { height: 340px; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 12px 24px;
+    }
+    .metric {
+      background: #0d1117;
+      border: 1px solid #21262d;
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+    }
+    .metric .value { font-size: 22px; font-weight: 700; color: #58a6ff; }
+    .metric .label { font-size: 11px; color: #8b949e; margin-top: 4px; }
+
+    .detections {
+      padding: 12px 24px;
+    }
+    .detection-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .detection-tag {
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .detection-tag.gravity_well { background: #1a3a5c; color: #58a6ff; }
+    .detection-tag.atom { background: #1a3c1a; color: #3fb950; }
+    .detection-tag.star { background: #5c3a1a; color: #d29922; }
+    .detection-tag.quantum_coherence { background: #3a1a5c; color: #bc8cff; }
+    .detection-tag.galaxy { background: #5c1a3a; color: #f778ba; }
+    .detection-tag.herniation { background: #5c1a1a; color: #f85149; }
+    .detection-tag.conservation_violation { background: #5c3a3a; color: #f85149; }
+
+    .field-selector {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .field-selector button {
+      padding: 3px 10px;
+      border: 1px solid #30363d;
+      border-radius: 4px;
+      background: transparent;
+      color: #8b949e;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .field-selector button.active { background: #1f6feb; color: #fff; border-color: #1f6feb; }
+
+    #timeline { height: 200px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Reality Engine v3</h1>
+    <div class="status">
+      <span class="dot disconnected" id="statusDot"></span>
+      <span id="statusText">Connecting...</span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <button id="btnStart" onclick="apiCall('start')">Start</button>
+    <button id="btnStop" onclick="apiCall('stop')">Stop</button>
+    <button id="btnStep" onclick="apiCall('step')">Step</button>
+    <button id="btnReset" onclick="apiCall('reset')">Reset</button>
+  </div>
+
+  <div class="metrics">
+    <div class="metric"><div class="value" id="metTick">0</div><div class="label">Tick</div></div>
+    <div class="metric"><div class="value" id="metEnergy">0</div><div class="label">Total Energy</div></div>
+    <div class="metric"><div class="value" id="metMass">0</div><div class="label">Total Mass</div></div>
+    <div class="metric"><div class="value" id="metStructures">0</div><div class="label">Stable Structures</div></div>
+  </div>
+
+  <div class="dashboard">
+    <div class="panel cosmic-view">
+      <div class="panel-header">
+        Cosmic View
+        <span class="field-selector" style="float:right">
+          <button class="active" onclick="setField('cosmic')">Cosmic</button>
+          <button onclick="setField('E')">E</button>
+          <button onclick="setField('I')">I</button>
+          <button onclick="setField('M')">M</button>
+          <button onclick="setField('T')">T</button>
+        </span>
+      </div>
+      <div class="panel-body"><div id="fieldPlot" style="width:100%;height:100%"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">Energy Timeline</div>
+      <div class="panel-body"><div id="timeline"></div></div>
+    </div>
+    <div class="panel">
+      <div class="panel-header">Detections</div>
+      <div class="panel-body" id="detectionPanel"><div class="detection-list" id="detectionList"></div></div>
+    </div>
+  </div>
+
+  <script>
+    let ws = null;
+    let currentField = 'cosmic';
+    const history = { ticks: [], energy: [], mass: [], temp: [] };
+    const MAX_HISTORY = 500;
+
+    function connect() {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${proto}//${location.host}/ws`);
+      ws.onopen = () => {
+        document.getElementById('statusDot').className = 'dot connected';
+        document.getElementById('statusText').textContent = 'Connected';
+      };
+      ws.onclose = () => {
+        document.getElementById('statusDot').className = 'dot disconnected';
+        document.getElementById('statusText').textContent = 'Disconnected';
+        setTimeout(connect, 2000);
+      };
+      ws.onmessage = (event) => {
+        try { handleSnapshot(JSON.parse(event.data)); } catch(e) {}
+      };
+    }
+
+    function handleSnapshot(snap) {
+      // Metrics
+      document.getElementById('metTick').textContent = snap.tick;
+      document.getElementById('metEnergy').textContent = snap.total_energy.toFixed(1);
+      document.getElementById('metMass').textContent = snap.mass_total.toFixed(2);
+      document.getElementById('metStructures').textContent = snap.stable_structures;
+
+      // History
+      history.ticks.push(snap.tick);
+      history.energy.push(snap.total_energy);
+      history.mass.push(snap.mass_total);
+      history.temp.push(snap.temp_mean);
+      if (history.ticks.length > MAX_HISTORY) {
+        history.ticks.shift(); history.energy.shift();
+        history.mass.shift(); history.temp.shift();
+      }
+
+      // Field heatmap
+      if (snap.fields) {
+        if (currentField === 'cosmic') {
+          // True RGB cosmic view: R=|I| (information), G=M (mass), B=|E| (energy)
+          const E = snap.fields.E, I = snap.fields.I, M = snap.fields.M;
+          const rows = E.length, cols = E[0].length;
+          let maxE = 0, maxI = 0, maxM = 0;
+          for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+              maxE = Math.max(maxE, Math.abs(E[r][c]));
+              maxI = Math.max(maxI, Math.abs(I[r][c]));
+              maxM = Math.max(maxM, Math.abs(M[r][c]));
+            }
+          }
+          maxE = maxE || 1; maxI = maxI || 1; maxM = maxM || 1;
+          const rgbData = [];
+          for (let r = 0; r < rows; r++) {
+            rgbData[r] = [];
+            for (let c = 0; c < cols; c++) {
+              rgbData[r][c] = [
+                Math.round(255 * Math.abs(I[r][c]) / maxI),
+                Math.round(255 * Math.abs(M[r][c]) / maxM),
+                Math.round(255 * Math.abs(E[r][c]) / maxE),
+              ];
+            }
+          }
+          Plotly.react('fieldPlot', [{
+            z: rgbData,
+            type: 'image',
+          }], {
+            paper_bgcolor: '#0d1117',
+            plot_bgcolor: '#0d1117',
+            margin: { l: 40, r: 20, t: 10, b: 30 },
+            xaxis: { color: '#30363d', gridcolor: '#21262d' },
+            yaxis: { color: '#30363d', gridcolor: '#21262d' },
+          }, { responsive: true });
+        } else {
+          const data = snap.fields[currentField];
+          if (data) {
+            Plotly.react('fieldPlot', [{
+              z: data,
+              type: 'heatmap',
+              colorscale: currentField === 'M' ? 'Hot' :
+                          currentField === 'T' ? 'YlOrRd' : 'RdBu',
+              showscale: true,
+              colorbar: { tickfont: { color: '#8b949e' } },
+            }], {
+              paper_bgcolor: '#0d1117',
+              plot_bgcolor: '#0d1117',
+              margin: { l: 40, r: 20, t: 10, b: 30 },
+              xaxis: { color: '#30363d', gridcolor: '#21262d' },
+              yaxis: { color: '#30363d', gridcolor: '#21262d' },
+            }, { responsive: true });
+          }
+        }
+      }
+
+      // Timeline
+      if (snap.tick % 5 === 0) {
+        Plotly.react('timeline', [
+          { x: history.ticks, y: history.energy, name: 'Energy', line: { color: '#58a6ff' } },
+          { x: history.ticks, y: history.mass, name: 'Mass', line: { color: '#3fb950' } },
+          { x: history.ticks, y: history.temp, name: 'Temp', line: { color: '#d29922' }, yaxis: 'y2' },
+        ], {
+          paper_bgcolor: '#0d1117',
+          plot_bgcolor: '#0d1117',
+          margin: { l: 50, r: 50, t: 10, b: 30 },
+          xaxis: { color: '#30363d', gridcolor: '#21262d', title: 'Tick' },
+          yaxis: { color: '#58a6ff', gridcolor: '#21262d' },
+          yaxis2: { color: '#d29922', overlaying: 'y', side: 'right' },
+          legend: { font: { color: '#8b949e' }, bgcolor: 'transparent' },
+          showlegend: true,
+        }, { responsive: true });
+      }
+
+      // Detections
+      const list = document.getElementById('detectionList');
+      list.innerHTML = '';
+      const counts = {};
+      for (const d of snap.detections) {
+        counts[d.kind] = (counts[d.kind] || 0) + 1;
+      }
+      for (const [kind, count] of Object.entries(counts)) {
+        const tag = document.createElement('span');
+        tag.className = `detection-tag ${kind}`;
+        tag.textContent = `${kind.replace('_', ' ')} ×${count}`;
+        list.appendChild(tag);
+      }
+    }
+
+    function setField(f) {
+      currentField = f;
+      document.querySelectorAll('.field-selector button').forEach(b => {
+        b.className = b.textContent.toLowerCase() === f || (f === 'cosmic' && b.textContent === 'Cosmic') ? 'active' : '';
+      });
+    }
+
+    async function apiCall(action) {
+      await fetch(`/api/${action}`, { method: 'POST' });
+    }
+
+    // Init empty plots
+    Plotly.newPlot('fieldPlot', [], {
+      paper_bgcolor: '#0d1117', plot_bgcolor: '#0d1117',
+      margin: { l: 40, r: 20, t: 10, b: 30 },
+    });
+    Plotly.newPlot('timeline', [], {
+      paper_bgcolor: '#0d1117', plot_bgcolor: '#0d1117',
+      margin: { l: 50, r: 50, t: 10, b: 30 },
+    });
+
+    connect();
+  </script>
+</body>
+</html>
