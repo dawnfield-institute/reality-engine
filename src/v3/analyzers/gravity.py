@@ -34,7 +34,7 @@ class GravityAnalyzer:
             self._manifold = MobiusManifold(nu, nv, device=state.device)
         return self._manifold
 
-    def analyze(self, state: FieldState, bus: EventBus) -> List[Detection]:
+    def analyze(self, state: FieldState, bus: EventBus, prior_detections=None) -> List[Detection]:
         m = self._get_manifold(state)
         M = state.M
 

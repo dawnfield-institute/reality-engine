@@ -44,6 +44,8 @@ from src.v3.operators.thermal_noise import ThermalNoiseOperator
 from src.v3.operators.normalization import NormalizationOperator
 from src.v3.operators.adaptive import AdaptiveOperator
 from src.v3.operators.time_emergence import TimeEmergenceOperator
+from src.v3.operators.gravity import GravitationalCollapseOperator
+from src.v3.operators.fusion import FusionOperator
 from src.v3.analyzers import (
     ConservationAnalyzer, GravityAnalyzer, AtomDetector,
     StarDetector, QuantumDetector, GalaxyAnalyzer,
@@ -58,6 +60,8 @@ def build_default_pipeline() -> Pipeline:
         QBEOperator(),
         EulerIntegrator(),
         MemoryOperator(),
+        GravitationalCollapseOperator(),   # self-gravity: mass attracts mass
+        FusionOperator(),                   # stellar nucleosynthesis: M+T → E+Z
         ConfluenceOperator(),
         TemperatureOperator(),
         ThermalNoiseOperator(),
@@ -128,10 +132,10 @@ class SimulationRunner:
     def _tick_and_snapshot(self) -> None:
         state = self.engine.tick()
 
-        # Run analyzers
+        # Run analyzers in causal chain order — each sees prior detections
         all_detections = []
         for analyzer in self._analyzers:
-            dets = analyzer.analyze(state, self.engine.bus)
+            dets = analyzer.analyze(state, self.engine.bus, prior_detections=all_detections)
             all_detections.extend(dets)
 
         # Track structure persistence
@@ -146,6 +150,7 @@ class SimulationRunner:
             "pac_total": state.pac_total,
             "mass_total": float(state.M.sum().item()),
             "temp_mean": float(state.T.mean().item()),
+            "metallicity_total": float(state.Z.sum().item()),
             "detections": [
                 {"kind": d.kind, "position": d.position, "properties": d.properties}
                 for d in all_detections
@@ -159,6 +164,7 @@ class SimulationRunner:
                 "I": state.I.tolist(),
                 "M": state.M.tolist(),
                 "T": state.T.tolist(),
+                "Z": state.Z.tolist(),
             },
         }
 

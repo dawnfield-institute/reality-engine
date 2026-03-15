@@ -110,6 +110,7 @@
     .detection-tag.galaxy { background: #5c1a3a; color: #f778ba; }
     .detection-tag.herniation { background: #5c1a1a; color: #f85149; }
     .detection-tag.conservation_violation { background: #5c3a3a; color: #f85149; }
+    .detection-tag.hydrogen { background: #1a2a3a; color: #8db6cd; }
 
     .field-selector {
       display: flex;
@@ -150,6 +151,7 @@
     <div class="metric"><div class="value" id="metTick">0</div><div class="label">Tick</div></div>
     <div class="metric"><div class="value" id="metEnergy">0</div><div class="label">Total Energy</div></div>
     <div class="metric"><div class="value" id="metMass">0</div><div class="label">Total Mass</div></div>
+    <div class="metric"><div class="value" id="metMetals">0</div><div class="label">Metals (Z)</div></div>
     <div class="metric"><div class="value" id="metStructures">0</div><div class="label">Stable Structures</div></div>
   </div>
 
@@ -163,6 +165,7 @@
           <button onclick="setField('I')">I</button>
           <button onclick="setField('M')">M</button>
           <button onclick="setField('T')">T</button>
+          <button onclick="setField('Z')">Z</button>
         </span>
       </div>
       <div class="panel-body"><div id="fieldPlot" style="width:100%;height:100%"></div></div>
@@ -205,6 +208,7 @@
       document.getElementById('metTick').textContent = snap.tick;
       document.getElementById('metEnergy').textContent = snap.total_energy.toFixed(1);
       document.getElementById('metMass').textContent = snap.mass_total.toFixed(2);
+      document.getElementById('metMetals').textContent = (snap.metallicity_total || 0).toFixed(2);
       document.getElementById('metStructures').textContent = snap.stable_structures;
 
       // History
@@ -260,7 +264,7 @@
               z: data,
               type: 'heatmap',
               colorscale: currentField === 'M' ? 'Hot' :
-                          currentField === 'T' ? 'YlOrRd' : 'RdBu',
+                          currentField === 'T' ? 'YlOrRd' : currentField === 'Z' ? 'Greens' : 'RdBu',
               showscale: true,
               colorbar: { tickfont: { color: '#8b949e' } },
             }], {

@@ -25,7 +25,7 @@ class ConservationAnalyzer:
     def name(self) -> str:
         return "conservation"
 
-    def analyze(self, state: FieldState, bus: EventBus) -> List[Detection]:
+    def analyze(self, state: FieldState, bus: EventBus, prior_detections=None) -> List[Detection]:
         pac = state.pac_total
         detections: List[Detection] = []
 

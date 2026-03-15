@@ -35,7 +35,7 @@ class HerniationDetector:
             self._manifold = MobiusManifold(nu, nv, device=state.device)
         return self._manifold
 
-    def analyze(self, state: FieldState, bus: EventBus) -> List[Detection]:
+    def analyze(self, state: FieldState, bus: EventBus, prior_detections=None) -> List[Detection]:
         m = self._get_manifold(state)
 
         # Antiperiodic violation: |f_twisted + f|

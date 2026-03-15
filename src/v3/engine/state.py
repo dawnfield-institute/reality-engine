@@ -21,6 +21,7 @@ class FieldState:
         I: Information field (potential) — shape (nu, nv)
         M: Memory field (mass/persistence) — shape (nu, nv)
         T: Temperature field — shape (nu, nv)
+        Z: Metallicity field (fusion products) — shape (nu, nv)
         tick: Current simulation tick
         dt: Time step used to reach this state
         time: Cumulative simulation time
@@ -31,10 +32,16 @@ class FieldState:
     I: torch.Tensor
     M: torch.Tensor
     T: torch.Tensor
+    Z: Optional[torch.Tensor] = None  # metallicity — only written by FusionOperator
     tick: int = 0
     dt: float = 0.001
     time: float = 0.0
     metrics: Dict[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        # Auto-create Z as zeros if not provided
+        if self.Z is None:
+            object.__setattr__(self, "Z", torch.zeros_like(self.E))
 
     # --- helpers ---------------------------------------------------------
 
@@ -45,6 +52,7 @@ class FieldState:
             "I": self.I,
             "M": self.M,
             "T": self.T,
+            "Z": self.Z,
             "tick": self.tick,
             "dt": self.dt,
             "time": self.time,
@@ -87,7 +95,7 @@ class FieldState:
         """Create a zero-initialised FieldState."""
         device = device or torch.device("cpu")
         z = torch.zeros(nu, nv, dtype=dtype, device=device)
-        return FieldState(E=z.clone(), I=z.clone(), M=z.clone(), T=z.clone())
+        return FieldState(E=z.clone(), I=z.clone(), M=z.clone(), T=z.clone(), Z=z.clone())
 
     @staticmethod
     def big_bang(
@@ -103,4 +111,5 @@ class FieldState:
         I = torch.randn(nu, nv, dtype=dtype, device=device) * temperature
         M = torch.zeros(nu, nv, dtype=dtype, device=device)
         T = torch.full((nu, nv), temperature, dtype=dtype, device=device)
-        return FieldState(E=E, I=I, M=M, T=T)
+        Z = torch.zeros(nu, nv, dtype=dtype, device=device)
+        return FieldState(E=E, I=I, M=M, T=T, Z=Z)

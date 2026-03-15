@@ -25,6 +25,8 @@ from src.v3.operators.thermal_noise import ThermalNoiseOperator
 from src.v3.operators.normalization import NormalizationOperator
 from src.v3.operators.adaptive import AdaptiveOperator
 from src.v3.operators.time_emergence import TimeEmergenceOperator
+from src.v3.operators.gravity import GravitationalCollapseOperator
+from src.v3.operators.fusion import FusionOperator
 from src.v3.analyzers import (
     ConservationAnalyzer, GravityAnalyzer, AtomDetector,
     StarDetector, QuantumDetector, GalaxyAnalyzer,
@@ -38,6 +40,8 @@ def build_pipeline():
         QBEOperator(),
         EulerIntegrator(),
         MemoryOperator(),
+        GravitationalCollapseOperator(),
+        FusionOperator(),
         ConfluenceOperator(),
         TemperatureOperator(),
         ThermalNoiseOperator(),
@@ -74,10 +78,10 @@ def run_cli(ticks: int, nu: int, nv: int):
         state = engine.tick()
 
         if (i + 1) % report_every == 0 or i == 0:
-            # Run analyzers
+            # Run analyzers in causal chain order
             all_dets = []
             for a in analyzers:
-                all_dets.extend(a.analyze(state, engine.bus))
+                all_dets.extend(a.analyze(state, engine.bus, prior_detections=all_dets))
             structure_tracker.update(all_dets, state.tick)
 
             # Detection summary
@@ -93,6 +97,7 @@ def run_cli(ticks: int, nu: int, nv: int):
                 f"  tick {state.tick:>6d} | "
                 f"E={state.total_energy:>10.1f} | "
                 f"M={state.M.sum().item():>8.2f} | "
+                f"Z={state.Z.sum().item():>6.2f} | "
                 f"T={state.T.mean().item():>5.2f} | "
                 f"PAC={state.pac_total:>10.1f} | "
                 f"stable={structure_tracker.stable_count} | "

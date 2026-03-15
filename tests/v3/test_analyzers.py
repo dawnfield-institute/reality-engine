@@ -138,13 +138,34 @@ class TestAtomDetector:
 # ---------------------------------------------------------------------------
 
 class TestStarDetector:
-    def test_detects_hot_massive_region(self):
+    def _gravity_wells_at_mass_peak(self):
+        """Prior detections with gravity wells at the mass peak location."""
+        return [Detection("gravity_well", (8, 4), {"mass": 5.0, "curvature": -1.0})]
+
+    def test_detects_hot_massive_region_with_well(self):
         a = StarDetector(mass_threshold=2.0, temp_threshold=2.0)
         bus = _make_bus()
         s = _state_with_mass_peak(mass_val=5.0, temp_val=5.0)
-        dets = a.analyze(s, bus)
+        wells = self._gravity_wells_at_mass_peak()
+        dets = a.analyze(s, bus, prior_detections=wells)
         assert len(dets) > 0
         assert dets[0].kind == "star"
+
+    def test_hot_massive_no_well_not_star(self):
+        """Without gravity well, hot dense region is NOT a star."""
+        a = StarDetector(mass_threshold=2.0, temp_threshold=2.0)
+        bus = _make_bus()
+        s = _state_with_mass_peak(mass_val=5.0, temp_val=5.0)
+        dets = a.analyze(s, bus, prior_detections=[])  # no wells
+        assert len(dets) == 0
+
+    def test_without_prior_detections_still_works(self):
+        """Backward compat: no prior_detections = no causal gate."""
+        a = StarDetector(mass_threshold=2.0, temp_threshold=2.0)
+        bus = _make_bus()
+        s = _state_with_mass_peak(mass_val=5.0, temp_val=5.0)
+        dets = a.analyze(s, bus)  # no prior_detections
+        assert len(dets) > 0
 
     def test_cold_mass_not_star(self):
         a = StarDetector(mass_threshold=2.0, temp_threshold=2.0)
@@ -191,13 +212,31 @@ class TestQuantumDetector:
 # ---------------------------------------------------------------------------
 
 class TestGalaxyAnalyzer:
-    def test_detects_large_mass_region(self):
-        a = GalaxyAnalyzer(mass_threshold=0.1, min_region_fraction=0.01)
+    def _gravity_wells_in_mass_region(self):
+        """Multiple gravity wells within the mass peak region."""
+        return [
+            Detection("gravity_well", (7, 3), {"mass": 2.0, "curvature": -0.5}),
+            Detection("gravity_well", (8, 4), {"mass": 2.0, "curvature": -0.5}),
+            Detection("gravity_well", (9, 5), {"mass": 2.0, "curvature": -0.5}),
+        ]
+
+    def test_detects_large_mass_region_with_wells(self):
+        a = GalaxyAnalyzer(mass_threshold=0.1, min_region_fraction=0.01, min_gravity_wells=3)
         bus = _make_bus()
         s = _state_with_mass_peak(mass_val=2.0)
-        dets = a.analyze(s, bus)
+        wells = self._gravity_wells_in_mass_region()
+        dets = a.analyze(s, bus, prior_detections=wells)
         assert len(dets) > 0
         assert dets[0].kind == "galaxy"
+        assert dets[0].properties["gravity_wells"] == 3
+
+    def test_not_enough_wells_no_galaxy(self):
+        a = GalaxyAnalyzer(mass_threshold=0.1, min_region_fraction=0.01, min_gravity_wells=3)
+        bus = _make_bus()
+        s = _state_with_mass_peak(mass_val=2.0)
+        one_well = [Detection("gravity_well", (8, 4), {"mass": 2.0})]
+        dets = a.analyze(s, bus, prior_detections=one_well)
+        assert len(dets) == 0
 
     def test_no_galaxy_on_empty(self):
         a = GalaxyAnalyzer(mass_threshold=1.0)

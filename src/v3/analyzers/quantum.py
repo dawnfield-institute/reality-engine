@@ -25,7 +25,7 @@ class QuantumDetector:
     def name(self) -> str:
         return "quantum"
 
-    def analyze(self, state: FieldState, bus: EventBus) -> List[Detection]:
+    def analyze(self, state: FieldState, bus: EventBus, prior_detections=None) -> List[Detection]:
         E, I = state.E, state.I
 
         # Local coherence: normalised correlation |E·I| / (|E|·|I| + ε)
