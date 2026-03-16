@@ -1,17 +1,28 @@
-"""MemoryOperator — mass generation, quantum pressure, and diffusion.
+"""MemoryOperator — mass generation, de-actualization, quantum pressure, and diffusion.
 
-Memory field M accumulates where information collapses (E-I disequilibrium).
-Quantum pressure prevents uniform collapse. Diffusion redistributes mass.
+Memory field M accumulates where information collapses (E-I disequilibrium)
+and fades where the imbalance resolves. This completes the PAC cycle:
 
-    dM/dt = mass_generation + quantum_pressure + diffusion
+    potential → actualization → memory → potential
+
+    dM/dt = mass_generation - de_actualization + quantum_pressure + diffusion
+
+Mass generation (crystallization):
     mass_generation = γ_local · ((E-I)² + |∇(E-I)|²) · saturation
+    γ_local = (E-I)² / (E² + I² + ε) — emergent per cell
+
+De-actualization (memory fading):
+    dM_deact = -η · M · (1 - γ_local)
+    Where (1 - γ_local) is the "forgetting factor": high when E ≈ I (balanced,
+    nothing to remember), zero when disequilibrium is maximal. Dissolved mass
+    returns equally to E and I (PAC conserving).
+
+    From infodynamics.md: M is "recursive memory of imbalance." When the
+    imbalance resolves, the memory should fade back into potential.
+
+Quantum pressure and diffusion:
     quantum_pressure = -β · ∇²(M²) / M
     diffusion = D · ∇²M
-
-The mass generation coefficient γ_local is NOT hardcoded — it EMERGES per cell:
-    γ_local = (E-I)² / (E² + I² + ε)
-This is the fraction of total field energy in disequilibrium form — high where
-fields are imbalanced (ready to crystallize), low where fields are balanced.
 
 Two mass generation channels:
 1. Bulk: γ_local · (E-I)² — mass forms where disequilibrium is large
@@ -109,6 +120,15 @@ class MemoryOperator:
         saturation = sat_cap * sat_degen
         mass_gen = mass_gen * saturation
 
+        # --- De-actualization: memory fading (PAC cycle completion) ---
+        # M is "recursive memory of imbalance" (DFT). When disequilibrium
+        # resolves (gamma_local → 0), memory should dissolve back to potential.
+        # Forgetting factor = (1 - gamma_local): high when balanced, zero when imbalanced.
+        # Dissolved mass returns equally to E and I downstream (PAC conserving).
+        eta = config.deactualization_rate
+        forgetting = 1.0 - gamma_local
+        deactualization = eta * M * forgetting
+
         # Quantum pressure: -β · ∇²(M²) / M_safe
         M_safe = M + 1e-6
         lap_M2 = m.laplacian(M * M)
@@ -118,8 +138,8 @@ class MemoryOperator:
         lap_M = m.laplacian(M)
         diffusion = config.mass_diffusion_coeff * lap_M
 
-        # Combined
-        dM_dt = mass_gen + quantum_pressure + diffusion
+        # Combined (generation - fading + pressure + diffusion)
+        dM_dt = mass_gen - deactualization + quantum_pressure + diffusion
         M_candidate = M + dt * dM_dt
 
         # PAC-conserving clamp: track mass created by min=0 floor
@@ -141,6 +161,8 @@ class MemoryOperator:
 
         metrics = dict(state.metrics)
         metrics["mass_generation_rate"] = mass_gen.mean().item()
+        metrics["deactualization_rate"] = deactualization.mean().item()
+        metrics["forgetting_mean"] = forgetting.mean().item()
         metrics["gamma_local_mean"] = gamma_mean
         metrics["gamma_local_std"] = gamma_std
 
