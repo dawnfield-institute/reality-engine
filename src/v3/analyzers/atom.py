@@ -70,33 +70,38 @@ class AtomDetector:
         detections: List[Detection] = []
         if atom_mask.any():
             positions = torch.nonzero(atom_mask, as_tuple=False)
-            for pos in positions[:15]:
-                u, v = pos[0].item(), pos[1].item()
+            total_atoms = positions.shape[0]
 
-                # Check local metallicity to determine element type
-                u_lo = max(0, u - 1)
-                u_hi = min(state.shape[0], u + 2)
-                v_lo = max(0, v - 1)
-                v_hi = min(state.shape[1], v + 2)
-                local_Z = state.Z[u_lo:u_hi, v_lo:v_hi].mean().item()
+            # Vectorized local metallicity via avg-pooling (3x3 neighborhood)
+            Z_padded = torch.nn.functional.pad(state.Z.unsqueeze(0).unsqueeze(0), (1, 1, 1, 1), mode='reflect')
+            local_Z_map = torch.nn.functional.avg_pool2d(Z_padded, kernel_size=3, stride=1, padding=0).squeeze()
 
-                if local_Z > self.metallicity_threshold:
-                    kind = "atom"  # heavy element — fusion products present
-                else:
-                    kind = "hydrogen"  # mass peak with no metals
+            masses = state.M[atom_mask]
+            grads = grad_E[atom_mask]
+            local_Zs = local_Z_map[atom_mask]
+            is_heavy = local_Zs > self.metallicity_threshold
 
+            total_heavy = int(is_heavy.sum().item())
+            total_hydrogen = total_atoms - total_heavy
+
+            # Report top-20 by mass
+            n_report = min(20, total_atoms)
+            _, top_idx = masses.topk(n_report)
+
+            for i in range(n_report):
+                idx = top_idx[i]
+                pos = positions[idx]
+                kind = "atom" if is_heavy[idx] else "hydrogen"
                 detections.append(Detection(
                     kind=kind,
-                    position=(u, v),
+                    position=(pos[0].item(), pos[1].item()),
                     properties={
-                        "mass": state.M[u, v].item(),
-                        "energy_gradient": grad_E[u, v].item(),
-                        "metallicity": local_Z,
+                        "mass": masses[idx].item(),
+                        "energy_gradient": grads[idx].item(),
+                        "metallicity": local_Zs[idx].item(),
                     },
                 ))
-            if detections:
-                atom_count = sum(1 for d in detections if d.kind == "atom")
-                h_count = sum(1 for d in detections if d.kind == "hydrogen")
-                bus.emit("atom_detected", {"atoms": atom_count, "hydrogen": h_count})
+            if total_atoms > 0:
+                bus.emit("atom_detected", {"atoms": total_heavy, "hydrogen": total_hydrogen})
 
         return detections

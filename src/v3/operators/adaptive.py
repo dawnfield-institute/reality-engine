@@ -24,14 +24,12 @@ class AdaptiveOperator:
 
     def __init__(
         self,
-        gamma_init: float = 0.005,
         gamma_min: float = 0.001,
-        gamma_max: float = 0.1,
+        gamma_max: float = 0.5,
         dt_min: float = 1e-5,
         dt_max: float = 0.01,
-        adaptation_rate: float = 0.01,
+        adaptation_rate: float = 0.02,
     ) -> None:
-        self.gamma = gamma_init
         self.gamma_min = gamma_min
         self.gamma_max = gamma_max
         self.dt_min = dt_min
@@ -59,23 +57,23 @@ class AdaptiveOperator:
             ratio = energy / (self._prev_energy + 1e-10)
 
             # Energy growing fast → increase damping, decrease dt
-            if ratio > 1.1:
-                self.gamma = min(self.gamma * (1 + self.rate), self.gamma_max)
+            if ratio > 1.05:
+                config.gamma_damping = min(config.gamma_damping * (1 + self.rate), self.gamma_max)
                 config.dt = max(config.dt * (1 - self.rate), self.dt_min)
             # Energy stable or shrinking → relax damping slightly
             elif ratio < 1.01:
-                self.gamma = max(self.gamma * (1 - self.rate * 0.1), self.gamma_min)
+                config.gamma_damping = max(config.gamma_damping * (1 - self.rate * 0.1), self.gamma_min)
                 config.dt = min(config.dt * (1 + self.rate * 0.1), self.dt_max)
 
         self._prev_energy = energy
 
         metrics = dict(state.metrics)
-        metrics["adaptive_gamma"] = self.gamma
+        metrics["adaptive_gamma"] = config.gamma_damping
         metrics["adaptive_dt"] = config.dt
 
         if bus is not None:
             bus.emit("parameters_adapted", {
-                "gamma": self.gamma,
+                "gamma": config.gamma_damping,
                 "dt": config.dt,
                 "energy": energy,
             })

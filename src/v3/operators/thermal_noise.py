@@ -1,9 +1,8 @@
-"""ThermalNoiseOperator — Langevin dynamics.
+"""ThermalNoiseOperator — Langevin dynamics (PAC-conserving).
 
-Adds thermal fluctuations to E and I fields:
-    noise = scale · √(2T·dt) · N(0,1)
-
-Without noise the system over-stabilises and freezes.
+Adds anticorrelated thermal fluctuations: E += η, I -= η.
+This drives disequilibrium (E-I) without changing the total E+I,
+preserving PAC conservation while preventing over-stabilisation.
 """
 
 from __future__ import annotations
@@ -38,7 +37,7 @@ class ThermalNoiseOperator:
         amplitude = torch.sqrt(2.0 * T_mean * config.dt + 1e-10)
         scale = config.noise_scale
 
-        noise_E = scale * amplitude * torch.randn_like(state.E)
-        noise_I = scale * amplitude * torch.randn_like(state.I)
+        # Single noise field: E += η, I -= η  →  E+I unchanged (PAC-conserving)
+        noise = scale * amplitude * torch.randn_like(state.E)
 
-        return state.replace(E=state.E + noise_E, I=state.I + noise_I)
+        return state.replace(E=state.E + noise, I=state.I - noise)

@@ -37,26 +37,45 @@ class StarDetector:
         detections: List[Detection] = []
         if star_mask.any():
             positions = torch.nonzero(star_mask, as_tuple=False)
-            for pos in positions[:10]:
-                u, v = pos[0].item(), pos[1].item()
 
-                # Causal gate: must be inside a gravity well
-                if prior_detections is not None:
-                    nearby_wells = detections_near(
-                        prior_detections, "gravity_well", (u, v), radius=3
-                    )
-                    if not nearby_wells:
-                        continue  # hot dense region but no gravity well → not a star
+            # Causal gate: filter to only positions near a gravity well
+            if prior_detections is not None:
+                well_positions = [
+                    d.position for d in prior_detections if d.kind == "gravity_well"
+                ]
+                if well_positions:
+                    # Vectorized proximity check
+                    wells_t = torch.tensor(well_positions, device=positions.device, dtype=positions.dtype)
+                    # For each candidate star, check min distance to any well
+                    # positions: (N, 2), wells_t: (W, 2)
+                    diffs = positions.unsqueeze(1).float() - wells_t.unsqueeze(0).float()  # (N, W, 2)
+                    dists = diffs.norm(dim=2)  # (N, W)
+                    min_dists = dists.min(dim=1).values  # (N,)
+                    near_well = min_dists <= 3
+                    positions = positions[near_well]
+                else:
+                    positions = positions[:0]  # no wells → no stars
 
-                detections.append(Detection(
-                    kind="star",
-                    position=(u, v),
-                    properties={
-                        "mass": state.M[u, v].item(),
-                        "temperature": state.T[u, v].item(),
-                    },
-                ))
-            if detections:
-                bus.emit("star_detected", {"count": len(detections)})
+            total_stars = positions.shape[0]
+            if total_stars > 0:
+                masses = state.M[positions[:, 0], positions[:, 1]]
+                temps = state.T[positions[:, 0], positions[:, 1]]
+
+                # Report top-20 by mass
+                n_report = min(20, total_stars)
+                _, top_idx = masses.topk(n_report)
+
+                for i in range(n_report):
+                    idx = top_idx[i]
+                    pos = positions[idx]
+                    detections.append(Detection(
+                        kind="star",
+                        position=(pos[0].item(), pos[1].item()),
+                        properties={
+                            "mass": masses[idx].item(),
+                            "temperature": temps[idx].item(),
+                        },
+                    ))
+                bus.emit("star_detected", {"count": total_stars})
 
         return detections

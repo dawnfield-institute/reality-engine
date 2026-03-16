@@ -33,6 +33,7 @@ class FieldState:
     M: torch.Tensor
     T: torch.Tensor
     Z: Optional[torch.Tensor] = None  # metallicity — only written by FusionOperator
+    P: Optional[torch.Tensor] = None  # potential buffer — unactualized field changes (MAR)
     tick: int = 0
     dt: float = 0.001
     time: float = 0.0
@@ -42,6 +43,9 @@ class FieldState:
         # Auto-create Z as zeros if not provided
         if self.Z is None:
             object.__setattr__(self, "Z", torch.zeros_like(self.E))
+        # Auto-create P (potential buffer) as zeros if not provided
+        if self.P is None:
+            object.__setattr__(self, "P", torch.zeros_like(self.E))
 
     # --- helpers ---------------------------------------------------------
 
@@ -53,6 +57,7 @@ class FieldState:
             "M": self.M,
             "T": self.T,
             "Z": self.Z,
+            "P": self.P,
             "tick": self.tick,
             "dt": self.dt,
             "time": self.time,
@@ -81,9 +86,14 @@ class FieldState:
 
     @property
     def pac_total(self) -> float:
-        """PAC conservation quantity: sum(E + I + α·M)."""
-        alpha_pac = 0.964
-        return (self.E + self.I + alpha_pac * self.M).sum().item()
+        """PAC conservation quantity: sum(E + I + M).
+
+        From theory: P + A + M = Ξ per cell (coefficient 1.0 on all fields).
+        α=0.964 is the RBF collapse coupling, NOT the PAC coefficient.
+        Information-energy equivalency: E and I are dual views of the same
+        field, and M is crystallized information — all weigh equally in PAC.
+        """
+        return (self.E + self.I + self.M).sum().item()
 
     @staticmethod
     def zeros(

@@ -48,8 +48,13 @@ class HerniationDetector:
         detections: List[Detection] = []
         if hern_mask.any():
             positions = torch.nonzero(hern_mask, as_tuple=False)
+            total_herniations = positions.shape[0]
             intensity = violation[hern_mask].mean().item()
-            for pos in positions[:10]:
+            # Report top-10 strongest for the detection list (can be hundreds)
+            violations_at_pos = violation[hern_mask]
+            _, top_idx = violations_at_pos.topk(min(10, total_herniations))
+            for idx in top_idx:
+                pos = positions[idx]
                 u, v = pos[0].item(), pos[1].item()
                 detections.append(Detection(
                     kind="herniation",
@@ -59,7 +64,7 @@ class HerniationDetector:
                     },
                 ))
             bus.emit("herniation_detected", {
-                "count": len(detections),
+                "count": total_herniations,
                 "mean_intensity": intensity,
             })
 

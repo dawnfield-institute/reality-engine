@@ -1,4 +1,4 @@
-"""Phase 2 tests — Memory, Confluence, Temperature, ThermalNoise, Normalization operators."""
+"""Phase 2 tests â€” Memory, Confluence, Temperature, ThermalNoise, Normalization operators."""
 
 import pytest
 import torch
@@ -125,7 +125,7 @@ class TestTemperatureOperator:
         s = FieldState(E=E, I=I, M=torch.zeros(8, 4, dtype=torch.float64), T=T)
         cfg = SimulationConfig(nu=8, nv=4, t_min=0.0, t_max=100.0, device=CPU)
         s2 = op(s, cfg)
-        # |E-I| = 5 everywhere, blend=0 → T should be 5
+        # |E-I| = 5 everywhere, blend=0 â†’ T should be 5
         assert s2.T.mean().item() == pytest.approx(5.0)
 
     def test_temperature_clamped(self):
@@ -162,7 +162,7 @@ class TestThermalNoiseOperator:
         assert torch.equal(s.E, s2.E)
 
     def test_noise_scales_with_temperature(self):
-        """Higher temperature → more noise variance."""
+        """Higher temperature â†’ more noise variance."""
         torch.manual_seed(0)
         op = ThermalNoiseOperator()
         cfg = SimulationConfig(nu=32, nv=16, dt=0.01, noise_scale=1.0, device=CPU)
@@ -185,14 +185,23 @@ class TestThermalNoiseOperator:
 # ---------------------------------------------------------------------------
 
 class TestNormalizationOperator:
-    def test_clamps_large_values(self):
+    def test_pac_conserving_normalization(self):
+        """QBE cross-injection: tanh losses go to dual field. PAC conserved."""
         op = NormalizationOperator()
         E = torch.full((8, 4), 1000.0, dtype=torch.float64)
-        s = FieldState(E=E, I=E.clone(), M=torch.zeros(8, 4, dtype=torch.float64),
-                       T=torch.zeros(8, 4, dtype=torch.float64))
+        I = torch.full((8, 4), 500.0, dtype=torch.float64)  # asymmetric
+        M = torch.zeros(8, 4, dtype=torch.float64)
+        s = FieldState(E=E, I=I, M=M, T=torch.zeros(8, 4, dtype=torch.float64))
         cfg = SimulationConfig(nu=8, nv=4, field_scale=50.0, device=CPU)
         s2 = op(s, cfg)
-        assert s2.E.max().item() < 51.0  # tanh asymptotes to field_scale
+        # PAC conserved: E + I + M before = after
+        pac_before = (s.E + s.I + s.M).sum().item()
+        pac_after = (s2.E + s2.I + s2.M).sum().item()
+        assert abs(pac_after - pac_before) < 1.0
+        # QBE cross-injection: E got I's tanh loss, I got E's tanh loss
+        # With asymmetric fields, E should be reduced (lost more to tanh,
+        # got back less from I's smaller loss)
+        assert s2.E.mean().item() < s.E.mean().item()
 
     def test_mass_nonnegative(self):
         op = NormalizationOperator()
@@ -254,5 +263,6 @@ class TestFullPipeline:
         engine.initialize("big_bang", temperature=1.0)
         initial_energy = engine.state.total_energy
         engine.run(200)
-        # With normalization, energy shouldn't grow unboundedly
-        assert engine.state.total_energy < initial_energy * 10
+        # With normalization + Landauer reinjection, energy is bounded
+        # but can grow as mass cap returns energy to E+I fields
+        assert engine.state.total_energy < initial_energy * 50

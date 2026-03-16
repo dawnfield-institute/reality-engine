@@ -71,7 +71,7 @@ class TestZField:
 class TestGravitationalCollapse:
     def test_mass_conserved(self):
         """Gravity redistributes mass but doesn't create or destroy it."""
-        op = GravitationalCollapseOperator(G=0.1, iterations=10)
+        op = GravitationalCollapseOperator(iterations=10)
         cfg = SimulationConfig(nu=16, nv=8, device=CPU)
         M = torch.zeros(16, 8, dtype=torch.float64)
         M[7:10, 3:6] = 5.0
@@ -86,7 +86,7 @@ class TestGravitationalCollapse:
 
     def test_concentrates_mass(self):
         """Self-gravity should increase peak mass concentration."""
-        op = GravitationalCollapseOperator(G=0.5, iterations=30)
+        op = GravitationalCollapseOperator(iterations=30)
         cfg = SimulationConfig(nu=16, nv=8, dt=0.01, device=CPU)
         M = torch.zeros(16, 8, dtype=torch.float64)
         M[7:10, 3:6] = 5.0
@@ -102,7 +102,7 @@ class TestGravitationalCollapse:
 
     def test_flat_field_unchanged(self):
         """Uniform mass field has no gradient → no gravitational flow."""
-        op = GravitationalCollapseOperator(G=0.1)
+        op = GravitationalCollapseOperator()
         cfg = SimulationConfig(nu=8, nv=4, device=CPU)
         M = torch.ones(8, 4, dtype=torch.float64) * 2.0
         s = FieldState(E=torch.zeros(8, 4, dtype=torch.float64),
@@ -113,7 +113,7 @@ class TestGravitationalCollapse:
         assert torch.allclose(s.M, s2.M, atol=1e-8)
 
     def test_emits_event(self):
-        op = GravitationalCollapseOperator(G=0.1)
+        op = GravitationalCollapseOperator()
         cfg = SimulationConfig(nu=8, nv=4, device=CPU)
         bus = EventBus()
         events = []
@@ -127,7 +127,7 @@ class TestGravitationalCollapse:
         assert len(events) > 0
 
     def test_stores_potential_metric(self):
-        op = GravitationalCollapseOperator(G=0.1)
+        op = GravitationalCollapseOperator()
         cfg = SimulationConfig(nu=8, nv=4, device=CPU)
         M = torch.zeros(8, 4, dtype=torch.float64)
         M[3:5, 1:3] = 3.0
@@ -417,7 +417,7 @@ class TestPipelinePhase6:
             QBEOperator(),
             EulerIntegrator(),
             MemoryOperator(),
-            GravitationalCollapseOperator(G=0.1),
+            GravitationalCollapseOperator(),
             FusionOperator(eta=0.5, mass_ignition=1.0, temp_ignition=1.0),
             TemperatureOperator(),
             NormOp2(),

@@ -27,7 +27,8 @@ class SimulationConfig:
 
     # --- evolution parameters (adaptive can override) --------------------
     dt: float = 0.001              # Base time step
-    field_scale: float = 50.0      # Soft clamp boundary
+    gamma_damping: float = 0.01    # RBF damping coefficient (adaptive updates this)
+    field_scale: float = 20.0      # Soft clamp boundary
     noise_scale: float = 0.01      # Thermal noise amplitude fraction
     t_min: float = 0.1             # Temperature floor
     t_max: float = 10.0            # Temperature ceiling
@@ -35,11 +36,16 @@ class SimulationConfig:
     # --- memory dynamics -------------------------------------------------
     mass_gen_coeff: float = 0.63   # Mass generation coefficient
     quantum_pressure_coeff: float = 0.015
-    mass_diffusion_coeff: float = 0.002
+    mass_diffusion_coeff: float = 0.0005
 
     # --- confluence ------------------------------------------------------
     confluence_weight: float = 0.3  # Blend factor for confluence step
     confluence_every: int = 1       # Apply confluence every N ticks
+
+    # --- actualization (MAR-derived) ---------------------------------------
+    enable_actualization: bool = True    # Use actualization gate vs raw Euler
+    actualization_threshold: float = 0.05  # MAR threshold in field units
+    actualization_tree_depth: int = 6      # PAC tree redistribution depth
 
     # --- operator toggles ------------------------------------------------
     enable_thermal_noise: bool = True

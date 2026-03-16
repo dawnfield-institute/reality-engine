@@ -119,7 +119,7 @@ class TestFieldState:
         M = torch.ones(4, 4) * 3
         T = torch.zeros(4, 4)
         s = FieldState(E=E, I=I, M=M, T=T)
-        expected = 16 * (1 + 2 + 0.964 * 3)
+        expected = 16 * (1 + 2 + 3)  # PAC = E + I + M (coefficient 1.0 on all)
         assert s.pac_total == pytest.approx(expected)
 
 

@@ -45,16 +45,27 @@ class GravityAnalyzer:
         detections: List[Detection] = []
         if wells_mask.any():
             positions = torch.nonzero(wells_mask, as_tuple=False)
-            for pos in positions[:20]:  # cap at 20
-                u, v = pos[0].item(), pos[1].item()
+            total_wells = positions.shape[0]
+
+            # Vectorized extraction — no Python loop
+            masses = M[wells_mask]
+            curvatures = lap_M[wells_mask]
+
+            # Report top-20 strongest wells by mass (avoid thousands of Detection objects)
+            n_report = min(20, total_wells)
+            _, top_idx = masses.topk(n_report)
+
+            for i in range(n_report):
+                idx = top_idx[i]
+                pos = positions[idx]
                 detections.append(Detection(
                     kind="gravity_well",
-                    position=(u, v),
+                    position=(pos[0].item(), pos[1].item()),
                     properties={
-                        "mass": M[u, v].item(),
-                        "curvature": lap_M[u, v].item(),
+                        "mass": masses[idx].item(),
+                        "curvature": curvatures[idx].item(),
                     },
                 ))
-            bus.emit("gravity_well_detected", {"count": len(detections)})
+            bus.emit("gravity_well_detected", {"count": total_wells})
 
         return detections

@@ -29,8 +29,8 @@ CPU = torch.device("cpu")
 
 class TestAdaptiveOperator:
     def test_gamma_increases_on_energy_growth(self):
-        op = AdaptiveOperator(gamma_init=0.01)
-        cfg = SimulationConfig(nu=8, nv=4, device=CPU)
+        op = AdaptiveOperator()
+        cfg = SimulationConfig(nu=8, nv=4, gamma_damping=0.01, device=CPU)
         # First call: baseline
         s1 = FieldState.big_bang(8, 4, temperature=1.0, device=CPU)
         op(s1, cfg)
@@ -39,21 +39,21 @@ class TestAdaptiveOperator:
         s2 = FieldState(E=E_big, I=E_big, M=torch.zeros(8, 4, dtype=torch.float64),
                         T=torch.ones(8, 4, dtype=torch.float64))
         op(s2, cfg)
-        assert op.gamma > 0.01
+        assert cfg.gamma_damping > 0.01
 
     def test_gamma_stays_in_bounds(self):
-        op = AdaptiveOperator(gamma_init=0.001, gamma_min=0.001, gamma_max=0.1)
-        cfg = SimulationConfig(nu=8, nv=4, device=CPU)
+        op = AdaptiveOperator(gamma_min=0.001, gamma_max=0.1)
+        cfg = SimulationConfig(nu=8, nv=4, gamma_damping=0.001, device=CPU)
         # Drive energy down repeatedly
         for i in range(100):
             E = torch.ones(8, 4, dtype=torch.float64) * (0.01 / (i + 1))
             s = FieldState(E=E, I=E, M=torch.zeros(8, 4, dtype=torch.float64),
                            T=torch.ones(8, 4, dtype=torch.float64))
             op(s, cfg)
-        assert op.gamma >= op.gamma_min
+        assert cfg.gamma_damping >= op.gamma_min
 
     def test_disabled_passthrough(self):
-        op = AdaptiveOperator(gamma_init=0.01)
+        op = AdaptiveOperator()
         cfg = SimulationConfig(nu=8, nv=4, enable_adaptive=False, device=CPU)
         s = FieldState.big_bang(8, 4, device=CPU)
         s2 = op(s, cfg)
