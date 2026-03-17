@@ -43,7 +43,7 @@ Default order in Pipeline:
 3. **Actualization** — MAR-gated integration, ln(phi) split, pi/2 harmonic modulation
 4. **Memory** — Mass generation (bulk + gradient boundary seeding), de-actualization (PAC cycle completion), quantum pressure, diffusion
 5. **PhiCascade** — Fibonacci two-step memory for phi-spaced mass levels
-6. **Gravity** — Self-gravity via spectral Poisson solver, xi_mod, cascade-depth tiling filter
+6. **Gravity** — Self-gravity via spectral Poisson solver, xi_mod, cascade-depth tiling filter + pi-harmonic modulation
 7. **SpinStatistics** — Emergent Pauli exclusion from information cost
 8. **ChargeDynamics** — EM-like forces from charge field Q
 9. **Fusion** — Nuclear fusion in dense, hot, gravity-compressed regions
@@ -51,7 +51,7 @@ Default order in Pipeline:
 11. **Temperature** — Local T from |E-I| gradients
 12. **ThermalNoise** — Langevin noise
 13. **Normalization** — Soft-clamp E/I, cap M, Landauer reinjection
-14. **SECTracking** — Read-only SEC energy functional + entropy tracking
+14. **SECTracking** — Read-only SEC energy functional, entropy, info fraction, cascade depth
 15. **Adaptive** — Self-tuning damping and dt from energy growth
 16. **TimeEmergence** — dt = dt_base / (1 + kappa*max|E-I|)
 
@@ -63,14 +63,17 @@ Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
 - **Tier 1** (coupling attractors): f->gamma_EM, gamma->1/phi, alpha->ln(2), G->1/phi^2, lambda->1-ln(2)
 - **Tier 2** (structural): phi^2 mass spacing, PAC conservation, spin 1/2, entropy reduction
 - **Tier 3** (aspirational): fine structure 1/137, Koide Q=2/3, mu/e ratio
-- **Current score**: 8/13 passing (GPA C), as of 2026-03-16 (de-actualization reduced coupling drift 24%)
+- **Current score**: 7/13 passing (GPA C), as of 2026-03-17 (theory integration implementation)
+- **NOW tick detection**: finds minimum Tier 1 error epoch, reports beta functions and cosmic epoch map
 
 ## Key Physics
 
-- **Gravity**: Spectral Poisson solver with cascade-depth tiling filter (DFT exp_36). Entropy-coherence modulation xi_mod. Amplitude coupling nabla^2 Phi = sqrt(M).
+- **Gravity**: Spectral Poisson solver with cascade-depth tiling filter (DFT exp_36) + pi-harmonic modulation (spike 02). Entropy-coherence modulation xi_mod. Amplitude coupling nabla^2 Phi = sqrt(M).
 - **Mass generation**: Bulk (gamma_local * diseq^2) + boundary gradient seeding (gamma_local * |grad(diseq)|^2 / (1+M))
-- **De-actualization**: dM_deact = -eta * M * (1 - gamma_local). Memory fades where disequilibrium resolves, completing PAC cycle: potential -> actualization -> memory -> potential
+- **De-actualization**: dM_deact = -eta * M * (1 - gamma_local), eta=0.025 (spike 04 optimal). Memory fades where disequilibrium resolves, completing PAC cycle.
 - **PAC conservation**: E + I + M = const enforced at machine precision (<1e-12)
+- **SEC metrics**: info_fraction = |I|/(|E|+|I|) (best duty cycle proxy, r=+0.954), log-time cascade depth with running NOW estimate
+- **Initialization**: `big_bang` (symmetric E~I), `entropy_dominated` (E>>I, DFT-correct), `info_dominated` (I>>E, fast convergence)
 - **DFT constants**: Xi = gamma_EM + ln(phi) = 1.05843, ln^2(2) = 0.4805, phi = golden ratio
 
 ## Conventions
@@ -99,14 +102,17 @@ Key findings:
 - **Init independence**: Late-time trajectories correlate >0.997 regardless of init. Info-dominated converges fastest (tick 2300), entropy slowest (13950).
 - **Emergent RG flow**: Coupling drift = renormalization group flow, not a bug. Beta functions init-independent. Gravity running 1.3x at high-z (JWST match).
 - **SEC duty cycle**: Log-time mapping + info fraction proxy gives r=+0.954 correlation with theory.
-- **"YOU ARE HERE" tick**: 8450/20000 = 42% lifecycle, 6.03% avg error across 5 Tier 1 constants.
+- **"YOU ARE HERE" tick**: 5400/10000 = 54% lifecycle, 4.75% avg error (post-implementation)
+
+Implemented into engine: info fraction metric, eta=0.025, entropy/info init factories, log-time cascade depth, pi-harmonic tiling filter, scorecard NOW tick + beta functions + epoch map.
 
 ## Current State
 
 - v3 architecture, 18 operators, 138 tests
-- Physics scorecard: 8/13 (C) — de-actualization completes PAC cycle, coupling drift reduced 24%
-- Theory integration: 10/10 DFT predictions confirmed (spikes 09-13)
-- 6 analyzers operational, PAC conservation validated
+- Physics scorecard: 7/13 (C) — theory integration implemented, NOW tick at 5400 (4.75%)
+- Theory integration: 10/10 DFT predictions confirmed (spikes 09-13), 6 findings implemented
+- Initialization: 3 modes (big_bang, entropy_dominated, info_dominated)
+- 6 analyzers operational, PAC conservation validated at machine precision
 - Not accepting code contributions yet
 
 ## Guardrails
