@@ -17,6 +17,8 @@ import os
 import sys
 import time
 
+import numpy as np
+
 re_path = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
 if re_path not in sys.path:
     sys.path.insert(0, re_path)
@@ -412,6 +414,13 @@ def run_scorecard(total_ticks=10000, device=None):
     t0 = time.time()
     cp_idx = 0
 
+    # Fine-grained Tier 1 sampling for NOW tick detection
+    sample_every = 50
+    tier1_targets = {t["metric_key"]: t["target"] for t in targets
+                     if t["tier"] == 1 and not t.get("absolute")}
+    tier1_series = {k: [] for k in tier1_targets}
+    sample_ticks = []
+
     print(f"\n{'=' * 70}")
     print(f"  REALITY ENGINE PHYSICS SCORECARD")
     print(f"  Device: {device} | Grid: {config.nu}x{config.nv} | dt={config.dt}")
@@ -420,6 +429,14 @@ def run_scorecard(total_ticks=10000, device=None):
 
     for tick in range(1, total_ticks + 1):
         engine.tick()
+
+        # Fine-grained Tier 1 sampling
+        if tick % sample_every == 0:
+            m = dict(engine.state.metrics)
+            for key in tier1_targets:
+                tier1_series[key].append(float(m.get(key, 0.0)))
+            sample_ticks.append(tick)
+
         if cp_idx < len(checkpoints) and tick == checkpoints[cp_idx]:
             cp_idx += 1
             elapsed = time.time() - t0
@@ -541,6 +558,65 @@ def run_scorecard(total_ticks=10000, device=None):
             else:
                 row += f" | {'N/A':>10s}"
         print(row)
+
+    # ================================================================
+    # NOW Tick Detection + Beta Functions
+    # ================================================================
+    if len(sample_ticks) > 20:
+        sample_ticks_np = np.array(sample_ticks)
+        errors_by_key = {}
+        for key, target in tier1_targets.items():
+            vals = np.array(tier1_series[key])
+            errors_by_key[key] = np.abs(vals - target) / (np.abs(target) + 1e-30) * 100
+        avg_errors = np.mean(list(errors_by_key.values()), axis=0)
+        now_idx = int(np.argmin(avg_errors))
+        now_tick = int(sample_ticks_np[now_idx])
+        now_err = float(avg_errors[now_idx])
+        now_pct = now_tick / total_ticks * 100
+
+        print(f"\n{'=' * 70}")
+        print(f"  'YOU ARE HERE' (NOW TICK)")
+        print(f"{'=' * 70}")
+        print(f"  NOW tick:   {now_tick} / {total_ticks} ({now_pct:.0f}% lifecycle)")
+        print(f"  Avg error:  {now_err:.2f}%")
+        print(f"\n  Values at NOW:")
+        for key, target in tier1_targets.items():
+            val = tier1_series[key][now_idx]
+            err = errors_by_key[key][now_idx]
+            short = key.replace("_mean", "").replace("_local", "")
+            print(f"    {short:<12s}: {val:.6f}  (target {target:.4f}, err {err:.1f}%)")
+
+        # Beta functions (drift rates) at NOW
+        window = 10
+        if now_idx > window and now_idx < len(sample_ticks_np) - window:
+            print(f"\n  Beta functions at NOW (drift per tick):")
+            for key, target in tier1_targets.items():
+                vals = np.array(tier1_series[key])
+                y_before = vals[now_idx - window]
+                y_after = vals[now_idx + window]
+                dt_ticks = sample_ticks_np[now_idx + window] - sample_ticks_np[now_idx - window]
+                beta = (y_after - y_before) / dt_ticks
+                sign = "+" if beta >= 0 else ""
+                short = key.replace("_mean", "").replace("_local", "")
+                print(f"    d({short})/dt = {sign}{beta:.2e}")
+
+        # Epoch map
+        EPOCHS = [
+            (0, 500, "Inflation"),
+            (500, 2000, "Radiation"),
+            (2000, 5000, "Matter"),
+            (5000, 8000, "Structure"),
+            (8000, total_ticks, "Thermalization"),
+        ]
+        print(f"\n{'=' * 70}")
+        print(f"  COSMIC EPOCH MAP")
+        print(f"{'=' * 70}")
+        for start, end, label in EPOCHS:
+            mask = (sample_ticks_np >= start) & (sample_ticks_np < end)
+            if mask.any():
+                epoch_err = float(np.mean(avg_errors[mask]))
+                now_marker = " << NOW >>" if start <= now_tick < end else ""
+                print(f"  Tick {start:>5d}-{end:>5d}: {epoch_err:5.1f}% avg  ({label}){now_marker}")
 
     # Tuning suggestions
     suggestions = suggest_tuning(results, config)

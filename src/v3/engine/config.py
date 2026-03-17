@@ -37,7 +37,7 @@ class SimulationConfig:
     mass_gen_coeff: float = 0.63   # Mass generation coefficient
     quantum_pressure_coeff: float = 0.020  # retuned with de-actualization active
     mass_diffusion_coeff: float = 0.0005
-    deactualization_rate: float = 0.01   # η — memory fading rate (PAC cycle completion)
+    deactualization_rate: float = 0.025  # η — memory fading rate (PAC cycle completion, spike 04 optimal)
 
     # --- confluence ------------------------------------------------------
     confluence_weight: float = 0.3  # Blend factor for confluence step

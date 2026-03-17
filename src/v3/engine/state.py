@@ -123,3 +123,49 @@ class FieldState:
         T = torch.full((nu, nv), temperature, dtype=dtype, device=device)
         Z = torch.zeros(nu, nv, dtype=dtype, device=device)
         return FieldState(E=E, I=I, M=M, T=T, Z=Z)
+
+    @staticmethod
+    def entropy_dominated(
+        nu: int = 128,
+        nv: int = 32,
+        device: Optional[torch.device] = None,
+        dtype: torch.dtype = torch.float64,
+        temperature: float = 5.0,
+    ) -> FieldState:
+        """DFT-correct big bang: pure potential, no structure (E >> I).
+
+        Entropy-dominated init where E carries full amplitude and I is
+        suppressed 100x. This is the theoretically motivated starting point:
+        infinite potential, zero information, the moment before the first
+        actualization. Spike 12 confirmed late-time physics is universal
+        regardless of init, but this variant is closest to DFT cosmology.
+        """
+        device = device or torch.device("cpu")
+        E = torch.randn(nu, nv, dtype=dtype, device=device) * temperature
+        I = torch.randn(nu, nv, dtype=dtype, device=device) * temperature * 0.01
+        M = torch.zeros(nu, nv, dtype=dtype, device=device)
+        T = torch.full((nu, nv), temperature, dtype=dtype, device=device)
+        Z = torch.zeros(nu, nv, dtype=dtype, device=device)
+        return FieldState(E=E, I=I, M=M, T=T, Z=Z)
+
+    @staticmethod
+    def info_dominated(
+        nu: int = 128,
+        nv: int = 32,
+        device: Optional[torch.device] = None,
+        dtype: torch.dtype = torch.float64,
+        temperature: float = 5.0,
+    ) -> FieldState:
+        """Information-dominated init (I >> E).
+
+        Converges fastest to DFT attractors (tick 2300 vs 8450 symmetric)
+        because it relaxes downhill without paying Landauer E->I cost.
+        Not physically motivated as a big bang but useful for fast convergence.
+        """
+        device = device or torch.device("cpu")
+        E = torch.randn(nu, nv, dtype=dtype, device=device) * temperature * 0.01
+        I = torch.randn(nu, nv, dtype=dtype, device=device) * temperature
+        M = torch.zeros(nu, nv, dtype=dtype, device=device)
+        T = torch.full((nu, nv), temperature, dtype=dtype, device=device)
+        Z = torch.zeros(nu, nv, dtype=dtype, device=device)
+        return FieldState(E=E, I=I, M=M, T=T, Z=Z)

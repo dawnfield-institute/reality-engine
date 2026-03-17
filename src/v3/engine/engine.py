@@ -63,11 +63,19 @@ class Engine:
         """Create initial field state.
 
         Args:
-            mode: 'big_bang' or 'zeros'
+            mode: 'big_bang', 'zeros', 'entropy_dominated', or 'info_dominated'
         """
         device = self.config.get_device()
         if mode == "big_bang":
             self._state = FieldState.big_bang(
+                self.config.nu, self.config.nv, device=device, **kwargs
+            )
+        elif mode == "entropy_dominated":
+            self._state = FieldState.entropy_dominated(
+                self.config.nu, self.config.nv, device=device, **kwargs
+            )
+        elif mode == "info_dominated":
+            self._state = FieldState.info_dominated(
                 self.config.nu, self.config.nv, device=device, **kwargs
             )
         elif mode == "zeros":

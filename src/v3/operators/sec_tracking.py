@@ -34,10 +34,22 @@ class SECTrackingOperator:
     and tracks field entropy. Does NOT modify state fields.
     """
 
+    # DFT Tier 1 attractor targets (derived constants, not tuneable)
+    _TIER1_TARGETS = {
+        "f_local_mean": 0.5772156649015329,   # gamma_EM
+        "gamma_local_mean": 0.6180339887,      # 1/phi
+        "alpha_local_mean": 0.6931471805599453, # ln(2)
+        "G_local_mean": 0.3819660112,          # 1/phi^2
+        "lambda_local_mean": 0.3068528194,     # 1 - ln(2)
+    }
+    _K_EQ = 2  # cascade depth at equilibrium
+
     def __init__(self) -> None:
         self._evolver: Optional[object] = None
         self._prev_entropy: Optional[float] = None
         self._initial_entropy: Optional[float] = None
+        self._min_coupling_error: float = float('inf')
+        self._tick_now_estimate: int = 1
 
     @property
     def name(self) -> str:
@@ -85,6 +97,33 @@ class SECTrackingOperator:
         metrics["entropy_reduction_cumulative"] = self._initial_entropy - entropy
 
         self._prev_entropy = entropy
+
+        # --- Info fraction (best SEC duty cycle proxy, r=+0.954 with theory) ---
+        E_abs = state.E.abs().mean().item()
+        I_abs = state.I.abs().mean().item()
+        metrics["info_fraction"] = I_abs / (E_abs + I_abs + 1e-30)
+
+        # --- Log-time cascade depth (spike 11: r=+0.954 with DFT theory) ---
+        tick = state.tick
+        if tick > 0:
+            # Running estimate of NOW tick from minimum Tier 1 coupling error
+            avg_err = 0.0
+            count = 0
+            for key, target in self._TIER1_TARGETS.items():
+                val = metrics.get(key)
+                if val is not None:
+                    avg_err += abs(val - target) / (abs(target) + _EPS)
+                    count += 1
+            if count > 0:
+                avg_err /= count
+                if avg_err < self._min_coupling_error:
+                    self._min_coupling_error = avg_err
+                    self._tick_now_estimate = tick
+
+            tick_now = max(self._tick_now_estimate, 2)
+            cascade_depth = self._K_EQ * math.log(max(tick, 1)) / math.log(tick_now)
+            metrics["cascade_depth"] = cascade_depth
+            metrics["tick_now_estimate"] = self._tick_now_estimate
 
         # --- SEC energy functional (via fracton) ---
         evolver = self._get_evolver(state.device)

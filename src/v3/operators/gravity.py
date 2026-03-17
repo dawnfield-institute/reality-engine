@@ -113,6 +113,14 @@ class GravitationalCollapseOperator:
 
         log_suppression = _XI * cascade_depth * math.log(_LN2_SQ)
         tiling_filter = torch.exp(log_suppression)
+
+        # Pi-harmonic modulation (spike 02): resonance at cascade depths
+        # that are multiples of pi/2, matching actualization phase structure.
+        # Floor at 0.3 prevents gravity from zeroing at anti-nodes.
+        pi_harmonic = torch.sin(math.pi / 2.0 * cascade_depth).abs()
+        pi_mod = 0.3 + 0.7 * pi_harmonic
+        tiling_filter = tiling_filter * pi_mod
+
         tiling_filter[0, 0] = 0.0
         return tiling_filter
 
