@@ -156,10 +156,10 @@ def build_targets():
     targets.append({
         "name": "entropy reduction",
         "tier": 2,
-        "metric_key": "entropy_reduction_rate",
+        "metric_key": "entropy_reduction_cumulative",
         "target": None,  # just track, positive = good
         "target_label": "> 0",
-        "description": "SEC entropy decrease",
+        "description": "SEC cumulative entropy decrease",
         "positive_good": True,
     })
 

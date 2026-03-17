@@ -11,11 +11,12 @@ Mass generation (crystallization):
     mass_generation = γ_local · ((E-I)² + |∇(E-I)|²) · saturation
     γ_local = (E-I)² / (E² + I² + ε) — emergent per cell
 
-De-actualization (memory fading):
-    dM_deact = -η · M · (1 - γ_local)
-    Where (1 - γ_local) is the "forgetting factor": high when E ≈ I (balanced,
-    nothing to remember), zero when disequilibrium is maximal. Dissolved mass
-    returns equally to E and I (PAC conserving).
+De-actualization (attractor-gated memory fading):
+    dM_deact = -η · M · clamp(γ_attractor - γ_local, min=0) / γ_attractor
+    Where γ_attractor = 1/φ ≈ 0.618 is the emergent equilibrium. Forgetting
+    is maximal when γ_local = 0 (perfectly balanced, nothing to remember) and
+    zero when γ_local ≥ γ_attractor (at or beyond equilibrium — mass persists).
+    This prevents late-time thermalization from eroding all structure.
 
     From infodynamics.md: M is "recursive memory of imbalance." When the
     imbalance resolves, the memory should fade back into potential.
@@ -35,6 +36,7 @@ Two mass generation channels:
 
 from __future__ import annotations
 
+import math
 from typing import Optional
 
 import torch
@@ -46,6 +48,7 @@ from src.v3.substrate.manifold import MobiusManifold
 
 
 _EPS = 1e-12
+_PHI = (1 + math.sqrt(5)) / 2
 
 
 class MemoryOperator:
@@ -120,13 +123,17 @@ class MemoryOperator:
         saturation = sat_cap * sat_degen
         mass_gen = mass_gen * saturation
 
-        # --- De-actualization: memory fading (PAC cycle completion) ---
+        # --- De-actualization: attractor-gated memory fading (PAC cycle completion) ---
         # M is "recursive memory of imbalance" (DFT). When disequilibrium
-        # resolves (gamma_local → 0), memory should dissolve back to potential.
-        # Forgetting factor = (1 - gamma_local): high when balanced, zero when imbalanced.
-        # Dissolved mass returns equally to E and I downstream (PAC conserving).
+        # resolves, memory should dissolve back to potential.
+        # Forgetting = clamp(γ_attractor - γ_local, min=0) / γ_attractor:
+        #   γ_local = 0 (balanced): forgetting = 1.0 (full dissolution)
+        #   γ_local = γ_attractor (equilibrium): forgetting = 0.0 (mass persists)
+        #   γ_local > γ_attractor: forgetting = 0.0 (structure actively forming)
+        # This prevents late-time thermalization from eroding stable structures.
         eta = config.deactualization_rate
-        forgetting = 1.0 - gamma_local
+        gamma_attractor = 1.0 / _PHI  # 0.618... — emergent equilibrium
+        forgetting = torch.clamp(gamma_attractor - gamma_local, min=0.0) / gamma_attractor
         deactualization = eta * M * forgetting
 
         # Quantum pressure: -β · ∇²(M²) / M_safe

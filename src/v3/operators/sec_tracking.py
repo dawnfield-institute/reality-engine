@@ -37,6 +37,7 @@ class SECTrackingOperator:
     def __init__(self) -> None:
         self._evolver: Optional[object] = None
         self._prev_entropy: Optional[float] = None
+        self._initial_entropy: Optional[float] = None
 
     @property
     def name(self) -> str:
@@ -77,6 +78,12 @@ class SECTrackingOperator:
             metrics["entropy_reduction_rate"] = self._prev_entropy - entropy
         else:
             metrics["entropy_reduction_rate"] = 0.0
+
+        # Cumulative: initial_entropy - current_entropy (positive = net structure formed)
+        if self._initial_entropy is None:
+            self._initial_entropy = entropy
+        metrics["entropy_reduction_cumulative"] = self._initial_entropy - entropy
+
         self._prev_entropy = entropy
 
         # --- SEC energy functional (via fracton) ---
