@@ -1,0 +1,50 @@
+schema_version: '2.0'
+directory_name: reality-engine
+description: >
+  Reality Engine — computational physics framework where fundamental physics emerges
+  from information dynamics. Three fields (Energy, Information, Mass) plus 18 composable
+  operators on a Mobius manifold generate quantum mechanics, gravity, thermodynamics,
+  and relativity without programming them. v3 architecture with spectral Poisson gravity,
+  PAC conservation at machine precision, and 3-tier physics scorecard (9/13 passing, C+).
+  138 tests. Based on Dawn Field Theory (PAC/SEC/RBF/MED). Pre-alpha research software.
+semantic_scope:
+  - physics-simulation
+  - emergent-physics
+  - mobius-manifold
+  - pac-conservation
+  - field-dynamics
+  - gravity
+  - quantum-mechanics
+  - dawn-field-theory
+files:
+  - CITATION.cff
+  - LICENSE
+  - README.md
+  - package.json
+  - pytest.ini
+  - requirements.txt
+  - start-dashboard.ps1
+child_directories:
+  - analyzers
+  - configs
+  - conservation
+  - core
+  - cosmology
+  - dashboard
+  - docs
+  - dynamics
+  - emergence
+  - examples
+  - experiments
+  - laws
+  - memory
+  - proof_of_concepts
+  - results
+  - scales
+  - scripts
+  - spikes
+  - src
+  - substrate
+  - tests
+title: Reality Engine
+repository_role: simulation
