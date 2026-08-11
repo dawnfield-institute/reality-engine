@@ -1,25 +1,30 @@
-# Reality Engine - Python Dependencies
-# Pre-Alpha Research Software
+# Reality Engine — Python dependencies
+# Pre-alpha research software. These are v3's dependencies (src/v3); see archive/ for
+# earlier generations.
 
 # Core scientific computing
 numpy>=1.24.0
 scipy>=1.10.0
 torch>=2.0.0
 
-# Visualization
+# Analysis and plotting
 matplotlib>=3.7.0
-pygame>=2.5.0
 
-# Config
-pyyaml>=6.0
+# Dashboard (src/v3/dashboard) — FastAPI + WebSocket + Plotly.js.
+# These were MISSING: the file previously declared Flask + flask-socketio + eventlet,
+# which belong to the v1 dashboard now in archive/v1/. v3's dashboard has always used
+# FastAPI, and the gap only surfaced when CI ran the suite in a clean environment —
+# locally it passed because fastapi happened to be installed.
+fastapi>=0.110.0
+uvicorn>=0.27.0
 
-# Dashboard server
-flask>=2.3.0
-flask-socketio>=5.3.0
-flask-cors>=4.0.0
-python-socketio>=5.9.0
-eventlet>=0.33.0
-
-# Optional: For development and testing
+# Development and testing
 pytest>=7.3.0
 pytest-cov>=4.0.0
+
+# Not listed, deliberately:
+#   fracton — the PAC/Mobius SDK is imported behind try/except fallbacks and the
+#     integration is currently incomplete (see CLAUDE.md, Known Gaps). Install it from
+#     the sibling repo when working on that.
+#   pygame, flask, flask-socketio, eventlet, pyyaml — used only by archive/v1 and
+#     archive/v2. Install them alongside archived code if you need to run it.

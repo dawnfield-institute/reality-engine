@@ -1,0 +1,83 @@
+name: Tests
+
+# The repository's first CI. Before this, nothing ran on push, and the only local
+# gate (pytest.ini) pointed at tests/v2 — the middle of three engine generations.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: v3 + v2 (shipping config)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # CPU wheels only — CUDA builds are ~2GB and nothing here needs a GPU to test.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run tests
+        run: python -m pytest -q
+
+  fracton-integration:
+    name: with fracton (characterization — pins the known gap)
+    runs-on: ubuntu-latest
+    # reality-engine imports fracton behind try/except fallbacks, so the suite is green
+    # without it; with fracton actually present, 15 v3 tests fail on the PACValidator
+    # float/Tensor mismatch (see CLAUDE.md, Known Gaps). That was invisible for months
+    # because fracton is not installed in the usual dev environment and pytest.ini
+    # skipped tests/v3 entirely.
+    #
+    # This job pins that number rather than being allowed to fail. A permanently-red
+    # check teaches people to ignore CI; a pinned count stays green while the gap is
+    # unchanged and goes red the moment it moves IN EITHER DIRECTION — including when
+    # someone fixes it, which is the signal to lower EXPECTED_FAILURES to 0 and fold
+    # this job into the main one.
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: dawnfield-institute/fracton
+          path: _fracton
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run tests with fracton, assert the known failure count
+        env:
+          PYTHONPATH: ${{ github.workspace }}/_fracton
+          EXPECTED_FAILURES: '15'
+        run: |
+          set +e
+          python -m pytest -q --tb=no > result.txt 2>&1
+          set -e
+          tail -25 result.txt
+          actual=$(grep -oE '[0-9]+ failed' result.txt | head -1 | grep -oE '[0-9]+' || echo 0)
+          echo "expected $EXPECTED_FAILURES failures, got $actual"
+          if [ "$actual" != "$EXPECTED_FAILURES" ]; then
+            echo "::error::fracton integration changed: expected $EXPECTED_FAILURES failing tests, got $actual."
+            echo "If you FIXED it, lower EXPECTED_FAILURES (to 0 once clean) in this workflow."
+            echo "If this rose, something regressed. Either way this number must be updated deliberately."
+            exit 1
+          fi
+          echo "Known fracton gap unchanged at $actual failing tests."

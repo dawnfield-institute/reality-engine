@@ -28,12 +28,25 @@ reality-engine/
 │   ├── atomic_emergence/      # Atom classification
 │   ├── big_bang/              # Big bang evolution
 │   └── ...
-├── tests/v3/                  # 138 tests (pytest)
-├── examples/                  # field_visualizer.py
+├── tests/v3/                  # 138 tests (pytest) — the only suite that runs
 ├── docs/                      # Theory and guides
-├── proof_of_concepts/         # v2 POCs (001-007, reference only)
-└── [legacy dirs]              # core/, dynamics/, conservation/, etc. — v1/v2 reference
+└── archive/                   # earlier generations, preserved not deleted
+    ├── v1/                    # Jan 2026 layer packages: core/, dynamics/,
+    │                          #   conservation/, substrate/, scales/, emergence/,
+    │                          #   cosmology/, memory/, analyzers/ + their consumers
+    │                          #   (proof_of_concepts/, dashboard/, examples/, tools/,
+    │                          #   and the v1-importing spikes/scripts/tests)
+    └── v2/                    # Feb 2026, Reality Engine 2.0.0a1 (was src/) + tests/v2
 ```
+
+**Three generations existed; v3 is the only live one.** v1 was what
+`.spec/architecture.spec.md` originally documented — its SUBSTRATE/CONSERVATION/DYNAMICS/
+SCALES/EMERGENCE layers were the top-level directory list. v3 imports nothing from either
+archived generation (verified: 0 references).
+
+`src/` is kept as the import root purely because v3 addresses itself absolutely — 31
+modules and 72 test references use `src.v3.*`. Promoting `v3` to the top level would mean
+rewriting all of them for no behavioural gain.
 
 ## v3 Operator Pipeline (18 operators)
 
@@ -81,17 +94,25 @@ Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
 - Physics must EMERGE, never be programmed — no hardcoded F=ma, E=mc^2, etc.
 - PAC conservation enforced at machine precision (< 1e-12)
 - Mobius manifold substrate with anti-periodic boundaries: f(x+pi) = -f(x)
-- Tests: `pytest tests/v3/` from repo root (138 tests)
+- Tests: `pytest` from repo root — `pytest.ini` now targets `tests/v3` (138 tests)
 - Installation: `pip install -r requirements.txt`
-- Run quick demo: `python examples/field_visualizer.py`
+- Run the engine: `python -m src.v3 --help`
 - Scorecard: `python scripts/physics_scorecard.py`
+- Conventions are canonical in [`dawn-field-theory/STANDARDS.md`](../dawn-field-theory/STANDARDS.md);
+  this file is repo-specific context, not a second standard.
+
+> The old quick demo `examples/field_visualizer.py` is in `archive/v1/` — it imports
+> `core.reality_engine` and visualises v1's P/A fields, not v3's E/I/M.
 
 ## Related Repos
 
-- `fracton` — Infodynamics SDK (provides PAC/Mobius primitives)
+- `fracton` — Infodynamics SDK (provides PAC/Mobius primitives). **Imported behind
+  try/except fallbacks.** With fracton absent the suite is 138/138; with it present, 15 v3
+  tests fail — see Known Gaps.
 - `dawn-field-theory` — theoretical foundation (exp_28, exp_29, exp_36 feed gravity)
 - `dawn-models` — AI architectures using same DFT principles
-- `kronos-vault` — knowledge vault (FDOs: proj-reality-engine, reality-engine-dynamics, coupling-drift-physics)
+- `lore` — the knowledge graph (CT106). **kronos is retired — never write through
+  `kronos_*` tools.** Search with `lore_search`; sync after structural changes.
 
 ## Theory Integration (2026-03-17)
 
@@ -115,11 +136,31 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 - 6 analyzers operational, PAC conservation validated at machine precision
 - Not accepting code contributions yet
 
+## Known Gaps
+
+- **fracton integration is incomplete.** `src/v3/operators/normalization.py` calls
+  fracton's `PACValidator.validate(parent, children)` with Python floats; the API is typed
+  for `torch.Tensor` and does `torch.zeros_like(parent)`. Because the import sits behind a
+  fallback, this was invisible for months — the suite was green only because fracton was
+  never installed and `pytest.ini` skipped `tests/v3` entirely. CI now runs a second,
+  non-blocking job with fracton present so the gap stays visible.
+  Note before fixing: the call asks `validate(E+I+M, [E, I, M])`, whose residual is
+  `|x − (a+b+c)|` with `x = a+b+c` — **tautologically zero**. It needs replacing, not
+  repairing (STANDARDS §2.7: a test that passes for a reason unrelated to what it guards
+  is replaced, not counted).
+- **`Ξ` has three legitimate values.** fracton defines `XI_ANALYTIC` (γ+ln φ = 1.05843),
+  `XI_DISCRETE` (1+π/55 = 1.05712) and `XI_PAC`; the 0.12% spread is structural (γ/48,
+  exp_26). Use the named constant — never a bare literal — and say which you mean.
+- **`.spec/` is behind the code.** `architecture.spec.md` documents v1;
+  `modernization-roadmap.spec.md` predates M6–M15 and sources from Era-1/2 experiments.
+
 ## Guardrails
 
 - Do NOT hardcode physics laws — all physics must emerge from field dynamics
 - Do NOT break PAC conservation invariants (< 1e-12 error)
 - Do NOT modify substrate geometry without understanding Mobius topology
-- Always run `pytest tests/v3/` after changes
+- Always run `pytest` after changes (138 tests must stay green)
 - spikes/ are research experiments — treat as exploratory, not production code
-- Legacy dirs (core/, dynamics/, conservation/, etc.) are v1/v2 reference — do not modify
+- `archive/v1/` and `archive/v2/` are lineage — **read, never modify, never import from**.
+  Archived work keeps its original shape; that shape is evidence of when it was done.
+- Never add a bare physical constant — import it named from fracton
