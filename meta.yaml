@@ -1,50 +1,42 @@
 schema_version: '2.0'
 directory_name: reality-engine
-description: >
-  Reality Engine — computational physics framework where fundamental physics emerges
-  from information dynamics. Three fields (Energy, Information, Mass) plus 18 composable
-  operators on a Mobius manifold generate quantum mechanics, gravity, thermodynamics,
-  and relativity without programming them. v3 architecture with spectral Poisson gravity,
-  PAC conservation at machine precision, and 3-tier physics scorecard (9/13 passing, C+).
-  138 tests. Based on Dawn Field Theory (PAC/SEC/RBF/MED). Pre-alpha research software.
+description: Reality Engine — computational physics framework where fundamental physics emerges from
+  information dynamics. Three fields (Energy, Information, Mass) plus 18 composable operators on a
+  Mobius manifold generate quantum mechanics, gravity, thermodynamics, and relativity without programming
+  them. The engine is v3 (src/v3); the v1 and v2 generations are preserved in archive/ as lineage
+  and are not imported by v3. 138 tests. Based on Dawn Field Theory (PAC/SEC/RBF/MED). Pre-alpha research
+  software.
 semantic_scope:
-  - physics-simulation
-  - emergent-physics
-  - mobius-manifold
-  - pac-conservation
-  - field-dynamics
-  - gravity
-  - quantum-mechanics
-  - dawn-field-theory
+- physics-simulation
+- emergent-physics
+- mobius-manifold
+- pac-conservation
+- field-dynamics
+- gravity
+- quantum-mechanics
+- dawn-field-theory
 files:
-  - CITATION.cff
-  - LICENSE
-  - README.md
-  - package.json
-  - pytest.ini
-  - requirements.txt
-  - start-dashboard.ps1
+- .gitignore
+- CITATION.cff
+- CLAUDE.md
+- LICENSE
+- README.md
+- meta.yaml
+- pytest.ini
+- requirements.txt
 child_directories:
-  - analyzers
-  - configs
-  - conservation
-  - core
-  - cosmology
-  - dashboard
-  - docs
-  - dynamics
-  - emergence
-  - examples
-  - experiments
-  - laws
-  - memory
-  - proof_of_concepts
-  - results
-  - scales
-  - scripts
-  - spikes
-  - src
-  - substrate
-  - tests
+- .changelog
+- .github
+- .spec
+- archive
+- configs
+- docs
+- experiments
+- reality_seed
+- scripts
+- spikes
+- src
+- tests
+- todo
 title: Reality Engine
 repository_role: simulation

@@ -54,11 +54,14 @@ git clone https://github.com/dawnfield-institute/reality-engine.git
 cd reality-engine
 pip install -r requirements.txt
 
-# Watch fields evolve
-python examples/field_visualizer.py
+# Run the engine
+python -m src.v3 --help
 
 # Run physics scorecard (13 metrics, ~3 min on GPU)
 python scripts/physics_scorecard.py
+
+# Tests
+pytest
 
 # Run tests
 pytest tests/v3/ -v
@@ -135,13 +138,17 @@ reality-engine/
 │   ├── thermal_validation/ # Heat-information coupling
 │   ├── law_discovery/      # Automated physics discovery
 │   └── universe_evolution/ # Long-term structure formation
-├── tests/v3/               # 138 tests
-├── examples/               # field_visualizer.py
+├── tests/v3/               # 138 tests — the suite that runs
 ├── docs/                   # Theory and guides
 │   └── legacy/             # Archived v1/v2 documentation
-├── proof_of_concepts/      # v2 POCs (001-007, reference)
-└── [legacy dirs]           # core/, dynamics/, conservation/, etc. — v1/v2 reference
+└── archive/                # earlier generations — preserved, not deleted
+    ├── v1/                 # Jan 2026 layer packages + their consumers
+    └── v2/                 # Feb 2026, Reality Engine 2.0.0a1
 ```
+
+Three generations of the engine existed. **v3 is the only live one**; v1 and v2 are kept
+as lineage and import nothing into v3. See [`CLAUDE.md`](CLAUDE.md) for the full picture
+and [`.spec/architecture.spec.md`](.spec/architecture.spec.md) for the operator model.
 
 ---
 
