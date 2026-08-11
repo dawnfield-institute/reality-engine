@@ -1,0 +1,66 @@
+name: Tests
+
+# The repository's first CI. Before this, nothing ran on push, and the only local
+# gate (pytest.ini) pointed at tests/v2 — the middle of three engine generations.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  tests:
+    name: v3 + v2 (shipping config)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # CPU wheels only — CUDA builds are ~2GB and nothing here needs a GPU to test.
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run tests
+        run: python -m pytest -q
+
+  fracton-integration:
+    name: with fracton (known incomplete — informational)
+    runs-on: ubuntu-latest
+    # Does NOT gate the build. reality-engine imports fracton behind try/except
+    # fallbacks, so the suite is green without it; with fracton actually present,
+    # 15 v3 tests fail. That gap was invisible for months because fracton is not
+    # installed in the usual dev environment and pytest.ini skipped tests/v3.
+    # Surfacing it here means it is visible on every run instead of discovered by
+    # someone who happens to install fracton. Flip continue-on-error to false when
+    # the integration is fixed.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: dawnfield-institute/fracton
+          path: _fracton
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+          pip install pytest pytest-asyncio
+
+      - name: Run tests with fracton on the path
+        run: python -m pytest -q
+        env:
+          PYTHONPATH: ${{ github.workspace }}/_fracton
