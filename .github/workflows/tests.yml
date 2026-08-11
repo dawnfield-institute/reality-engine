@@ -31,19 +31,16 @@ jobs:
         run: python -m pytest -q
 
   fracton-integration:
-    name: with fracton (characterization — pins the known gap)
+    name: with fracton
     runs-on: ubuntu-latest
-    # reality-engine imports fracton behind try/except fallbacks, so the suite is green
-    # without it; with fracton actually present, 15 v3 tests fail on the PACValidator
-    # float/Tensor mismatch (see CLAUDE.md, Known Gaps). That was invisible for months
-    # because fracton is not installed in the usual dev environment and pytest.ini
-    # skipped tests/v3 entirely.
+    # reality-engine imports fracton behind try/except fallbacks, so the main job above
+    # exercises only the fallback path. This job runs the same suite with fracton
+    # actually present — the configuration that was broken and unnoticed for months
+    # precisely because nobody ran it.
     #
-    # This job pins that number rather than being allowed to fail. A permanently-red
-    # check teaches people to ignore CI; a pinned count stays green while the gap is
-    # unchanged and goes red the moment it moves IN EITHER DIRECTION — including when
-    # someone fixes it, which is the signal to lower EXPECTED_FAILURES to 0 and fold
-    # this job into the main one.
+    # It is a full gate, not informational. It briefly pinned an expected-failure count
+    # of 15 while the PACValidator mismatch stood; that is now fixed, so it must be
+    # green like any other job.
     steps:
       - uses: actions/checkout@v4
 
@@ -63,21 +60,7 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-asyncio
 
-      - name: Run tests with fracton, assert the known failure count
+      - name: Run tests with fracton on the path
+        run: python -m pytest -q
         env:
           PYTHONPATH: ${{ github.workspace }}/_fracton
-          EXPECTED_FAILURES: '15'
-        run: |
-          set +e
-          python -m pytest -q --tb=no > result.txt 2>&1
-          set -e
-          tail -25 result.txt
-          actual=$(grep -oE '[0-9]+ failed' result.txt | head -1 | grep -oE '[0-9]+' || echo 0)
-          echo "expected $EXPECTED_FAILURES failures, got $actual"
-          if [ "$actual" != "$EXPECTED_FAILURES" ]; then
-            echo "::error::fracton integration changed: expected $EXPECTED_FAILURES failing tests, got $actual."
-            echo "If you FIXED it, lower EXPECTED_FAILURES (to 0 once clean) in this workflow."
-            echo "If this rose, something regressed. Either way this number must be updated deliberately."
-            exit 1
-          fi
-          echo "Known fracton gap unchanged at $actual failing tests."

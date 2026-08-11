@@ -138,16 +138,16 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 
 ## Known Gaps
 
-- **fracton integration is incomplete.** `src/v3/operators/normalization.py` calls
-  fracton's `PACValidator.validate(parent, children)` with Python floats; the API is typed
-  for `torch.Tensor` and does `torch.zeros_like(parent)`. Because the import sits behind a
-  fallback, this was invisible for months — the suite was green only because fracton was
-  never installed and `pytest.ini` skipped `tests/v3` entirely. CI now runs a second,
-  non-blocking job with fracton present so the gap stays visible.
-  Note before fixing: the call asks `validate(E+I+M, [E, I, M])`, whose residual is
-  `|x − (a+b+c)|` with `x = a+b+c` — **tautologically zero**. It needs replacing, not
-  repairing (STANDARDS §2.7: a test that passes for a reason unrelated to what it guards
-  is replaced, not counted).
+- ~~fracton integration is incomplete~~ — **fixed 2026-08-11.** Both suites are now
+  138/138, with and without fracton, and CI gates both. What it was: the PAC audit in
+  `src/v3/operators/normalization.py` called `validate(E+I+M, [E, I, M])` — residual
+  `|x − (a+b+c)|` with `x = a+b+c`, tautologically zero, so it could never fail — through
+  `validate()`, typed for `torch.Tensor`, which raised `TypeError` whenever fracton was
+  actually installed. It now calls `validate_tree` (the scalar entry point) against the
+  **pre-correction** sums, which measures how far PAC drifted before the correction pulled
+  it back. Auditing the post-correction state would have been tautological too, one step
+  removed. Verified it can fail: injecting 5.0 of drift yields residual 5.0 and one
+  counted violation, where normal operation yields exactly 0.
 - **`Ξ` has three legitimate values.** fracton defines `XI_ANALYTIC` (γ+ln φ = 1.05843),
   `XI_DISCRETE` (1+π/55 = 1.05712) and `XI_PAC`; the 0.12% spread is structural (γ/48,
   exp_26). Use the named constant — never a bare literal — and say which you mean.

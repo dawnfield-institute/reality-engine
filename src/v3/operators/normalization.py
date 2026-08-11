@@ -113,6 +113,11 @@ class NormalizationOperator:
         current_pac = (E_new + I_new + M_new).sum().item()
         pac_residual = self._initial_pac - current_pac
 
+        # Pre-correction component sums. The audit below must run against these: after
+        # the correction the totals equal _initial_pac by construction, so auditing the
+        # corrected state can only ever measure float rounding.
+        pre_correction = [E_new.sum().item(), I_new.sum().item(), M_new.sum().item()]
+
         if abs(pac_residual) > 1e-8:
             correction = pac_residual / (2.0 * E_new.numel())
             E_new = E_new + correction
@@ -127,13 +132,24 @@ class NormalizationOperator:
         metrics["pac_correction"] = pac_residual
 
         # --- Fracton PACValidator audit (read-only, no correction) ---
+        # Independently measures how far PAC drifted this tick, BEFORE the correction
+        # above pulled it back: the invariant total from the first tick against the
+        # pre-correction component sums. `validate_tree` computes |root - sum(leaves)|
+        # and counts a violation when that exceeds its tolerance, so this is the honest
+        # measure of how hard the correction is working.
+        #
+        # The previous call was wrong twice over. It read
+        # `validate(E_sum + I_sum + M_sum, [E_sum, I_sum, M_sum])` — residual
+        # |x - (a+b+c)| with x = a+b+c, tautologically zero, so it could never fail. And
+        # `validate` is typed for torch.Tensor and calls torch.zeros_like on its first
+        # argument, so passing floats raised TypeError whenever fracton was installed.
+        # `validate_tree` is the scalar entry point this always wanted.
+        #
+        # Auditing the POST-correction state would have been tautological too, one step
+        # removed: the correction forces the total to equal _initial_pac, so the audit
+        # would agree by construction and report only float rounding.
         if self._pac_validator is not None:
-            E_sum = E_new.sum().item()
-            I_sum = I_new.sum().item()
-            M_sum = M_new.sum().item()
-            result = self._pac_validator.validate(
-                E_sum + I_sum + M_sum, [E_sum, I_sum, M_sum],
-            )
+            result = self._pac_validator.validate_tree(self._initial_pac, pre_correction)
             metrics["pac_validator_residual"] = result.residual
             metrics["pac_validator_violations"] = self._pac_validator.stats["violations"]
 
