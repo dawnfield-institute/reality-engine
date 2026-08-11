@@ -2,10 +2,19 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Optional
 
 import torch
+
+# Source constants from fracton (canonical), with local fallback
+try:
+    from fracton.constants import PHI as _PHI
+    from fracton.constants.mathematical import XI_DISCRETE as _XI
+except ImportError:
+    _PHI = (1 + math.sqrt(5)) / 2
+    _XI = 1 + math.pi / 55
 
 
 @dataclass
@@ -20,8 +29,8 @@ class SimulationConfig:
     nv: int = 32
 
     # --- physical constants (derived from DFT, not tuneable) -------------
-    xi: float = 1.0571072          # Ξ — universal balance constant (1 + π/55)
-    phi: float = 1.618033988749895  # φ — golden ratio
+    xi: float = _XI                 # Ξ — universal balance constant (1 + π/55)
+    phi: float = _PHI               # φ — golden ratio
     alpha_pac: float = 0.964       # PAC memory coefficient
     lambda_freq: float = 0.020     # λ — universal frequency (Hz)
 
