@@ -48,10 +48,58 @@ The Reality Engine is a computational physics simulator implementing the PAC (Po
 
 ---
 
-## System Architecture (Current - Pre-Modernization)
+## System Architecture — v3 (current)
+
+The engine is `src/v3`. Physics is **composable**: every operation is an `Operator` — a
+callable transforming `FieldState` — and a `Pipeline` chains them. This is the extension
+point; adding physics means adding an operator, not editing a layer.
+
+```python
+# src/v3/operators/protocol.py
+class Operator(Protocol):
+    @property
+    def name(self) -> str: ...
+    def __call__(self, state, config, bus=None): ...   # returns a new FieldState
+
+class Pipeline:
+    def add(self, op) -> Pipeline: ...
+    def remove(self, name: str) -> Pipeline: ...
+```
 
 ```
-Reality Engine
+src/v3/
+├── engine/       Engine loop, immutable FieldState (E, I, M, T, metrics),
+│                 EventBus, SimulationConfig
+├── operators/    18 physics operators + protocol.py (Operator, Pipeline)
+│                 RBF · QBE · Actualization · Memory · PhiCascade · Gravity ·
+│                 SpinStatistics · ChargeDynamics · Fusion · Confluence ·
+│                 Temperature · ThermalNoise · Normalization · SECTracking ·
+│                 Adaptive · TimeEmergence · Integrator · UnifiedForce
+├── analyzers/    7 — Conservation, Gravity, Atom, Star, Quantum, Galaxy
+├── emergence/    3 — Structure, Particle, Herniation detectors
+├── substrate/    MobiusManifold, Constants, Projections
+└── dashboard/    FastAPI + WebSocket + Plotly.js
+```
+
+Fields are **E, I, M** (energy, information, mass). The v1 P/A/M/T model below is not what
+runs; `FieldState` is immutable and operators return a new state rather than mutating.
+
+Constants come from fracton by name — `XI_ANALYTIC` (γ+ln φ), `XI_DISCRETE` (1+π/55),
+`XI_PAC` — never as bare literals. The 0.12% spread between the first two is structural
+(γ/48, exp_26), not an error.
+
+---
+
+## System Architecture — v1 (ARCHIVED, retained as lineage)
+
+> The layer model below described the January 2026 engine, now in `archive/v1/`. Its
+> layer names were literally the top-level directory names. It is kept because the v3
+> operators descend from these layers conceptually — `Confluence` from MobiusConfluence,
+> `TimeEmergence` from TimeEmergence, `PhiCascade` from ScaleHierarchy — and that lineage
+> is only legible against the original.
+
+```
+Reality Engine (v1 — archive/v1/)
 ├── Layer 1: SUBSTRATE (Geometric Foundation)
 │   ├── MobiusManifold
 │   │   ├── Anti-periodic boundaries: f(x+π) = -f(x)
@@ -536,5 +584,5 @@ class ResonanceDetector:  # [Phase 1]
 - `.spec/modernization-roadmap.spec.md` - Detailed implementation plan
 - `.spec/challenges.md` - Open research questions
 - `tests/` - Comprehensive validation suite
-- `../dawn-field-theory/foundational/` - Theoretical foundations
+- `../dawn-field-theory/` - Theoretical foundations
 - `../dawn-models/research/gaia/` - GAIA POC implementations

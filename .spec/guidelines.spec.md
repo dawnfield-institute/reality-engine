@@ -690,7 +690,7 @@ Before any significant commit, verify:
 1. Check `.spec/` for existing specification
 2. Check `.spec/challenges.md` for open questions
 3. Check `tests/` for examples and patterns
-4. Check `../dawn-field-theory/foundational/` for theory
+4. Check `../dawn-field-theory/` for theory
 5. Ask for clarification rather than guessing
 
 **Remember**: Scientific code must be CORRECT first, fast second. Slow and right beats fast and wrong every time.

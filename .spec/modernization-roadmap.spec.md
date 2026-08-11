@@ -1,5 +1,28 @@
 # Reality Engine Modernization Roadmap
 
+> ## ⚠ SUPERSEDED — kept as lineage, not as a plan
+>
+> **Status:** superseded 2026-08-11. Do not execute from this document.
+>
+> Its theory base predates the milestone stack. Every Dawn Field Theory source it cites is
+> an Era-1/Era-2 experiment — `pre_field_recursion`, `pac_confluence_xi`,
+> `oscillation_attractor_dynamics` — and its "Phase 3: Theoretical Unification" is **not**
+> M6–M15. Nothing from M10 (PAC as spectral confinement), M12 (connection = ADE), M13
+> (Lorentz from SEC complexification), M14 (QM as complement-indeterminacy on the orbit
+> quotient) or M15 (the holonomy closed form) is reflected here, because none of it existed
+> when this was written.
+>
+> Its "Current State (Baseline)" describes **v1** — the architecture now in `archive/v1/`.
+> The engine is v3.
+>
+> **What is still worth taking from it:** the GAIA efficiency work (PAC lazy architecture,
+> pre-field resonance detection, tiered memory cache) is orthogonal to the theory refresh
+> and may still be wanted. Judge it on its own merits, not as part of a stale plan.
+>
+> Paths were corrected on 2026-08-11 for the dawn-field-theory reorganization so the
+> citations still resolve; the content was **not** otherwise rewritten. A successor roadmap
+> belongs to the milestone-rollout round and should take M6–M15 as its input.
+
 ## Overview
 
 This specification defines the comprehensive modernization plan for the Reality Engine, integrating:
@@ -85,7 +108,7 @@ This specification defines the comprehensive modernization plan for the Reality 
 
 ### 1.2: Pre-Field Resonance Detection
 
-**Source**: `dawn-field-theory/foundational/experiments/pre_field_recursion/`
+**Source**: `dawn-field-theory/archive/era2-prefield/pre_field_recursion/`
 **Impact**: 5.11× convergence speedup, 0.1% CPU overhead
 
 **Requirements**:
@@ -349,7 +372,7 @@ KnowledgeTransfer:
 
 ### 3.1: π→φ→PAC Mechanism Integration
 
-**Source**: `dawn-field-theory/foundational/experiments/oscillation_attractor_dynamics/`
+**Source**: `dawn-field-theory/experiments/studies/oscillation_attractor_dynamics/`
 **Impact**: Complete mechanistic chain from pure math to Standard Model
 
 **Mechanism**:
@@ -408,7 +431,7 @@ UnifiedMechanism:
 
 ### 3.2: Standard Model Parameter Validation
 
-**Source**: `dawn-field-theory/foundational/experiments/pac_confluence_xi/`
+**Source**: `dawn-field-theory/archive/era2-prefield/pac_confluence_xi/`
 **Impact**: 5 SM parameters derived from single Fibonacci recursion
 
 **Parameters to Validate**:
@@ -436,7 +459,7 @@ UnifiedMechanism:
 
 ### 3.3: Cosmological Validation Framework
 
-**Source**: `dawn-field-theory/foundational/experiments/pac_cosmology_validation/`
+**Source**: `dawn-field-theory/experiments/studies/pac_cosmology_validation/`
 **Impact**: Map PAC evolution to cosmic eras, validate JWST predictions
 
 **Requirements**:
@@ -696,12 +719,12 @@ experiments/
 - `../dawn-models/research/gaia/proof_of_concepts/poc_020_multi_model_pac/`
 
 ### Dawn Field Theory
-- `../dawn-field-theory/foundational/arithmetic/unified_pac_framework_comprehensive.md`
-- `../dawn-field-theory/foundational/arithmetic/infodynamics_arithmetic_v1.md`
-- `../dawn-field-theory/foundational/experiments/pac_confluence_xi/`
-- `../dawn-field-theory/foundational/experiments/pre_field_recursion/`
-- `../dawn-field-theory/foundational/experiments/oscillation_attractor_dynamics/`
-- `../dawn-field-theory/foundational/docs/preprints/`
+- `../dawn-field-theory/formal/derivations/unified_pac_framework_comprehensive.md`
+- `../dawn-field-theory/formal/derivations/infodynamics_arithmetic_v1.md`
+- `../dawn-field-theory/archive/era2-prefield/pac_confluence_xi/`
+- `../dawn-field-theory/archive/era2-prefield/pre_field_recursion/`
+- `../dawn-field-theory/experiments/studies/oscillation_attractor_dynamics/`
+- `../dawn-field-theory/papers/`
 
 ### Current Reality Engine
 - `core/reality_engine.py` - Main simulation engine
