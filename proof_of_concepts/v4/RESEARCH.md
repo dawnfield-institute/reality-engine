@@ -86,46 +86,55 @@ conditions dominate there; late-time they do not (>0.997 correlation). POC-01→
   shows 6.07× because cells must physically redistribute across the manifold. The excess
   is the SEC contribution on top of PAC.
 
-## 6. The gap: the mechanism is built but NOT WIRED IN
+## 6. Pipeline proliferation — and which one a result was measured with
 
-**Corrected.** My first pass searched for the vocabulary (`delta`, `reconcile`,
-`unreconciled`), found zero hits, and concluded the engine implements none of the model.
-That was wrong — it exists under different names.
+**Corrected twice; this is the version that survived checking every site.**
 
-`FieldState` carries **`P` — "potential buffer, unactualized field changes (MAR)"**. And
-`ActualizationOperator` accumulates `P = state.P + dt·dE_dt` ("the balance field's *desire*
-for E to change") and **actualizes when |P| crosses the MAR threshold**
-(`actualization_threshold = 0.05`). That is structurally a Δ buffer cleared at a threshold
-event — the reconciliation mechanism, in the engine, already.
+First pass: searched for the vocabulary (`delta`, `reconcile`), found nothing, concluded
+the engine implements none of the model. Wrong — it exists as `state.P` plus MAR-gated
+`ActualizationOperator`.
 
-**But it does not run.** `build_default_pipeline()` uses `EulerIntegrator` instead, so
-`P` is all zeros at every tick — verified: 0 of 512 cells nonzero at t = 1, 100, 1000, 3000.
+Second pass: found `build_default_pipeline()` omitted six operators and concluded the
+documented physics does not run, "including the scorecard's 7/13". **Also wrong**, and it
+made `CLAUDE.md` worse before being reverted.
 
-**Six implemented operators are absent from the default pipeline:**
+What is actually true, after enumerating all 25 `Pipeline([...])` sites outside `archive/`:
 
-| operator | what is lost |
+| operators | sites |
 |---|---|
-| **`ActualizationOperator`** | the MAR gate — the Δ buffer and its reconciliation threshold |
-| **`PhiCascadeOperator`** | Fibonacci two-step memory, φ-spaced mass levels |
-| `SECTrackingOperator` | SEC energy functional, entropy, **`info_fraction`**, cascade depth |
-| `SpinStatisticsOperator` | emergent Pauli exclusion |
-| `ChargeDynamicsOperator` | EM-like forces |
-| `UnifiedForceOperator` | combined gravity + EM |
+| 16 | 7 — incl. `src/v3/__main__.py`, `physics_scorecard.py`, `theory_integration/harness.py` |
+| 15 | 8 |
+| 14 | 5 |
+| 13 / 12 / 10 / 9 / 8 / 3 | 1–2 each |
 
-`CLAUDE.md` documents a 16-operator default order including all of these. The actual
-default is **12 operators and an Euler integrator**. The documented physics is not the
-physics that runs.
+- **The canonical pipeline is 16 operators**, and `CLAUDE.md` documented it correctly.
+  `__main__.py` names it explicitly: `ActualizationOperator(), # replaces EulerIntegrator`.
+- **The scorecard's 7/13 and the theory_integration spikes used the canonical 16.** They
+  are not affected by any of this.
+- **The dashboard is the outlier at 12**, under the misleading name
+  `build_default_pipeline`. Under it `state.P` is all zeros — no Δ term.
+- **POC-01→03 imported the dashboard's pipeline**, so they measured reduced physics
+  without MAR actualization or the φ-cascade. That is a defect in those POCs, not in the
+  engine.
 
-This also explains a workaround in POC-02: `info_fraction` was "missing from metrics" and
-I computed it from the fields instead of asking *why* it was missing. It was missing
-because `SECTrackingOperator` is not in the pipeline.
+The real problem is that **no site declared which pipeline it was using or why**, so
+results were not comparable and nothing detected the divergence. Now declared in
+`src/v3/engine/pipelines.py` (`CANONICAL`, `DASHBOARD_REDUCED`, `REDUCED_OMITS`, `UNUSED`)
+and gated by `tests/v3/test_pipeline_completeness.py`.
 
-**Consequence.** Every result the engine has produced — the scorecard's 7/13, the
-theory_integration spikes, POC-01→03 — was produced **without** MAR actualization or the
-φ-cascade. "No mechanism found" is unsurprising when the mechanisms are not wired in.
+**Measured effect of the operators the reduced pipeline drops** (32×16, 1500 ticks, noise
+off, seed 7 — all run stably; none is broken):
 
-Note also that `build_default_pipeline()` — the canonical definition of what the engine
-*is* — lives in `dashboard/server.py`, a UI module.
+| operator | effect |
+|---|---|
+| `Actualization` | M_total **+8.9%**; makes `state.P` live — \|P\| → ~12.4 over 475/512 cells and **saturates**; including P **halves** apparent ledger drift (0.181 → 0.082 at t=3000) |
+| `SpinStatistics` | M_total −6.4% |
+| `PhiCascade` | M_total +0.5% |
+| `SECTracking` | none (read-only) — its absence is why `info_fraction` was missing in POC-02 |
+| `ChargeDynamics` | none measured — no Q field in `FieldState`; likely inert |
+
+The Δ saturation is the substantive physics result here: a **bounded** buffer, which is
+what `Δ ∈ [−bound, +bound]` predicts, observed in the engine for the first time.
 
 ## 7. Genuinely open questions (these are the targets)
 

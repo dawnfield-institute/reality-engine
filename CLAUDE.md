@@ -48,48 +48,45 @@ archived generation (verified: 0 references).
 modules and 72 test references use `src.v3.*`. Promoting `v3` to the top level would mean
 rewriting all of them for no behavioural gain.
 
-## v3 Operator Pipeline
+## v3 Operator Pipeline (16 operators)
 
-**18 operators are implemented; the default pipeline runs 12.** Six are implemented but
-excluded — each is listed with its reason and measured effect in
-`src/v3/engine/pipelines.py` (`EXCLUDED`), and `tests/v3/test_pipeline_completeness.py`
-fails if any operator is implemented without being either included or explicitly excluded.
+**This is the canonical pipeline** — used by `src/v3/__main__.py`, `scripts/physics_scorecard.py`,
+and `spikes/theory_integration/harness.py`. Declared in `src/v3/engine/pipelines.py` as
+`CANONICAL`; use `build_canonical_pipeline()`.
 
-This section previously documented a 16-operator default order that did not match the
-code. Nothing detected that, because nothing compared the described physics to the running
-physics.
-
-**Excluded by default** (all verified to run stably, 32x16 / 1500 ticks — none was omitted
-because it is broken):
-
-| operator | effect | note |
-|---|---|---|
-| `Actualization` | M_total +8.9% | REPLACES Euler. Makes `state.P` — the Delta buffer — live. Without it the engine has no Delta and cannot express `P + A + Delta = C`. |
-| `PhiCascade` | M_total +0.5% | phi-spaced mass levels |
-| `SpinStatistics` | M_total -6.4% | emergent Pauli exclusion |
-| `SECTracking` | none (read-only) | why `info_fraction` is absent from metrics |
-| `ChargeDynamics` | none measured | likely inert — no Q field in FieldState |
-| `UnifiedForce` | n/a | would double-count gravity |
-
-**Every engine result to date — the 7/13 scorecard, the theory_integration spikes — was
-produced without MAR actualization or the phi cascade.**
-
-Default order (what actually runs):
+Default order:
 1. **RBF** — Recursive Balance Field: dE/dt from laplacian, coupling terms
 2. **QBE** — Quantum Balance: dI/dt = -dE/dt (PAC conservation)
-3. **Euler** — plain integration (Actualization is excluded; see above)
+3. **Actualization** — MAR-gated integration, ln(phi) split, pi/2 harmonic modulation. Replaces EulerIntegrator. Populates `state.P`, the unactualized potential buffer.
 4. **Memory** — Mass generation (bulk + gradient boundary seeding), de-actualization (PAC cycle completion), quantum pressure, diffusion
-5. **Gravity** — Self-gravity via spectral Poisson solver, xi_mod, cascade-depth tiling filter + pi-harmonic modulation
-6. **Fusion** — Nuclear fusion in dense, hot, gravity-compressed regions
-7. **Confluence** — Mobius antiperiodic projection f(u+pi,1-v) = -f(u,v)
-8. **Temperature** — Local T from |E-I| gradients
-9. **ThermalNoise** — Langevin noise
-10. **Normalization** — Soft-clamp E/I, cap M, Landauer reinjection
-11. **Adaptive** — Self-tuning damping and dt from energy growth
-12. **TimeEmergence** — dt = dt_base / (1 + kappa*max|E-I|)
+5. **PhiCascade** — Fibonacci two-step memory for phi-spaced mass levels
+6. **Gravity** — Self-gravity via spectral Poisson solver, xi_mod, cascade-depth tiling filter + pi-harmonic modulation
+7. **SpinStatistics** — Emergent Pauli exclusion from information cost
+8. **ChargeDynamics** — EM-like forces from charge field Q
+9. **Fusion** — Nuclear fusion in dense, hot, gravity-compressed regions
+10. **Confluence** — Mobius antiperiodic projection f(u+pi,1-v) = -f(u,v)
+11. **Temperature** — Local T from |E-I| gradients
+12. **ThermalNoise** — Langevin noise
+13. **Normalization** — Soft-clamp E/I, cap M, Landauer reinjection
+14. **SECTracking** — Read-only SEC energy functional, entropy, info fraction, cascade depth
+15. **Adaptive** — Self-tuning damping and dt from energy growth
+16. **TimeEmergence** — dt = dt_base / (1 + kappa*max|E-I|)
 
-All 12 above run by default. The six excluded operators are in the table further up,
-with `build_full_pipeline()` in `src/v3/engine/pipelines.py` to run them.
+### Pipeline proliferation — know which one you are running
+
+**25 sites outside `archive/` build their own `Pipeline([...])`, from 8 to 16 operators**
+(7 use 16, 8 use 15, 5 use 14, the rest fewer). Results are not comparable across them:
+two spikes can disagree because they ran different physics, and nothing says so.
+
+The notable divergence is the **dashboard**, whose pipeline had the misleading name
+`build_default_pipeline` and runs **12** operators — omitting Actualization, PhiCascade,
+SpinStatistics, SECTracking and ChargeDynamics. Under it `state.P` is **all zeros**, so
+the engine has no Delta term. It is now `build_dashboard_pipeline()`, and
+`tests/v3/test_pipeline_completeness.py` fails if the difference from canonical changes
+without being declared.
+
+Anything measured with the dashboard pipeline is measuring reduced physics. The scorecard
+and theory_integration spikes are **not** affected — they use the canonical 16.
 
 ## Physics Scorecard
 

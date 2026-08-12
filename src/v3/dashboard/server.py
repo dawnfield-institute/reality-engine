@@ -57,7 +57,11 @@ from src.v3.emergence import HerniationDetector, StructureAnalyzer
 # should not be defined in a view module. Re-exported here so existing imports keep
 # working. See tests/v3/test_pipeline_completeness.py for the gate that keeps the
 # declared pipeline and the implemented operators in agreement.
-from ..engine.pipelines import build_default_pipeline, build_full_pipeline  # noqa: F401,E402
+from ..engine.pipelines import (  # noqa: F401,E402
+    build_canonical_pipeline,
+    build_dashboard_pipeline,
+    build_default_pipeline,  # alias of build_dashboard_pipeline, kept for back-compat
+)
 
 
 class SimulationRunner:

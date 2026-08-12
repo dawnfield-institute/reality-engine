@@ -1,14 +1,25 @@
 """Canonical pipeline definitions.
 
-The default pipeline previously lived in `dashboard/server.py` — a view module — and had
-drifted from `CLAUDE.md`, which documented a 16-operator order. The real default was 12
-operators plus an Euler integrator, and **six implemented operators were silently absent**.
-Nothing detected that, because nothing compared the described physics to the running
-physics.
+**The problem this solves is pipeline proliferation, not a missing operator.**
 
-Every operator must now appear in exactly one of `DEFAULT_OPERATORS` or `EXCLUDED` —
-`tests/v3/test_pipeline_completeness.py` fails otherwise. An operator cannot be written
-and then quietly left out of the loop again.
+25 sites outside `archive/` construct their own `Pipeline([...])`, ranging from 8 to 16
+operators: 7 sites use 16, 8 use 15, 5 use 14, and the rest fewer. Scripts and spikes each
+hand-roll one, so **results are not comparable across them** — two spikes can disagree
+because they ran different physics, and nothing says so.
+
+`CANONICAL` is the 16-operator pipeline used by `src/v3/__main__.py` (the engine entry
+point), `scripts/physics_scorecard.py`, and `spikes/theory_integration/harness.py`. It is
+what `CLAUDE.md` documents. New code should use `build_canonical_pipeline()` rather than
+assembling another variant.
+
+`DASHBOARD_REDUCED` is the 12-operator pipeline that `dashboard/server.py` used under the
+misleading name `build_default_pipeline`. It omits six operators, including
+`ActualizationOperator` — so under it `state.P`, the unactualized potential buffer and the
+engine's Δ term, is **all zeros**. Retained because the dashboard depends on it and its
+performance characteristics may be why it exists, but it is NOT the default physics.
+
+`tests/v3/test_pipeline_completeness.py` asserts every implemented operator is accounted
+for, and that the two variants differ only by the documented set.
 """
 
 from __future__ import annotations
@@ -33,11 +44,31 @@ from ..operators.thermal_noise import ThermalNoiseOperator
 from ..operators.time_emergence import TimeEmergenceOperator
 from ..operators.unified_force import UnifiedForceOperator
 
-# --- the pipeline that actually runs -------------------------------------------------
-DEFAULT_OPERATORS = [
+# --- the canonical 16 — __main__, scorecard, theory_integration, and CLAUDE.md ---------
+CANONICAL = [
     RBFOperator,
     QBEOperator,
-    EulerIntegrator,
+    ActualizationOperator,      # replaces EulerIntegrator — MAR-gated integration
+    MemoryOperator,
+    PhiCascadeOperator,
+    GravitationalCollapseOperator,
+    SpinStatisticsOperator,
+    ChargeDynamicsOperator,
+    FusionOperator,
+    ConfluenceOperator,
+    TemperatureOperator,
+    ThermalNoiseOperator,
+    NormalizationOperator,
+    SECTrackingOperator,
+    AdaptiveOperator,
+    TimeEmergenceOperator,
+]
+
+# --- the dashboard's reduced 12 -------------------------------------------------------
+DASHBOARD_REDUCED = [
+    RBFOperator,
+    QBEOperator,
+    EulerIntegrator,            # NOT ActualizationOperator — state.P stays zero
     MemoryOperator,
     GravitationalCollapseOperator,
     FusionOperator,
@@ -49,56 +80,53 @@ DEFAULT_OPERATORS = [
     TimeEmergenceOperator,
 ]
 
-# --- implemented, deliberately not in the default ------------------------------------
-#
-# Each entry states WHY, and the measured effect. Measured 2026-08-11 at 32x16, 1500
-# ticks, noise off, seed 7 — every one of these runs stably: no crash, no non-finite
-# fields, |max field| within 0.05% of baseline. **None was excluded because it is
-# broken.** The omission was drift, not a decision, and these notes record what is known
-# so the next choice is informed.
-EXCLUDED: dict[type, str] = {
+# Operators in CANONICAL but not in DASHBOARD_REDUCED, with the measured cost of dropping
+# them (32x16, 1500 ticks, noise off, seed 7 — all run stably, none is broken):
+REDUCED_OMITS: dict[type, str] = {
     ActualizationOperator:
-        "MAR-gated integration; REPLACES EulerIntegrator rather than adding to it "
-        "(it contains its own Euler fallback). Wiring it in makes state.P — the "
-        "unactualized potential buffer, the engine's Delta term — live: |P| rises to "
-        "~12.4 over 475/512 cells and saturates, and including P halves apparent ledger "
-        "drift (0.181 -> 0.082 at t=3000). M_total +8.9%. This is the single most "
-        "consequential exclusion: without it the engine has no Delta and no "
-        "reconciliation, so the validated P+A+Delta=C model cannot be expressed.",
+        "MAR-gated integration. Its absence leaves state.P — the unactualized potential "
+        "buffer, the engine's Delta term — all zeros, so P + A + Delta = C cannot be "
+        "expressed. Under CANONICAL, |P| rises to ~12.4 across 475/512 cells and "
+        "saturates, and including P halves apparent ledger drift (0.181 -> 0.082 at "
+        "t=3000). M_total +8.9%.",
     PhiCascadeOperator:
-        "Fibonacci two-step memory for phi-spaced mass levels. Runs stably; M_total "
-        "+0.5%. Theoretically load-bearing — phi structure is the point of the framework.",
-    SECTrackingOperator:
-        "Read-only SEC metrics: entropy, info_fraction, cascade depth. Zero effect on "
-        "dynamics (M_total identical). Its absence is why info_fraction is missing from "
-        "metrics, which experiments have worked around by recomputing it from fields.",
+        "Fibonacci two-step memory producing phi-spaced mass levels. Runs stably; "
+        "M_total +0.5%. Theoretically load-bearing even though the bulk effect is small "
+        "— phi structure is the framework's central claim.",
     SpinStatisticsOperator:
-        "Emergent Pauli exclusion from information cost. Runs stably; M_total -6.4%.",
+        "Emergent Pauli exclusion from information cost. Runs stably; M_total -6.4%, the "
+        "largest dynamical effect of any omitted operator. Its absence means the reduced "
+        "pipeline has no exclusion principle at all.",
+    SECTrackingOperator:
+        "Read-only SEC metrics — entropy, info_fraction, cascade depth. No dynamical "
+        "effect, but its absence is why info_fraction is missing from metrics under the "
+        "reduced pipeline.",
     ChargeDynamicsOperator:
-        "EM-like forces from charge field Q. Runs stably but has NO measured effect "
-        "(M_total identical) — FieldState carries no Q field, so it is likely inert as "
-        "wired. Investigate before including.",
+        "EM-like forces from charge field Q. No measured effect — FieldState carries no Q "
+        "field, so it appears inert as wired. Worth investigating on its own.",
+}
+
+# Implemented but in neither variant.
+UNUSED: dict[type, str] = {
     UnifiedForceOperator:
-        "Combined gravity + EM. Superseded in the default by the separate "
-        "GravitationalCollapseOperator; including both would double-count gravity.",
+        "Combined gravity + EM. Not in CANONICAL — including it alongside "
+        "GravitationalCollapseOperator would double-count gravity. Used only by "
+        "scripts/validate_unified_force.py.",
 }
 
 
-def build_default_pipeline() -> Pipeline:
-    """The pipeline the engine actually runs."""
-    return Pipeline([op() for op in DEFAULT_OPERATORS])
+def build_canonical_pipeline() -> Pipeline:
+    """The 16-operator pipeline. Use this unless you have a stated reason not to."""
+    return Pipeline([op() for op in CANONICAL])
 
 
-def build_full_pipeline() -> Pipeline:
-    """Every operator that alters dynamics, including those excluded by default.
+def build_dashboard_pipeline() -> Pipeline:
+    """The dashboard's reduced 12. Runs without MAR actualization — state.P stays zero."""
+    return Pipeline([op() for op in DASHBOARD_REDUCED])
 
-    Actualization replaces Euler; UnifiedForce is left out to avoid double-counting
-    gravity. Provided so the excluded physics can be measured rather than argued about.
-    """
-    ops = [ActualizationOperator if op is EulerIntegrator else op
-           for op in DEFAULT_OPERATORS]
-    insert_at = ops.index(MemoryOperator)
-    for extra in (PhiCascadeOperator, SpinStatisticsOperator):
-        ops.insert(insert_at + 1, extra)
-    ops.append(SECTrackingOperator)
-    return Pipeline([op() for op in ops])
+
+# Back-compat: `build_default_pipeline` was the dashboard's reduced pipeline under a name
+# that implied it was the engine's default. It was not — __main__ and the scorecard both
+# use the canonical 16. Kept as an alias so existing imports do not break, but new code
+# should name which pipeline it wants.
+build_default_pipeline = build_dashboard_pipeline
