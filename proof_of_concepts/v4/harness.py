@@ -65,6 +65,10 @@ class DurabilityResult:
     verdict: str
     trajectory: list[float]
     pre_impulse_gap: float
+    # The reference twin's own values, unperturbed. Lets a caller measure a property of
+    # the baseline dynamics from the SAME run that produced R, so the two cannot differ
+    # by run conditions.
+    reference_trajectory: list[float] | None = None
 
 
 def durability(
@@ -111,11 +115,13 @@ def durability(
     d0 = {k: fn(per) - fn(ref) for k, fn in observables.items()}
 
     traj: dict[str, list[float]] = {k: [] for k in observables}
+    ref_traj: dict[str, list[float]] = {k: [fn(ref)] for k, fn in observables.items()}
     for _ in range(observe - 1):
         ref.tick()
         per.tick()
         for k, fn in observables.items():
             traj[k].append(fn(per) - fn(ref))
+            ref_traj[k].append(fn(ref))
 
     out = {}
     for k in observables:
@@ -126,6 +132,7 @@ def durability(
         out[k] = DurabilityResult(
             observable=k, D0=d0[k], D_end=d_end, R=R,
             verdict=classify(R), trajectory=series, pre_impulse_gap=pre_gap,
+            reference_trajectory=ref_traj[k],
         )
     return out
 
