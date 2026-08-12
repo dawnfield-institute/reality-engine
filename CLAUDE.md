@@ -28,7 +28,7 @@ reality-engine/
 │   ├── atomic_emergence/      # Atom classification
 │   ├── big_bang/              # Big bang evolution
 │   └── ...
-├── tests/v3/                  # 138 tests (pytest) — the only suite that runs
+├── tests/v3/                  # 143 tests (pytest) — the only suite that runs
 ├── docs/                      # Theory and guides
 └── archive/                   # earlier generations, preserved not deleted
     ├── v1/                    # Jan 2026 layer packages: core/, dynamics/,
@@ -79,16 +79,17 @@ Default order (what actually runs):
 2. **QBE** — Quantum Balance: dI/dt = -dE/dt (PAC conservation)
 3. **Euler** — plain integration (Actualization is excluded; see above)
 4. **Memory** — Mass generation (bulk + gradient boundary seeding), de-actualization (PAC cycle completion), quantum pressure, diffusion
-6. **Gravity** — Self-gravity via spectral Poisson solver, xi_mod, cascade-depth tiling filter + pi-harmonic modulation
-9. **Fusion** — Nuclear fusion in dense, hot, gravity-compressed regions
-10. **Confluence** — Mobius antiperiodic projection f(u+pi,1-v) = -f(u,v)
-11. **Temperature** — Local T from |E-I| gradients
-12. **ThermalNoise** — Langevin noise
-13. **Normalization** — Soft-clamp E/I, cap M, Landauer reinjection
-15. **Adaptive** — Self-tuning damping and dt from energy growth
-16. **TimeEmergence** — dt = dt_base / (1 + kappa*max|E-I|)
+5. **Gravity** — Self-gravity via spectral Poisson solver, xi_mod, cascade-depth tiling filter + pi-harmonic modulation
+6. **Fusion** — Nuclear fusion in dense, hot, gravity-compressed regions
+7. **Confluence** — Mobius antiperiodic projection f(u+pi,1-v) = -f(u,v)
+8. **Temperature** — Local T from |E-I| gradients
+9. **ThermalNoise** — Langevin noise
+10. **Normalization** — Soft-clamp E/I, cap M, Landauer reinjection
+11. **Adaptive** — Self-tuning damping and dt from energy growth
+12. **TimeEmergence** — dt = dt_base / (1 + kappa*max|E-I|)
 
-Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
+All 12 above run by default. The six excluded operators are in the table further up,
+with `build_full_pipeline()` in `src/v3/engine/pipelines.py` to run them.
 
 ## Physics Scorecard
 
@@ -104,7 +105,11 @@ Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
 - **Gravity**: Spectral Poisson solver with cascade-depth tiling filter (DFT exp_36) + pi-harmonic modulation (spike 02). Entropy-coherence modulation xi_mod. Amplitude coupling nabla^2 Phi = sqrt(M).
 - **Mass generation**: Bulk (gamma_local * diseq^2) + boundary gradient seeding (gamma_local * |grad(diseq)|^2 / (1+M))
 - **De-actualization**: dM_deact = -eta * M * (1 - gamma_local), eta=0.025 (spike 04 optimal). Memory fades where disequilibrium resolves, completing PAC cycle.
-- **PAC conservation**: E + I + M = const enforced at machine precision (<1e-12)
+- **PAC conservation**: `E + I + M` held to <1e-12 by an explicit correction in
+  `NormalizationOperator` that fires on ~99.8% of ticks — it is ENFORCED, not
+  observed. Set `enforce_pac=False` to measure the unenforced dynamics. Note the
+  full ledger is `E + I + M + P`: `P` is the unactualized potential buffer (the
+  Delta term), inert under the default pipeline because Actualization is excluded.
 - **SEC metrics**: info_fraction = |I|/(|E|+|I|) (best duty cycle proxy, r=+0.954), log-time cascade depth with running NOW estimate
 - **Initialization**: `big_bang` (symmetric E~I), `entropy_dominated` (E>>I, DFT-correct), `info_dominated` (I>>E, fast convergence)
 - **DFT constants**: Xi = gamma_EM + ln(phi) = 1.05843, ln^2(2) = 0.4805, phi = golden ratio
@@ -114,7 +119,7 @@ Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
 - Physics must EMERGE, never be programmed — no hardcoded F=ma, E=mc^2, etc.
 - PAC conservation enforced at machine precision (< 1e-12)
 - Mobius manifold substrate with anti-periodic boundaries: f(x+pi) = -f(x)
-- Tests: `pytest` from repo root — `pytest.ini` now targets `tests/v3` (138 tests)
+- Tests: `pytest` from repo root — `pytest.ini` targets `tests/v3` (143 tests)
 - Installation: `pip install -r requirements.txt`
 - Run the engine: `python -m src.v3 --help`
 - Scorecard: `python scripts/physics_scorecard.py`
