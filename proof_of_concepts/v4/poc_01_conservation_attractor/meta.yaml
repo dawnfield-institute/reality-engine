@@ -7,7 +7,7 @@ description: >
   discretization error. The engine currently enforces conservation on 99.8% of ticks, so
   the pre-correction residual — median 8.5e-03, plateau ~1.29e-02 at 64x32 — has never
   been observed. Pre-registered with a kill sentence before any sweep was run.
-status: falsified
+status: superseded
 era: era4-milestone-stack-2026q2
 pillar: PAC
 hypothesis: >

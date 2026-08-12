@@ -8,7 +8,7 @@ description: >
   E<->I balance restores when displaced, using a ledger-preserving impulse (E += d, I -= d)
   so the result cannot be confounded with what POC-01 already settled. Durability is
   measured twice - does it return, and over how wide a parameter range.
-status: completed
+status: superseded
 era: era4-milestone-stack-2026q2
 pillar: PAC
 hypothesis: >

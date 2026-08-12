@@ -13,6 +13,26 @@ across all 18 trials. The engine has no conservation-as-attractor mechanism. See
 > the balance RBF and QBE govern, conflated local with global, and never operationalised
 > "attractor". Preserved in `journals/2026-08-11_kill-sentence-fired.md` with the reasons.
 
+
+> ## ⚠ SUPERSEDED BY PRIOR WORK — 2026-08-11
+>
+> **This POC tested the wrong model.** It was designed without reading the corpus.
+> See [`../RESEARCH.md`](../RESEARCH.md).
+>
+> - The ledger is **P + A + Δ = C**, not E + I + M. Δ is a bounded buffer of unreconciled
+>   actualization, cleared at reconciliation boundaries. Validated 5/5 in
+>   `dawn-field-theory/experiments/studies/asymmetric_conservation` (17 experiments).
+> - Conservation is **structural** — enforced at reconciliation boundaries — **not
+>   procedural**, per timestep. This POC tested the procedural form.
+> - Measurements ran 600–1000 ticks. `big_bang` is symmetric init, which converges at
+>   **tick 8450**. Everything here is transient.
+> - "Attractor" was operationalised as perturbation-recovery. The corpus standard is
+>   **path-independence** — different starts, one endpoint.
+>
+> Results are retained as lineage. The findings that survive are negative and structural:
+> the engine implements no Δ, no reconciliation, and no parent/child nodes, so the
+> validated model has never actually been run in it.
+
 ---
 
 ## The claim being tested

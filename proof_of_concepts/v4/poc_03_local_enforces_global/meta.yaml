@@ -9,7 +9,7 @@ description: >
   it into a falsifiable claim - if local enforcement produces global conservation, weaker
   local durability should accompany larger global drift across parameter space. Both
   quantities are taken from the same runs, global drift from the unperturbed reference twin.
-status: falsified
+status: superseded
 era: era4-milestone-stack-2026q2
 pillar: PAC
 hypothesis: >
