@@ -52,22 +52,67 @@ That is the boring explanation and it is the one this POC exists to exclude.
 
 ## Registered thresholds
 
-Plateau `P` is the median |residual| over the final 20% of ticks in a run with
+> ### Amendment 1 — 2026-08-11, before any run
+>
+> The original registration measured the plateau of the **per-tick residual**. That is the
+> wrong quantity and the criterion it carried was vacuous.
+>
+> Per-tick residual ≈ (dQ/dt)·dt. Halving `dt` halves it **whether the drift is physical or
+> numerical**, so the registered "falls by >40% per halving of dt" would have been
+> satisfied in both cases and could not discriminate. Corrected below to measure the
+> **rate**, which is the quantity that actually distinguishes them. Amended before the
+> sweep was written to disk and before any results exist.
+
+> ### Amendment 2 — 2026-08-11, before any run
+>
+> The default pipeline includes `ThermalNoise`, and the registration did not account for
+> it. Its amplitude is `√(2·T·dt)` — correct Langevin scaling — but that means a
+> noise-dominated residual behaves as `|residual| ~ √dt`, so
+> `rel_rate = |residual|/dt ~ dt^(−1/2)`, which **increases** under refinement. That is a
+> third signature, distinct from both registered outcomes, and it would have been
+> misread as "not converging, therefore interesting".
+>
+> Also: nothing in the engine is seeded, so runs are not reproducible and single runs
+> cannot be compared. A wiring check at `sim_time=0.1` gave plateaus of 1.95e-01,
+> 1.53e+00, 3.52e-01 across the three timesteps — scatter, not trend.
+>
+> **Primary sweep therefore runs deterministically (`noise_scale = 0`)**, which is the
+> configuration the registered physical/numerical criteria actually discriminate.
+> The stochastic case is characterised separately with repeats and reported as a
+> distinct result, not folded into the primary verdict.
+>
+> Added a third registered outcome for it: `rel_rate` rising as `dt^(−1/2)` under
+> refinement means the residual is noise-dominated and says nothing about conservation.
+
+The measured quantity is the **relative drift rate**, dimensionless and comparable across
+both grid and timestep:
+
+```
+rate      = |residual| / dt          absolute drift per unit simulated time
+rel_rate  = rate / |E + I + M|       fractional drift per unit simulated time
+```
+
+`P` is the median `rel_rate` over the final 20% of ticks of a run with
 `enforce_pac = False`.
+
+**Runs are compared at equal simulated time, not equal tick count** — tick budget is
+`T / dt`, so halving `dt` doubles the ticks. Comparing at equal ticks would compare
+different amounts of evolution.
 
 Refinement sweep: grid ∈ {32×16, 64×32, 128×64} × dt ∈ {1e-3, 5e-4, 2.5e-4}.
 
 | Outcome | Criterion | Reading |
 |---|---|---|
-| **Physical** | successive refinements change `P` by **< 10%** | converged to a finite non-zero limit |
-| **Numerical** | `P` falls by **> 40%** per halving of `dt`, consistent with `O(dt^p)`, `p > 0` | truncation error |
-| **Ambiguous** | anything between | not decisive; report as such, do not round toward the preferred answer |
+| **Physical** | `P` changes by **< 10%** across successive refinements in both `dt` and grid | converged to a finite non-zero limit |
+| **Numerical** | `P` falls **monotonically** with refinement, consistent with `O(dt^p)` / `O(h^q)`, `p,q > 0`, trending toward 0 | truncation error |
+| **Noise-dominated** | `P` **rises** under refinement, consistent with `dt^(−1/2)` | residual is thermal noise; says nothing about conservation |
+| **Ambiguous** | anything between, or the two axes disagreeing | not decisive; report as such, do not round toward the preferred answer |
 
 ## Kill sentence
 
-> **If `P` scales systematically toward zero as `dt → 0` and the grid refines, the
-> imbalance is discretization error, conservation is exact in the continuum, and the
-> attractor claim gets no support from this engine.**
+> **If the relative drift rate `P` scales systematically toward zero as `dt → 0` and the
+> grid refines, the imbalance is discretization error, conservation is exact in the
+> continuum, and the attractor claim gets no support from this engine.**
 
 This outcome is a real result and will be recorded as such. It would also mean the
 engine's conservation enforcement is masking a solver accuracy problem rather than a
