@@ -1,0 +1,30 @@
+schema_version: '2.1'
+directory_name: poc_02_balance_durability
+title: 'POC-02 (v4): How durable is balance?'
+description: >
+  POC-01 showed the global PAC ledger is neutrally conserved with no restoring mechanism.
+  A restoring term must reference a balance point, and the ledger has none - but Xi is one,
+  RBF is the Recursive Balance Field, and QBE drives dI/dt = -dE/dt. This tests whether the
+  E<->I balance restores when displaced, using a ledger-preserving impulse (E += d, I -= d)
+  so the result cannot be confounded with what POC-01 already settled. Durability is
+  measured twice - does it return, and over how wide a parameter range.
+status: active
+era: era4-milestone-stack-2026q2
+pillar: PAC
+hypothesis: >
+  A displaced E/I balance restores - recovery ratio R < 0.5 for at least one of
+  info_fraction, balance_magnitude, alpha_local_mean, lambda_local_mean.
+falsification: >
+  If every balance observable returns R >= 0.9, balance is not durable in this engine
+  either, and conservation-as-attractor has no support locally any more than globally.
+validation_type: computational
+tags:
+  - pac
+  - balance
+  - xi
+  - rbf
+  - qbe
+  - attractor
+  - durability
+  - pre-registered
+  - v4
