@@ -392,16 +392,21 @@ def build_pipeline():
 # ============================================================
 # Main
 # ============================================================
-def run_scorecard(total_ticks=10000, device=None):
+def run_scorecard(total_ticks=10000, device=None, enforce_pac=True):
     checkpoints = [500, 1000, 2000, 5000, total_ticks]
 
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    # enforce_pac=False disables the NormalizationOperator correction that forces
+    # E+I+M back to its initial value on ~99.8% of ticks. The Tier 2 "PAC conservation"
+    # metric grades that correction's residual, so it scores [A] regardless of what the
+    # dynamics do. Run with --no-enforce-pac to see which metrics depend on enforcement.
     config = SimulationConfig(
         nu=128, nv=64, dt=0.001, device=device,
         enable_actualization=True,
         actualization_threshold=0.05,
+        enforce_pac=enforce_pac,
     )
     torch.manual_seed(42)
     pipeline = build_pipeline()
@@ -423,7 +428,8 @@ def run_scorecard(total_ticks=10000, device=None):
 
     print(f"\n{'=' * 70}")
     print(f"  REALITY ENGINE PHYSICS SCORECARD")
-    print(f"  Device: {device} | Grid: {config.nu}x{config.nv} | dt={config.dt}")
+    print(f"  Device: {device} | Grid: {config.nu}x{config.nv} | dt={config.dt}"
+          f" | enforce_pac={config.enforce_pac}")
     print(f"{'=' * 70}")
     print(f"\n  Running {total_ticks} ticks...")
 
@@ -639,4 +645,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--ticks", type=int, default=10000)
+    ap.add_argument("--no-enforce-pac", action="store_true",
+                    help="disable the PAC correction; shows which metrics depend on it")
+    a = ap.parse_args()
+    run_scorecard(total_ticks=a.ticks, enforce_pac=not a.no_enforce_pac)

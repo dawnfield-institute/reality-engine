@@ -24,7 +24,7 @@ from typing import Callable, Iterable, Sequence
 
 import torch
 
-from src.v3.dashboard.server import build_default_pipeline
+from src.v3.engine.pipelines import build_canonical_pipeline
 from src.v3.engine.config import SimulationConfig
 from src.v3.engine.engine import Engine
 
@@ -35,10 +35,15 @@ UNSTABLE_MIN = 1.5
 
 
 def make_engine(seed: int, **cfg_kwargs) -> Engine:
-    """A fresh engine. Seeded, so two calls with the same seed are bit-identical."""
+    """A fresh engine on the CANONICAL 16-operator pipeline.
+
+    POC-01..03 used the dashboard's reduced 12, which has no ActualizationOperator
+    and therefore no live Delta buffer. Any durability result measured that way was
+    measuring reduced physics.
+    """
     torch.manual_seed(seed)
     cfg = SimulationConfig(**cfg_kwargs)
-    eng = Engine(config=cfg, pipeline=build_default_pipeline())
+    eng = Engine(config=cfg, pipeline=build_canonical_pipeline())
     eng.initialize(mode=cfg_kwargs.pop("mode", "big_bang"))
     return eng
 
