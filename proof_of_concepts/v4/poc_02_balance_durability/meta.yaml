@@ -8,7 +8,7 @@ description: >
   E<->I balance restores when displaced, using a ledger-preserving impulse (E += d, I -= d)
   so the result cannot be confounded with what POC-01 already settled. Durability is
   measured twice - does it return, and over how wide a parameter range.
-status: active
+status: completed
 era: era4-milestone-stack-2026q2
 pillar: PAC
 hypothesis: >
@@ -18,6 +18,16 @@ falsification: >
   If every balance observable returns R >= 0.9, balance is not durable in this engine
   either, and conservation-as-attractor has no support locally any more than globally.
 validation_type: computational
+result: >
+  Kill sentence did not fire. The E/I balance is durable: info_fraction recovers 97% of any
+  displacement (median R = 0.0281) in 18/18 parameter settings spanning x0.5 to x2 on four
+  parameters - a wide basin. gamma_local_mean is durable in 17/18. balance_magnitude, alpha
+  and lambda are not. The finding is the contrast with POC-01: the global ledger is neutral
+  (R = 1.000, no basin) while local balance strongly restores. That is the REVERSE of the
+  stated expectation that conservation is enforced as an attractor globally rather than
+  locally, and is recorded as measured. It would be reconciled if the engine's 'global' is
+  the framework's 'local' - a patch whose total is one term in a parent's sum - but this
+  experiment did not test a hierarchy and consistency is not evidence.
 tags:
   - pac
   - balance

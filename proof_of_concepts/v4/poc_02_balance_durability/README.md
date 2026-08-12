@@ -1,6 +1,8 @@
 # POC-02 (v4) — How durable is balance?
 
-**Status:** pre-registered · not yet run
+**Status:** COMPLETE — **balance is durable, and it is LOCAL.** info_fraction R = 0.028,
+durable in 18/18 parameter settings, against the global ledger's R = 1.000 in POC-01. See
+[`journals/2026-08-11_balance-is-durable.md`](journals/2026-08-11_balance-is-durable.md).
 **Registered:** 2026-08-11
 **Generation:** v4 proof-of-concept 2
 
