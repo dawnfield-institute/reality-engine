@@ -11,19 +11,21 @@ status: falsified
 era: era4-milestone-stack-2026q2
 pillar: PAC
 hypothesis: >
-  With enforcement disabled, the PAC residual saturates at a finite non-zero value that
-  persists under grid and timestep refinement.
+  With enforcement disabled, an impulse applied to the global PAC ledger decays - the
+  ledger returns toward the trajectory it would have followed unperturbed. (Registration
+  v2; v1 was withdrawn for presupposing a continuum ground truth DFT denies.)
 falsification: >
-  If the plateau scales systematically toward zero as dt -> 0 and the grid refines, the
-  imbalance is discretization error, conservation is exact in the continuum, and the
-  attractor claim gets no support from this engine.
+  If the displacement persists undiminished, or grows, the global ledger is not an
+  attractor - it is either neutrally conserved or unstable.
 validation_type: computational
 result: >
-  Kill sentence fired. Relative PAC drift rate falls monotonically under timestep
-  refinement on all three grids at order ~0.53, converging toward zero: the imbalance is
-  discretization error, not a physical attractor. Two secondary findings carry more
-  weight than the verdict - convergence order ~0.5 is poor and indicates the enforcement
-  was masking a solver accuracy problem, and the rate does NOT clearly converge in space.
+  NEUTRAL - kill sentence fired. Recovery ratio R = 1.000 across all 18 trials (3 configs
+  x 3 impulses x 2 seeds): a displaced ledger stays displaced, undiminished. The engine
+  conserves Q neutrally, like momentum in free space, and has no mechanism that would make
+  conservation an attractor - the only thing enforcing it is the explicit correction. This
+  is a statement about what the engine implements, NOT evidence against the DFT claim. The
+  registered invariant R held across a 4x range of impulse magnitude, both signs, two grids
+  and two timesteps.
 tags:
   - pac
   - conservation

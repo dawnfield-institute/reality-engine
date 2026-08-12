@@ -1,6 +1,8 @@
 # POC-01 (v4) — Is the global PAC ledger an attractor?
 
-**Status:** registration v2 · pre-registered, not yet run
+**Status:** COMPLETE — **NEUTRAL**. The ledger is conserved but non-restoring: R = 1.000
+across all 18 trials. The engine has no conservation-as-attractor mechanism. See
+[`journals/2026-08-11_ledger-is-neutral.md`](journals/2026-08-11_ledger-is-neutral.md).
 **Registered:** 2026-08-11
 **Generation:** v4 proof-of-concept 1
 

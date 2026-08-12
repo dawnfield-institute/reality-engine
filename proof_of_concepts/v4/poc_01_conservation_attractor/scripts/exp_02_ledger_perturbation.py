@@ -72,19 +72,19 @@ def run_trial(nu, nv, dt, seed, noise, settle, observe, impulse_frac) -> dict:
         ref.tick(); per.tick()
 
     # The two copies must be identical before the impulse, or the difference is meaningless.
-    pre_gap = abs(ledger(per) - ledger(ref))
-    q_settled = ledger(ref)
+    pre_gap = abs(ledger(per.state) - ledger(ref.state))
+    q_settled = ledger(ref.state)
 
     # Impulse: add a uniform increment to E across the perturbed copy only.
     delta = impulse_frac * abs(q_settled)
     st = per.state
     per.state = st.replace(E=st.E + delta / st.E.numel())
-    d0 = ledger(per) - ledger(ref)
+    d0 = ledger(per.state) - ledger(ref.state)
 
     disp, loc_ref, loc_per = [], [], []
     for _ in range(observe):
         ref.tick(); per.tick()
-        disp.append(ledger(per) - ledger(ref))
+        disp.append(ledger(per.state) - ledger(ref.state))
         loc_ref.append(local_balance(ref.state))
         loc_per.append(local_balance(per.state))
 
@@ -174,8 +174,8 @@ def main() -> int:
 
     print()
     print(f"  twin sanity — max pre-impulse gap: {max_pre_gap:.3e} (must be ~0)")
-    print(f"  R by config : { {k: round(v,3) for k,v in by_cfg.items()} }")
-    print(f"  R by impulse: { {k: round(v,3) for k,v in by_imp.items()} }")
+    print("  R by config :", {k: round(statistics.median(v), 4) for k, v in by_cfg.items()})
+    print("  R by impulse:", {k: round(statistics.median(v), 4) for k, v in by_imp.items()})
     print(f"  VERDICT: {verdict}")
     print(f"  wrote {out.relative_to(REPO).as_posix()}")
     return 0
