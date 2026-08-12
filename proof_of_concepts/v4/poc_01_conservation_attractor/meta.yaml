@@ -7,7 +7,7 @@ description: >
   discretization error. The engine currently enforces conservation on 99.8% of ticks, so
   the pre-correction residual — median 8.5e-03, plateau ~1.29e-02 at 64x32 — has never
   been observed. Pre-registered with a kill sentence before any sweep was run.
-status: active
+status: falsified
 era: era4-milestone-stack-2026q2
 pillar: PAC
 hypothesis: >
@@ -18,6 +18,12 @@ falsification: >
   imbalance is discretization error, conservation is exact in the continuum, and the
   attractor claim gets no support from this engine.
 validation_type: computational
+result: >
+  Kill sentence fired. Relative PAC drift rate falls monotonically under timestep
+  refinement on all three grids at order ~0.53, converging toward zero: the imbalance is
+  discretization error, not a physical attractor. Two secondary findings carry more
+  weight than the verdict - convergence order ~0.5 is poor and indicates the enforcement
+  was masking a solver accuracy problem, and the rate does NOT clearly converge in space.
 tags:
   - pac
   - conservation

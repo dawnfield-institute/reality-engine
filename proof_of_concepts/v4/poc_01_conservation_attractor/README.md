@@ -1,6 +1,8 @@
 # POC-01 (v4) — Is PAC conservation an attractor or an artifact?
 
-**Status:** pre-registered · not yet run
+**Status:** COMPLETE — **kill sentence fired**. Drift is discretization error;
+the attractor claim gets no support from this engine. See
+[`journals/2026-08-11_kill-sentence-fired.md`](journals/2026-08-11_kill-sentence-fired.md).
 **Registered:** 2026-08-11, before any sweep was executed
 **Generation:** v4 proof-of-concept 1
 

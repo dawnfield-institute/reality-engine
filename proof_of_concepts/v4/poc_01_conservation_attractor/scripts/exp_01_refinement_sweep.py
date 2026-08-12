@@ -57,18 +57,26 @@ def run_one(nu: int, nv: int, dt: float, enforce: bool, sim_time: float,
     eng = Engine(config=cfg, pipeline=build_default_pipeline())
     eng.initialize(mode="big_bang")
 
+    # Amendment 3: measure the INSTANTANEOUS rate from Q(t) directly.
+    #
+    # metrics["pac_correction"] cannot be used for this. With enforcement ON the
+    # correction resets the total every tick, so it holds a per-tick increment; with
+    # enforcement OFF nothing resets it, so it holds the CUMULATIVE deviation from
+    # Q(0). Dividing the cumulative form by dt inflates it as dt shrinks, which is a
+    # pure artifact of the definition. Tracking Q(t) and differencing gives the same
+    # meaning in both modes.
     rel_rates, totals = [], []
     t0 = time.time()
+    q_prev = None
     for _ in range(ticks):
         eng.tick()
         st = eng.state
-        residual = st.metrics.get("pac_correction")
-        if residual is None:
-            continue
         total = (st.E + st.I + st.M).sum().item()
         if abs(total) < 1e-12:
             continue
-        rel_rates.append(abs(residual) / dt / abs(total))
+        if q_prev is not None:
+            rel_rates.append(abs(total - q_prev) / dt / abs(total))
+        q_prev = total
         totals.append(total)
 
     tail = max(1, int(len(rel_rates) * TAIL_FRACTION))
@@ -120,7 +128,7 @@ def classify(runs: list[dict]) -> dict:
     elif all_mono and worst is not None and worst > 10.0:
         verdict = "NUMERICAL — plateau falls monotonically with refinement"
     elif all_rising:
-        verdict = "NOISE-DOMINATED — plateau rises under refinement (~dt^-1/2)"
+        verdict = "RISING under refinement — mechanism undetermined (noise-dominated if noise_scale>0)"
     else:
         verdict = "AMBIGUOUS — neither registered criterion met"
 
@@ -169,7 +177,7 @@ def main() -> int:
     out.write_text(json.dumps({
         "experiment": "poc_01_conservation_attractor / exp_01_refinement_sweep",
         "registered": "README.md (pre-registered 2026-08-11, Amendment 1 before any run)",
-        "measured": "median relative drift rate over final 20% of ticks, equal simulated time",
+        "measured": "median |dQ/dt|/|Q| over final 20% of ticks, equal simulated time (Amendment 3)",
         "noise_scale": args.noise, "repeats": args.repeats,
         "runs": runs, "control_with_enforcement": control, "analysis": analysis,
     }, indent=2), encoding="utf-8")
