@@ -147,6 +147,24 @@ def sweep(grid: dict[str, Sequence], base: dict | None = None) -> Iterable[dict]
         yield cfg
 
 
+def assert_params_live(names: Iterable[str], repo_root) -> dict[str, bool]:
+    """Check each parameter is actually read by an operator before sweeping it.
+
+    A dead config field silently inflates a robustness claim: varying it produces
+    bit-identical runs that look like independent confirmations. `mass_gen_coeff` is
+    declared in config.py and read by ZERO operators — memory.py computes
+    gamma_local = diseq2/total_field2 directly — and it was swept in POC-02 and POC-03
+    before anyone noticed the runs were duplicates.
+    """
+    import subprocess
+    live = {}
+    for n in names:
+        r = subprocess.run(["git", "grep", "-l", n, "--", "src/v3/operators"],
+                           cwd=repo_root, capture_output=True, text=True)
+        live[n] = bool(r.stdout.strip())
+    return live
+
+
 def one_at_a_time(base: dict, factors: dict[str, Sequence[float]]) -> Iterable[dict]:
     """Vary one parameter at a time from `base`, by multiplicative factors.
 

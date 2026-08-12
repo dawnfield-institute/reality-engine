@@ -1,16 +1,34 @@
 # 2026-08-11: Balance is durable — and it is *local*, not global
 
+## Correction — 2026-08-11, after POC-03
+
+**`mass_gen_coeff` is a dead config field.** It is declared in `config.py` and read by
+**zero** operators; `memory.py` computes `gamma_local = diseq²/total_field²` directly with
+no coefficient. Varying it produced bit-identical runs — confirmed in POC-03, where base,
+×0.5 and ×2.0 gave the same global drift to nine decimals at both seeds.
+
+So the sweep below covered **7 distinct settings, not 9**, and **14 distinct runs, not 18**.
+The two `mass_gen_coeff` settings are duplicates of base.
+
+The direction of the result is unchanged — `info_fraction` was durable in every distinct
+run — but the *breadth* claim is weaker than stated: the basin was shown wide across three
+live parameters, not four. Corrected rather than restated.
+
+The lesson is now in the harness: **audit that a swept parameter is actually read before
+sweeping it.** A dead parameter silently inflates a robustness claim, because duplicate
+runs look like independent confirmations.
+
 ## Result
 
 **Kill sentence did not fire.** Balance restores, robustly, across the whole swept range.
 
-18 runs: 9 parameter settings (base + 4 parameters × ×0.5/×2) × 2 seeds. Ledger-preserving
+18 runs, of which **14 distinct**: 7 live parameter settings (base + 3 live parameters × ×0.5/×2) × 2 seeds. See the correction above. Ledger-preserving
 impulse. Twin sanity exact — pre-impulse gap `0.000e+00`.
 
 | observable | median R | range | durable settings |
 |---|---|---|---|
-| **`info_fraction`** | **0.0281** | [0.0070, 0.1152] | **18/18 (100%)** |
-| **`gamma_local_mean`** | **0.0500** | [0.0152, 0.6556] | **17/18 (94%)** |
+| **`info_fraction`** | **0.0281** | [0.0070, 0.1152] | **14/14 distinct (100%)** |
+| **`gamma_local_mean`** | **0.0500** | [0.0152, 0.6556] | **13/14 distinct (93%)** |
 | `xi_s_mean` | 0.3246 | [0.0000, 5.4119] | 10/18 (56%) |
 | `balance_magnitude` | 0.7469 | [0.4950, 1.0530] | 1/18 (6%) |
 | `alpha_local_mean` | 0.8540 | [0.3480, 1.5771] | 2/18 (11%) |

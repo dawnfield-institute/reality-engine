@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import statistics
 import sys
 import time
 from datetime import datetime, timezone
@@ -28,17 +29,24 @@ sys.path.insert(0, str(REPO / "proof_of_concepts" / "v4"))
 from harness import durability, one_at_a_time  # noqa: E402
 
 BASE = {
-    "nu": 64, "nv": 32, "dt": 1e-3, "enforce_pac": False, "noise_scale": 0.0,
+    "nu": 32, "nv": 16, "dt": 1e-3, "enforce_pac": False, "noise_scale": 0.0,
     "quantum_pressure_coeff": 0.020,
     "deactualization_rate": 0.025,
-    "mass_gen_coeff": 0.63,
     "confluence_weight": 0.3,
+    "mass_diffusion_coeff": 0.0005,
+    "gamma_damping": 0.01,
 }
+
+# mass_gen_coeff is NOT swept: it is declared in config.py and read by ZERO operators.
+# memory.py computes gamma_local = diseq2/total_field2 directly, with no coefficient.
+# Varying it produced bit-identical runs — verified: base, x0.5 and x2.0 gave the same
+# drift to 9 decimals at both seeds. Swept parameters are audited as live before use.
 FACTORS = {
     "quantum_pressure_coeff": [0.5, 2.0],
     "deactualization_rate":   [0.5, 2.0],
-    "mass_gen_coeff":         [0.5, 2.0],
     "confluence_weight":      [0.5, 2.0],
+    "mass_diffusion_coeff":   [0.5, 2.0],
+    "gamma_damping":          [0.5, 2.0],
 }
 
 
@@ -93,10 +101,13 @@ def spearman(xs, ys):
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--settle", type=int, default=250)
-    ap.add_argument("--observe", type=int, default=600)
+    ap.add_argument("--settle", type=int, default=200)
+    ap.add_argument("--observe", type=int, default=400)
     ap.add_argument("--impulse", type=float, default=0.10)
-    ap.add_argument("--seeds", type=int, default=2)
+    # Seed dominates: the first run showed drift varying 36x by seed against ~40% by
+    # parameter. Pooling across few seeds produced a spurious rho of -0.43 that was
+    # entirely between-cluster. Default raised, and rho is reported WITHIN seed.
+    ap.add_argument("--seeds", type=int, default=6)
     args = ap.parse_args()
 
     rows, t0 = [], time.time()
@@ -128,7 +139,21 @@ def main() -> int:
 
     good = [r for r in rows if r["local_R"] == r["local_R"]
             and r["global_drift"] == r["global_drift"]]
-    rho, p = spearman([r["local_R"] for r in good], [r["global_drift"] for r in good])
+    rho_pooled, p_pooled = spearman([r["local_R"] for r in good],
+                                    [r["global_drift"] for r in good])
+
+    # WITHIN-SEED is the registered quantity. Seed changes global drift by ~36x while
+    # parameters change it by ~40%, so a pooled correlation measures which seed a point
+    # came from, not whether local durability predicts global conservation. Reporting the
+    # pooled value alone would have been Simpson's paradox.
+    per_seed = {}
+    for sd in sorted({r["seed"] for r in good}):
+        sub = [r for r in good if r["seed"] == sd]
+        if len(sub) >= 4:
+            rr, _ = spearman([r["local_R"] for r in sub], [r["global_drift"] for r in sub])
+            per_seed[sd] = rr
+    rho = statistics.median(per_seed.values()) if per_seed else float("nan")
+    p = float("nan")
 
     if rho > 0.6:
         verdict = f"SUPPORTED — local durability predicts global conservation (rho={rho:.3f})"
@@ -152,7 +177,10 @@ def main() -> int:
         "registered": "README.md (2026-08-11), pre-registered",
         "measured": "Spearman rho between local balance recovery ratio and global ledger "
                     "drift rate, from the same runs",
-        "n": len(good), "rho": rho, "p_value": p, "verdict": verdict,
+        "n": len(good), "rho_within_seed_median": rho, "rho_pooled": rho_pooled,
+        "rho_per_seed": per_seed, "p_value": p, "verdict": verdict,
+        "note": "within-seed rho is the registered quantity; pooled rho is reported only "
+                "to show the between-cluster artifact it produces",
         "confound_vigor_vs_global_drift": rho_vg,
         "confound_vigor_vs_local_R": rho_vl,
         "rows": rows,
@@ -160,7 +188,9 @@ def main() -> int:
     }, indent=2), encoding="utf-8")
 
     print()
-    print(f"  n = {len(good)}   Spearman rho = {rho:.4f}   p = {p:.4f}")
+    print(f"  n = {len(good)}   WITHIN-SEED median rho = {rho:+.4f}")
+    print(f"  per-seed rho: {[f'{v:+.3f}' for v in per_seed.values()]}")
+    print(f"  pooled rho (artifact, not registered) = {rho_pooled:+.4f}")
     print(f"  confound check — vigor vs global drift: rho={rho_vg:.3f}; "
           f"vigor vs local R: rho={rho_vl:.3f}")
     print(f"  VERDICT: {verdict}")
