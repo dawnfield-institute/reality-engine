@@ -1,0 +1,28 @@
+schema_version: '2.1'
+directory_name: poc_01_conservation_attractor
+title: 'POC-01 (v4): Is PAC conservation an attractor or an artifact?'
+description: >
+  Tests whether the PAC residual saturates at a finite non-zero value under grid and
+  timestep refinement once enforcement is disabled, or whether it scales toward zero as
+  discretization error. The engine currently enforces conservation on 99.8% of ticks, so
+  the pre-correction residual — median 8.5e-03, plateau ~1.29e-02 at 64x32 — has never
+  been observed. Pre-registered with a kill sentence before any sweep was run.
+status: active
+era: era4-milestone-stack-2026q2
+pillar: PAC
+hypothesis: >
+  With enforcement disabled, the PAC residual saturates at a finite non-zero value that
+  persists under grid and timestep refinement.
+falsification: >
+  If the plateau scales systematically toward zero as dt -> 0 and the grid refines, the
+  imbalance is discretization error, conservation is exact in the continuum, and the
+  attractor claim gets no support from this engine.
+validation_type: computational
+tags:
+  - pac
+  - conservation
+  - attractor
+  - noether
+  - rg-flow
+  - pre-registered
+  - v4
