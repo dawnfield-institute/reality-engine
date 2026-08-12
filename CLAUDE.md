@@ -48,23 +48,43 @@ archived generation (verified: 0 references).
 modules and 72 test references use `src.v3.*`. Promoting `v3` to the top level would mean
 rewriting all of them for no behavioural gain.
 
-## v3 Operator Pipeline (18 operators)
+## v3 Operator Pipeline
 
-Default order in Pipeline:
+**18 operators are implemented; the default pipeline runs 12.** Six are implemented but
+excluded — each is listed with its reason and measured effect in
+`src/v3/engine/pipelines.py` (`EXCLUDED`), and `tests/v3/test_pipeline_completeness.py`
+fails if any operator is implemented without being either included or explicitly excluded.
+
+This section previously documented a 16-operator default order that did not match the
+code. Nothing detected that, because nothing compared the described physics to the running
+physics.
+
+**Excluded by default** (all verified to run stably, 32x16 / 1500 ticks — none was omitted
+because it is broken):
+
+| operator | effect | note |
+|---|---|---|
+| `Actualization` | M_total +8.9% | REPLACES Euler. Makes `state.P` — the Delta buffer — live. Without it the engine has no Delta and cannot express `P + A + Delta = C`. |
+| `PhiCascade` | M_total +0.5% | phi-spaced mass levels |
+| `SpinStatistics` | M_total -6.4% | emergent Pauli exclusion |
+| `SECTracking` | none (read-only) | why `info_fraction` is absent from metrics |
+| `ChargeDynamics` | none measured | likely inert — no Q field in FieldState |
+| `UnifiedForce` | n/a | would double-count gravity |
+
+**Every engine result to date — the 7/13 scorecard, the theory_integration spikes — was
+produced without MAR actualization or the phi cascade.**
+
+Default order (what actually runs):
 1. **RBF** — Recursive Balance Field: dE/dt from laplacian, coupling terms
 2. **QBE** — Quantum Balance: dI/dt = -dE/dt (PAC conservation)
-3. **Actualization** — MAR-gated integration, ln(phi) split, pi/2 harmonic modulation
+3. **Euler** — plain integration (Actualization is excluded; see above)
 4. **Memory** — Mass generation (bulk + gradient boundary seeding), de-actualization (PAC cycle completion), quantum pressure, diffusion
-5. **PhiCascade** — Fibonacci two-step memory for phi-spaced mass levels
 6. **Gravity** — Self-gravity via spectral Poisson solver, xi_mod, cascade-depth tiling filter + pi-harmonic modulation
-7. **SpinStatistics** — Emergent Pauli exclusion from information cost
-8. **ChargeDynamics** — EM-like forces from charge field Q
 9. **Fusion** — Nuclear fusion in dense, hot, gravity-compressed regions
 10. **Confluence** — Mobius antiperiodic projection f(u+pi,1-v) = -f(u,v)
 11. **Temperature** — Local T from |E-I| gradients
 12. **ThermalNoise** — Langevin noise
 13. **Normalization** — Soft-clamp E/I, cap M, Landauer reinjection
-14. **SECTracking** — Read-only SEC energy functional, entropy, info fraction, cascade depth
 15. **Adaptive** — Self-tuning damping and dt from energy growth
 16. **TimeEmergence** — dt = dt_base / (1 + kappa*max|E-I|)
 

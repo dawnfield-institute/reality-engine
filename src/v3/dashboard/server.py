@@ -53,22 +53,11 @@ from src.v3.analyzers import (
 from src.v3.emergence import HerniationDetector, StructureAnalyzer
 
 
-def build_default_pipeline() -> Pipeline:
-    """Full physics pipeline with all operators."""
-    return Pipeline([
-        RBFOperator(),
-        QBEOperator(),
-        EulerIntegrator(),
-        MemoryOperator(),
-        GravitationalCollapseOperator(),   # self-gravity: mass attracts mass
-        FusionOperator(),                   # stellar nucleosynthesis: M+T → E+Z
-        ConfluenceOperator(),
-        TemperatureOperator(),
-        ThermalNoiseOperator(),
-        NormalizationOperator(),
-        AdaptiveOperator(),
-        TimeEmergenceOperator(),
-    ])
+# build_default_pipeline moved to src/v3/engine/pipelines.py — the canonical pipeline
+# should not be defined in a view module. Re-exported here so existing imports keep
+# working. See tests/v3/test_pipeline_completeness.py for the gate that keeps the
+# declared pipeline and the implemented operators in agreement.
+from ..engine.pipelines import build_default_pipeline, build_full_pipeline  # noqa: F401,E402
 
 
 class SimulationRunner:
