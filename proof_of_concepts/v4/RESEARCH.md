@@ -86,14 +86,46 @@ conditions dominate there; late-time they do not (>0.997 correlation). POC-01→
   shows 6.07× because cells must physically redistribute across the manifold. The excess
   is the SEC contribution on top of PAC.
 
-## 6. The gap: the engine implements none of it
+## 6. The gap: the mechanism is built but NOT WIRED IN
 
-`reality-engine/src/v3` contains **zero** references to Δ, reconciliation, or unreconciled
-state. `FieldState` is `E, I, M, T, Z`. There is no Δ buffer, no reconciliation boundary,
-and no parent/child node structure.
+**Corrected.** My first pass searched for the vocabulary (`delta`, `reconcile`,
+`unreconciled`), found zero hits, and concluded the engine implements none of the model.
+That was wrong — it exists under different names.
 
-**So the validated model has never been run in the engine.** Every "no mechanism found"
-result from POC-01→03 is explained by this: the mechanism was never built.
+`FieldState` carries **`P` — "potential buffer, unactualized field changes (MAR)"**. And
+`ActualizationOperator` accumulates `P = state.P + dt·dE_dt` ("the balance field's *desire*
+for E to change") and **actualizes when |P| crosses the MAR threshold**
+(`actualization_threshold = 0.05`). That is structurally a Δ buffer cleared at a threshold
+event — the reconciliation mechanism, in the engine, already.
+
+**But it does not run.** `build_default_pipeline()` uses `EulerIntegrator` instead, so
+`P` is all zeros at every tick — verified: 0 of 512 cells nonzero at t = 1, 100, 1000, 3000.
+
+**Six implemented operators are absent from the default pipeline:**
+
+| operator | what is lost |
+|---|---|
+| **`ActualizationOperator`** | the MAR gate — the Δ buffer and its reconciliation threshold |
+| **`PhiCascadeOperator`** | Fibonacci two-step memory, φ-spaced mass levels |
+| `SECTrackingOperator` | SEC energy functional, entropy, **`info_fraction`**, cascade depth |
+| `SpinStatisticsOperator` | emergent Pauli exclusion |
+| `ChargeDynamicsOperator` | EM-like forces |
+| `UnifiedForceOperator` | combined gravity + EM |
+
+`CLAUDE.md` documents a 16-operator default order including all of these. The actual
+default is **12 operators and an Euler integrator**. The documented physics is not the
+physics that runs.
+
+This also explains a workaround in POC-02: `info_fraction` was "missing from metrics" and
+I computed it from the fields instead of asking *why* it was missing. It was missing
+because `SECTrackingOperator` is not in the pipeline.
+
+**Consequence.** Every result the engine has produced — the scorecard's 7/13, the
+theory_integration spikes, POC-01→03 — was produced **without** MAR actualization or the
+φ-cascade. "No mechanism found" is unsurprising when the mechanisms are not wired in.
+
+Note also that `build_default_pipeline()` — the canonical definition of what the engine
+*is* — lives in `dashboard/server.py`, a UI module.
 
 ## 7. Genuinely open questions (these are the targets)
 
