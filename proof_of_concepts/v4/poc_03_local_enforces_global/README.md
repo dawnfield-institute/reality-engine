@@ -1,6 +1,8 @@
 # POC-03 (v4) — Does local enforcement produce global conservation?
 
-**Status:** pre-registered · not yet run
+**Status:** COMPLETE — **no relationship.** Within-seed ρ median −0.346 with inconsistent
+sign across seeds (+0.28 to −0.47). Kill sentence fired. See
+[`journals/2026-08-11_no-relationship.md`](journals/2026-08-11_no-relationship.md).
 **Registered:** 2026-08-11
 **Generation:** v4 proof-of-concept 3
 
