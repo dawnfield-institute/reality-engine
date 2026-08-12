@@ -1,5 +1,39 @@
 # 2026-08-11: The kill sentence fired — PAC drift is discretization error
 
+> ## ⚠ VERDICT WITHDRAWN — 2026-08-11, same day
+>
+> **The verdict below does not stand.** Kept in full as lineage; corrections layer forward.
+>
+> The refinement study presupposes that the continuum is the ground truth and the discrete
+> system approximates it. DFT denies exactly that: Ψ(k) = Ψ(k+1) + Ψ(k+2) is a recursion,
+> φ *comes from* the discreteness, and cascade depth is a count. Refining toward a
+> continuum moves away from the object. "Converges under refinement ⟹ artifact" is not a
+> valid inference in this framework.
+>
+> Consequently the spatial result was misgraded. Non-convergence in space was reported as
+> a defect, but **scale-dependence is DFT physics** — running couplings, RG flow. That may
+> have been signal.
+>
+> Two further errors of framing:
+> 1. **Wrong observable.** The scalar sum E+I+M was measured. RBF governs dE/dt, QBE
+>    enforces dI/dt = −dE/dt; the physics is in the *exchange* and its balance point Ξ.
+>    Neither RBF, QBE nor Ξ appears anywhere in the experiment.
+> 2. **Local/global conflation.** SEC is local; only the global PAC ledger balances. Local
+>    leaks are not defects and must not be graded as such. This design read local
+>    behaviour against a global claim.
+>
+> Also: "attractor" was never operationalised. An attractor is defined by its basin —
+> perturb the system and it returns. The experiment tested whether the ledger stays
+> *constant*, which is the property Peter's hypothesis explicitly denies it has.
+>
+> **What still stands, independent of ontology:** enforcement fires on 99.8% of ticks;
+> spike 9's "2.06e-14" measures the corrector rather than the dynamics; the drift magnitude
+> tracks dt, so the integrator contributes to it. What does *not* follow is "therefore not
+> physical".
+>
+> Superseded by exp_02 (ledger perturbation). See README.md registration v2.
+
+
 ## Summary
 
 **The registered kill sentence fired.** With enforcement disabled, the relative PAC drift

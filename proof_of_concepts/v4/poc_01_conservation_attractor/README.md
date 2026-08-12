@@ -1,163 +1,119 @@
-# POC-01 (v4) — Is PAC conservation an attractor or an artifact?
+# POC-01 (v4) — Is the global PAC ledger an attractor?
 
-**Status:** COMPLETE — **kill sentence fired**. Drift is discretization error;
-the attractor claim gets no support from this engine. See
-[`journals/2026-08-11_kill-sentence-fired.md`](journals/2026-08-11_kill-sentence-fired.md).
-**Registered:** 2026-08-11, before any sweep was executed
+**Status:** registration v2 · pre-registered, not yet run
+**Registered:** 2026-08-11
 **Generation:** v4 proof-of-concept 1
+
+> **Registration v1 is withdrawn.** It asked whether the residual survives grid/timestep
+> refinement. That test presupposes the continuum is ground truth and the discrete system
+> approximates it — which DFT denies: Ψ(k) = Ψ(k+1) + Ψ(k+2) is a recursion, φ comes from
+> the discreteness, cascade depth is a count. It also measured the scalar sum rather than
+> the balance RBF and QBE govern, conflated local with global, and never operationalised
+> "attractor". Preserved in `journals/2026-08-11_kill-sentence-fired.md` with the reasons.
 
 ---
 
-## Why
+## The claim being tested
 
-The engine measures **running couplings** — RG flow with init-independent beta functions,
-gravity running 1.3× at high-z. That is time-varying effective law. It *also* enforces
-exact PAC conservation on every tick. Those two things are in tension: by Noether, a
-conserved quantity exists because of a continuous symmetry, and energy conservation
-follows from time-translation invariance. If the laws change as time moves forward, that
-invariance is broken by construction and exact conservation does not follow. This is the
-ordinary situation in an expanding FRW spacetime, which has no global timelike Killing
-vector and therefore no globally conserved energy.
+> **Conservation is an attractor, not a constant.** (Peter, 2026-08-11)
 
-DFT's position (Peter, 2026-08-11) is that **conservation is an attractor, not a
-constant** — and that if our global is some parent's local, a persistent bounded imbalance
-is what should be observed from inside.
+And the structure that goes with it:
 
-The engine cannot currently see any of this. Measured on `main` at 64×32 over 400 ticks
-with the default pipeline:
+> **SEC is local; only the global PAC ledger balances.** Local leaks are not defects.
 
-```
-correction FIRED on 399/400 ticks (99.8%)
-pre-correction |residual|: median 8.50e-03, max 1.29e-02
-trigger threshold:         1.0e-08
-trajectory: ~1e-6 at t=0, rising, plateau at ~1.29e-02
-```
+## What "attractor" means operationally
 
-The correction is unconditional, so the residual is removed before it can be observed.
-Spike 9's recorded result — *"PAC conservation | PASS | max deviation 2.06e-14"* — is
-therefore measuring the residual left **after** enforcement, not conservation by the
-dynamics. That number describes the corrector, not the physics.
+An attractor is defined by its **basin**: displace the system and it returns. Not "stays
+constant" — that is the property the hypothesis explicitly denies. So the test is a
+**perturbation-recovery** test, which requires no assumption about continuum limits,
+convergence, or which discretization is "true".
 
-The drift is not machine epsilon (so conservation is not exact) and does not random-walk
-(so it is not noise). **It saturates.** This POC asks whether that saturation is real.
+**Perturb the global ledger. Measure whether it comes back.**
 
 ## Hypothesis
 
-**H1.** With enforcement disabled, the PAC residual saturates at a finite, non-zero value
-that **persists under grid and timestep refinement**.
-
-## The competing explanation this must rule out
-
-At 1.29e-02 in float64 the drift is far too large to be floating-point roundoff, but it is
-entirely consistent with **truncation error** from the Laplacian stencil and the timestep.
-That is the boring explanation and it is the one this POC exists to exclude.
-
-## Registered thresholds
-
-> ### Amendment 1 — 2026-08-11, before any run
->
-> The original registration measured the plateau of the **per-tick residual**. That is the
-> wrong quantity and the criterion it carried was vacuous.
->
-> Per-tick residual ≈ (dQ/dt)·dt. Halving `dt` halves it **whether the drift is physical or
-> numerical**, so the registered "falls by >40% per halving of dt" would have been
-> satisfied in both cases and could not discriminate. Corrected below to measure the
-> **rate**, which is the quantity that actually distinguishes them. Amended before the
-> sweep was written to disk and before any results exist.
-
-> ### Amendment 2 — 2026-08-11, before any run
->
-> The default pipeline includes `ThermalNoise`, and the registration did not account for
-> it. Its amplitude is `√(2·T·dt)` — correct Langevin scaling — but that means a
-> noise-dominated residual behaves as `|residual| ~ √dt`, so
-> `rel_rate = |residual|/dt ~ dt^(−1/2)`, which **increases** under refinement. That is a
-> third signature, distinct from both registered outcomes, and it would have been
-> misread as "not converging, therefore interesting".
->
-> Also: nothing in the engine is seeded, so runs are not reproducible and single runs
-> cannot be compared. A wiring check at `sim_time=0.1` gave plateaus of 1.95e-01,
-> 1.53e+00, 3.52e-01 across the three timesteps — scatter, not trend.
->
-> **Primary sweep therefore runs deterministically (`noise_scale = 0`)**, which is the
-> configuration the registered physical/numerical criteria actually discriminate.
-> The stochastic case is characterised separately with repeats and reported as a
-> distinct result, not folded into the primary verdict.
->
-> Added a third registered outcome for it: `rel_rate` rising as `dt^(−1/2)` under
-> refinement means the residual is noise-dominated and says nothing about conservation.
-
-The measured quantity is the **relative drift rate**, dimensionless and comparable across
-both grid and timestep:
-
-```
-rate      = |residual| / dt          absolute drift per unit simulated time
-rel_rate  = rate / |E + I + M|       fractional drift per unit simulated time
-```
-
-`P` is the median `rel_rate` over the final 20% of ticks of a run with
-`enforce_pac = False`.
-
-**Runs are compared at equal simulated time, not equal tick count** — tick budget is
-`T / dt`, so halving `dt` doubles the ticks. Comparing at equal ticks would compare
-different amounts of evolution.
-
-Refinement sweep: grid ∈ {32×16, 64×32, 128×64} × dt ∈ {1e-3, 5e-4, 2.5e-4}.
-
-| Outcome | Criterion | Reading |
-|---|---|---|
-| **Physical** | `P` changes by **< 10%** across successive refinements in both `dt` and grid | converged to a finite non-zero limit |
-| **Numerical** | `P` falls **monotonically** with refinement, consistent with `O(dt^p)` / `O(h^q)`, `p,q > 0`, trending toward 0 | truncation error |
-| **Noise-dominated** | `P` **rises** under refinement, consistent with `dt^(−1/2)` | residual is thermal noise; says nothing about conservation |
-| **Ambiguous** | anything between, or the two axes disagreeing | not decisive; report as such, do not round toward the preferred answer |
+**H1.** With enforcement disabled, an impulse applied to the global PAC ledger **decays** —
+the ledger returns toward the trajectory it would have followed unperturbed.
 
 ## Kill sentence
 
-> **If the relative drift rate `P` scales systematically toward zero as `dt → 0` and the
-> grid refines, the imbalance is discretization error, conservation is exact in the
-> continuum, and the attractor claim gets no support from this engine.**
+> **If the displacement persists undiminished, or grows, the global ledger is not an
+> attractor — it is either neutrally conserved or unstable, and "conservation is an
+> attractor" gets no support from this engine.**
 
-This outcome is a real result and will be recorded as such. It would also mean the
-engine's conservation enforcement is masking a solver accuracy problem rather than a
-physical effect, which is worth knowing on its own.
+Recorded as the result either way. Not retried, not retuned.
+
+## Design
+
+1. Run to a settled state with `enforce_pac = False`. No enforcement anywhere in this
+   experiment — the correction *is* the thing whose necessity is in question.
+2. Fork the state. One copy continues untouched (**reference**). The other receives a
+   single impulse `ΔQ` to the global ledger (**perturbed**).
+3. Both run on identically seeded dynamics.
+4. Measure `D(t) = Q_perturbed(t) − Q_reference(t)`, the displacement.
+
+Differencing against a twin removes the engine's own drift entirely — whatever the
+unperturbed dynamics do, both copies do it. **This is why the design needs no position on
+whether that drift is physical or numerical.** It was the unresolvable question in v1 and
+it is not on the critical path here.
+
+### Registered outcomes
+
+`D₀` is the displacement immediately after the impulse; `D_end` its median over the final
+20% of ticks. Recovery ratio `R = |D_end| / |D₀|`.
+
+| Outcome | Criterion | Reading |
+|---|---|---|
+| **Attractor** | `R < 0.5` | displacement decays; ledger restores |
+| **Neutral** | `0.9 ≤ R ≤ 1.1` | conserved but non-restoring — no basin |
+| **Unstable** | `R > 1.5` | displacement grows |
+| **Ambiguous** | anything else | report as such; do not round toward the hypothesis |
+
+Also recorded, not registered as criteria: the recovery timescale (fitted `D ~ exp(−t/τ)`
+where recovery occurs), and whether `R` depends on impulse sign or magnitude.
+
+## Local and global are measured separately, and not graded against each other
+
+Per the corpus rule, **local leaks are not defects.** Two distinct observables:
+
+- **Global** — the ledger `Q = Σ(E+I+M)`. This is where conservation-as-attractor is
+  claimed and where the criteria above apply.
+- **Local** — per-cell balance, and the `Ξ`-relevant E/I exchange RBF and QBE drive.
+  Recorded for context, **graded against nothing.** A local leak is expected behaviour.
+
+Reporting local deviation as error is the mistake v1 made. Whether the two views agree is
+itself a result — that is the perspective-dependence, and it is observed, not assumed.
+
+## Assumptions this design does **not** make
+
+Stated explicitly, because v1 failed by making them silently:
+
+- **No continuum limit.** Nothing is refined toward `dt → 0` or `h → 0`, and no
+  discretization is privileged as "true". Config is varied only to check the phenomenon
+  is not unique to one setting — reported as robustness, never as convergence.
+- **No claim that drift is error.** The twin-difference makes the engine's baseline drift
+  irrelevant to the measurement.
+- **No claim that scale-dependence is a defect.** Running couplings are DFT physics; if
+  `R` varies with resolution that is recorded as a finding, not a failure.
+- **No claim about intelligence, GAIA, observers, or parent universes.** A restoring
+  ledger would be *consistent* with the parent/sibling reading. It would not be evidence
+  for it.
 
 ## Registered invariant, not coordinates
 
-Per the corpus rule — *registered relations survive, registered coordinates die* — the
-registered quantity is **not** the number 1.29e-02, which will move with every config.
-
-**Registered:** the *ratio* of plateau value to the coupling-drift saturation timescale,
-which should be resolution-independent even if neither quantity is individually.
-
-Secondary and exploratory (not registered, because the estimator is not yet trusted):
-whether `P` shifts when the coupling approach is shifted.
-
-## What this does not claim
-
-- Nothing about intelligence, GAIA, or observers.
-- Nothing about parent/sibling universes. A persistent bounded imbalance would be
-  *consistent* with that reading; it would not be evidence for it. Other explanations
-  (an unmodelled sink, an operator that is not self-adjoint on this manifold) are not
-  excluded by this design.
-- No claim that the engine's dynamics are correct — only a measurement of what they do
-  when not corrected.
-
-## Method
-
-1. Add `enforce_pac: bool = True` to `SimulationConfig`. Default preserves current
-   behaviour exactly; the 138-test suite must stay green.
-2. `NormalizationOperator` skips the correction when it is `False`, and always records the
-   pre-correction residual (already implemented).
-3. Sweep grid × dt with enforcement off; record the full residual trajectory per run.
-4. Compute `P` per run; compare across refinements against the table above.
-5. Record the outcome against the kill sentence **as measured**, including "ambiguous".
+*Registered relations survive; registered coordinates die.* The registered quantity is the
+**recovery ratio `R`** — dimensionless, and independent of the impulse magnitude, the
+ledger's absolute value, and the config. Not `D₀`, not `Q`, not any drift rate.
 
 ## Files
 
 ```
 poc_01_conservation_attractor/
-├── README.md          this pre-registration
+├── README.md          this registration (v2)
 ├── meta.yaml
-├── scripts/           exp_01_refinement_sweep.py
-├── results/           exp_01_refinement_sweep_YYYYMMDD_HHMMSS.json
-└── journals/          dated findings
+├── scripts/
+│   ├── exp_01_refinement_sweep.py   v1, superseded — kept as lineage
+│   └── exp_02_ledger_perturbation.py
+├── results/
+└── journals/
 ```
