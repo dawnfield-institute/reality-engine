@@ -33,6 +33,7 @@ from ..operators.gravity import GravitationalCollapseOperator
 from ..operators.integrator import EulerIntegrator
 from ..operators.memory import MemoryOperator
 from ..operators.normalization import NormalizationOperator
+from ..operators.pac_balance import PACBalanceOperator
 from ..operators.phi_cascade import PhiCascadeOperator
 from ..operators.protocol import Pipeline
 from ..operators.qbe import QBEOperator
@@ -108,6 +109,14 @@ REDUCED_OMITS: dict[type, str] = {
 
 # Implemented but in neither variant.
 UNUSED: dict[type, str] = {
+    PACBalanceOperator:
+        "EXPERIMENTAL replacement for RBFOperator, from exp_30's ADE reconstruction: "
+        "B = lambda * P_anti[(E-I)/(1+alpha*|M|)]. Not in CANONICAL — it is under "
+        "evaluation, not adopted. Measured against RBF: spectral growth tilt 2.23x vs "
+        "9.09x (RBF's laplacian damps as k^2, piling power into the box mode), and mass "
+        "declines where RBF grows it. It does NOT produce spatial structure — correlation "
+        "length is 1.0 cell for both, i.e. neighbouring cells are uncorrelated. Adopting "
+        "it changes the spectrum, not the absence of structure.",
     UnifiedForceOperator:
         "Combined gravity + EM. Not in CANONICAL — including it alongside "
         "GravitationalCollapseOperator would double-count gravity. Used only by "
