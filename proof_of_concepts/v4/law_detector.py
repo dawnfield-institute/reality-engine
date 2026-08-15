@@ -21,6 +21,8 @@ labelled:
 
     ENFORCED     an operator explicitly maintains it — finding it proves nothing
     EMERGENT     nothing implements it, and it holds anyway — this is the interesting case
+    QUIESCENT    it holds, but the system has stopped evolving — a dead system conserves
+                 everything, so this certifies nothing
     ABSENT       expected and not found
 
 Written fresh rather than ported: `archive/` is read-only lineage, and a one-for-one port of
@@ -79,7 +81,8 @@ class Law:
     params: dict = _field(default_factory=dict)
 
     def __str__(self) -> str:
-        mark = {"EMERGENT": "*", "ENFORCED": "=", "ABSENT": " "}[self.verdict]
+        mark = {"EMERGENT": "*", "ENFORCED": "=", "ABSENT": " ",
+                "QUIESCENT": "~"}[self.verdict]
         return (f"  {mark} {self.name:<26} {self.kind:<14} {self.verdict:<9} "
                 f"{self.statistic:>10.4g}  {self.detail}")
 
@@ -89,7 +92,10 @@ class Law:
 # ======================================================================================
 
 def conservation_scan(history: dict[str, list[float]], tol: float = 1e-3,
-                      scales: dict[str, float] | None = None) -> list[Law]:
+                      scales: dict[str, float] | None = None,
+                      enforced: set[str] | None = None,
+                      activity: list[float] | None = None,
+                      min_activity: float = 0.05) -> list[Law]:
     """Which tracked quantities hold steady?
 
     Reports variation over the second half of the run — the second half, because the first
@@ -104,6 +110,35 @@ def conservation_scan(history: dict[str, list[float]], tol: float = 1e-3,
     laws that hold most exactly.
     """
     scales = scales or {}
+    # `enforced` is the set of laws an operator ACTUALLY maintained in THIS run. Pass it
+    # whenever the pipeline varies. Falling back to the static ENFORCED_BY_CONSTRUCTION table
+    # is a name lookup, and a name lookup gets the ablation ladder wrong: with the PAC
+    # correction disabled and no MemoryOperator to create mass, E+I+M is conserved BY
+    # CONSTRUCTION (QBE sets dI = -dE and Actualization moves E<->I conservatively). That is
+    # emergent, not enforced, and the static table cannot tell the difference — which is
+    # exactly the distinction this module exists to draw.
+    enforced_now = ENFORCED_BY_CONSTRUCTION.keys() if enforced is None else enforced
+
+    # LIVENESS GATE. A dead system conserves everything, so a conservation law found in a
+    # system that has stopped evolving is meaningless. Measured directly: the v3 core-only
+    # pipeline (RBF + QBE + Actualization + Normalization) drops from 66 actualization events
+    # per tick to 7 on a 4096-cell grid by t=3000, and at that point E*I and E^2+I^2 both read
+    # as conserved. They are not invariants; they are a field coasting to a fixed point.
+    #
+    # `activity` is any per-tick measure of how much is still happening. The gate compares the
+    # second half of the run (the window conservation is measured over) against the first, and
+    # refuses to certify anything when activity has collapsed below `min_activity` of its
+    # early value. Verdict QUIESCENT, not EMERGENT — the distinction the ablation ladder
+    # needed and did not have.
+    quiescent = False
+    activity_ratio = float("nan")
+    if activity is not None and len(activity) >= 8:
+        a = np.asarray(activity, float)
+        early, late = a[: len(a) // 2], a[len(a) // 2:]
+        if np.isfinite(early).all() and np.isfinite(late).all() and abs(early.mean()) > 1e-30:
+            activity_ratio = float(late.mean() / early.mean())
+            quiescent = activity_ratio < min_activity
+
     out = []
     for name, series in history.items():
         v = np.asarray(series, float)
@@ -113,11 +148,16 @@ def conservation_scan(history: dict[str, list[float]], tol: float = 1e-3,
             continue
         denom = abs(scales.get(name, v.mean()))
         cv = float(v.std() / denom) if denom > 1e-30 else float("inf")
-        if cv < tol:
-            enforced = name in ENFORCED_BY_CONSTRUCTION
+        if cv < tol and quiescent:
+            out.append(Law(name, "conservation", "QUIESCENT", cv,
+                           f"system stopped evolving (activity ratio {activity_ratio:.3g}) "
+                           f"- a dead system conserves everything"))
+        elif cv < tol:
+            is_enf = name in enforced_now
             out.append(Law(
-                name, "conservation", "ENFORCED" if enforced else "EMERGENT", cv,
-                ENFORCED_BY_CONSTRUCTION.get(name, "conserved, nothing implements it")))
+                name, "conservation", "ENFORCED" if is_enf else "EMERGENT", cv,
+                ENFORCED_BY_CONSTRUCTION.get(name, "conserved, nothing implements it")
+                if is_enf else "conserved, nothing implements it"))
         else:
             out.append(Law(name, "conservation", "ABSENT", cv, "drifts"))
     return out
@@ -301,7 +341,19 @@ def selftest() -> bool:
     print(f"    second law  slope {slope:+.3e}  violations {viol:.1%}  "
           f"{'OK' if good else 'FAIL'}")
 
-    # 5. The enforced/emergent split must actually fire.
+    # 5. The liveness gate must refuse a dead system.
+    dead = {"anything": [1.0] * 60}
+    decaying = list(np.exp(-np.arange(60) / 6.0))          # activity collapses
+    q = conservation_scan(dead, tol=1e-3, activity=decaying)[0]
+    good = q.verdict == "QUIESCENT"
+    ok &= good
+    print(f"    liveness    dead system -> {q.verdict}  {'OK' if good else 'FAIL'}")
+    alive = conservation_scan(dead, tol=1e-3, activity=[1.0] * 60)[0]
+    good = alive.verdict == "EMERGENT"
+    ok &= good
+    print(f"    liveness    live system -> {alive.verdict}  {'OK' if good else 'FAIL'}")
+
+    # 6. The enforced/emergent split must actually fire.
     tagged = conservation_scan({"E+I+M": [1.0] * 50}, tol=1e-3)[0]
     good = tagged.verdict == "ENFORCED"
     ok &= good

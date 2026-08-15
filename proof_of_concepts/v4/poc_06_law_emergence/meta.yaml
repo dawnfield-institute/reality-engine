@@ -48,6 +48,34 @@ result: >
   framework, and the corpus itself demonstrates law emergence working elsewhere: Dynkin topology
   alone fixes the turbulence cascade exponent to 0.26% of Kolmogorov with nothing tuned (PR
   #171), and M15 exp_06 derives the momentum operator rather than declaring it.
+result_exp_02: >
+  ABLATION LADDER IS FLAT. Stripping the pipeline from 16 operators to 4 does not change the
+  emergent-law count: zero at every rung where the system is still evolving. The operators are
+  not suppressing emergence, and the axioms as implemented do not generate laws at any depth.
+
+  The first pass appeared to show emergence RISING on ablation - 0 at 16 operators, 2 at the
+  core, 3 with PAC enforcement off - which would have inverted the engine's development
+  history. It is QUIESCENCE. The core-only pipeline decays from 66 actualization events per
+  tick to 7 on a 4096-cell grid, mean|E-E0| plateaus, and sum(E*I) still drifts 1.8e-3 over the
+  last 2500 ticks, right at the tolerance. A dead system conserves everything. Late
+  actualizing fraction is 0.00273 against 0.05-0.15 at every other rung - 20 to 55x less
+  active - which makes the reading unambiguous without any chosen threshold.
+
+  Separately: the NO-normalization rung DIVERGES at t=69. The clamps are load-bearing for
+  stability even though the PAC correction is not what does the conserving in a minimal
+  pipeline. Two separable jobs in one operator.
+
+  Two detector faults were exposed and fixed. Enforcement was a static NAME LOOKUP, so E+I+M
+  read as ENFORCED even with the correction disabled, where PAC actually holds by construction
+  from QBE's dI = -dE; it is now decided per run from what is in the pipeline. And the
+  divergence check only watched M, letting a non-finite ledger through as nan when E blew up.
+  Both would have made every rung look identical - the right answer for the wrong reason.
+
+  A LIVENESS GATE was added to conservation_scan: pass a per-tick activity series and it
+  returns QUIESCENT rather than EMERGENT when activity collapses. Selftested both directions.
+  Its 5% threshold did NOT fire on the core rungs (14%), and was deliberately left alone rather
+  than raised until the verdict flipped - tuning to fail is the same fault as tuning to pass.
+
 notes: >
   RETRACTED IN PART by POC-07: the force arm of this verdict is an instrument limit, not a
   finding. fit_force_law recovers r^-2, r^-3 and r^-1 exactly (R2 = 1.0000) from a clean

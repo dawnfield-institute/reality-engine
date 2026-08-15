@@ -1,0 +1,100 @@
+{
+  "ticks": 200,
+  "grid": [
+    32,
+    32
+  ],
+  "seeds": [
+    42
+  ],
+  "rungs": [
+    {
+      "rung": "16 canonical",
+      "n_ops": 16,
+      "emergent": [],
+      "n_enforced": 1,
+      "pac_cv": 1.0405640885662439e-15,
+      "entropy_slope": 0.0014040599199672305,
+      "seeds": [
+        42
+      ]
+    },
+    {
+      "rung": "12 no deep physics",
+      "n_ops": 12,
+      "emergent": [],
+      "n_enforced": 1,
+      "pac_cv": 9.869922360709647e-16,
+      "entropy_slope": 0.0013910741282173432,
+      "seeds": [
+        42
+      ]
+    },
+    {
+      "rung": "8 no forces/thermal",
+      "n_ops": 8,
+      "emergent": [],
+      "n_enforced": 1,
+      "pac_cv": 7.522444022014098e-16,
+      "entropy_slope": 0.0013910149226077535,
+      "seeds": [
+        42
+      ]
+    },
+    {
+      "rung": "6 core + memory + confluence",
+      "n_ops": 7,
+      "emergent": [],
+      "n_enforced": 1,
+      "pac_cv": 2.323782075595154e-15,
+      "entropy_slope": 0.0017710240480189893,
+      "seeds": [
+        42
+      ]
+    },
+    {
+      "rung": "5 core + memory",
+      "n_ops": 6,
+      "emergent": [],
+      "n_enforced": 1,
+      "pac_cv": 2.0275683186332394e-16,
+      "entropy_slope": 0.00013137955567439245,
+      "seeds": [
+        42
+      ]
+    },
+    {
+      "rung": "4 core only",
+      "n_ops": 5,
+      "emergent": [],
+      "n_enforced": 1,
+      "pac_cv": 2.0424224975721413e-16,
+      "entropy_slope": -0.0005419670473895271,
+      "seeds": [
+        42
+      ]
+    },
+    {
+      "rung": "4 core, enforce_pac off",
+      "n_ops": 5,
+      "emergent": [],
+      "n_enforced": 1,
+      "pac_cv": 2.0424224975721413e-16,
+      "entropy_slope": -0.0005419670473895271,
+      "seeds": [
+        42
+      ]
+    },
+    {
+      "rung": "3 NO normalization",
+      "n_ops": 4,
+      "emergent": [],
+      "n_enforced": 0,
+      "pac_cv": NaN,
+      "entropy_slope": NaN,
+      "seeds": [
+        42
+      ]
+    }
+  ]
+}
