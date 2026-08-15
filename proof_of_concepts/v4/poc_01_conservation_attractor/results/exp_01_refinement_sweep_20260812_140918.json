@@ -1,0 +1,243 @@
+{
+  "experiment": "poc_01_conservation_attractor / exp_01_refinement_sweep",
+  "registered": "README.md (pre-registered 2026-08-11, Amendment 1 before any run)",
+  "measured": "median |dQ/dt|/|Q| over final 20% of ticks, equal simulated time (Amendment 3)",
+  "noise_scale": 0.0,
+  "repeats": 1,
+  "runs": [
+    {
+      "nu": 32,
+      "nv": 16,
+      "dt": 0.001,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 400,
+      "sim_time": 0.4,
+      "cells": 512,
+      "plateau_rel_rate": 0.01703444075189489,
+      "rel_rate_first": 4.0858505014338605e-06,
+      "rel_rate_last": 0.017444959883348366,
+      "total_initial": 181.96953045568455,
+      "total_final": 182.69158042787586,
+      "wall_seconds": 2.22,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    },
+    {
+      "nu": 32,
+      "nv": 16,
+      "dt": 0.0005,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 800,
+      "sim_time": 0.4,
+      "cells": 512,
+      "plateau_rel_rate": 0.012655368933423368,
+      "rel_rate_first": 1.0441629171394061e-06,
+      "rel_rate_last": 0.013143964218905181,
+      "total_initial": 181.9695298942581,
+      "total_final": 182.47109160136,
+      "wall_seconds": 4.27,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    },
+    {
+      "nu": 32,
+      "nv": 16,
+      "dt": 0.00025,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 1600,
+      "sim_time": 0.4,
+      "cells": 512,
+      "plateau_rel_rate": 0.008206622542833105,
+      "rel_rate_first": 2.2929976566443047e-07,
+      "rel_rate_last": 0.008722687976291733,
+      "total_initial": 181.96952986737153,
+      "total_final": 182.30099311204347,
+      "wall_seconds": 8.36,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    },
+    {
+      "nu": 64,
+      "nv": 32,
+      "dt": 0.001,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 400,
+      "sim_time": 0.4,
+      "cells": 2048,
+      "plateau_rel_rate": 0.0422017222059224,
+      "rel_rate_first": 1.785011095505301e-05,
+      "rel_rate_last": 0.04431586753756618,
+      "total_initial": 277.1190789661904,
+      "total_final": 280.03512047531206,
+      "wall_seconds": 2.23,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    },
+    {
+      "nu": 64,
+      "nv": 32,
+      "dt": 0.0005,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 800,
+      "sim_time": 0.4,
+      "cells": 2048,
+      "plateau_rel_rate": 0.029408378966715783,
+      "rel_rate_first": 3.8234743931231235e-06,
+      "rel_rate_last": 0.030987851722430244,
+      "total_initial": 277.11907511837194,
+      "total_final": 279.0572502286183,
+      "wall_seconds": 4.44,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    },
+    {
+      "nu": 64,
+      "nv": 32,
+      "dt": 0.00025,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 1600,
+      "sim_time": 0.4,
+      "cells": 2048,
+      "plateau_rel_rate": 0.020433193599976886,
+      "rel_rate_first": 1.0556025497479802e-06,
+      "rel_rate_last": 0.02196919130935659,
+      "total_initial": 277.11907491520503,
+      "total_final": 278.3794185419652,
+      "wall_seconds": 8.98,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    },
+    {
+      "nu": 128,
+      "nv": 64,
+      "dt": 0.001,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 400,
+      "sim_time": 0.4,
+      "cells": 8192,
+      "plateau_rel_rate": 0.049708121854720975,
+      "rel_rate_first": 8.341502432108612e-06,
+      "rel_rate_last": 0.051787001672520046,
+      "total_initial": 982.4819293559168,
+      "total_final": 994.2284943541474,
+      "wall_seconds": 2.38,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    },
+    {
+      "nu": 128,
+      "nv": 64,
+      "dt": 0.0005,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 800,
+      "sim_time": 0.4,
+      "cells": 8192,
+      "plateau_rel_rate": 0.03454493650165909,
+      "rel_rate_first": 2.187116275657977e-06,
+      "rel_rate_last": 0.03748233393198082,
+      "total_initial": 982.4819179938607,
+      "total_final": 990.3739921458382,
+      "wall_seconds": 4.54,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    },
+    {
+      "nu": 128,
+      "nv": 64,
+      "dt": 0.00025,
+      "enforce_pac": false,
+      "noise_scale": 0.0,
+      "seed": 1000,
+      "ticks": 1600,
+      "sim_time": 0.4,
+      "cells": 8192,
+      "plateau_rel_rate": 0.0229089612289846,
+      "rel_rate_first": 6.83577690428903e-07,
+      "rel_rate_last": 0.024676384102287847,
+      "total_initial": 982.4819174065344,
+      "total_final": 987.5025501175787,
+      "wall_seconds": 8.92,
+      "repeats": 1,
+      "plateau_spread": 0.0
+    }
+  ],
+  "control_with_enforcement": {
+    "nu": 32,
+    "nv": 16,
+    "dt": 0.001,
+    "enforce_pac": true,
+    "noise_scale": 0.0,
+    "seed": 1000,
+    "ticks": 400,
+    "sim_time": 0.4,
+    "cells": 512,
+    "plateau_rel_rate": 3.1237877417423583e-13,
+    "rel_rate_first": 4.68568161261354e-13,
+    "rel_rate_last": 1.5618938708711794e-13,
+    "total_initial": 181.96953045568455,
+    "total_final": 181.96953045568452,
+    "wall_seconds": 2.13
+  },
+  "analysis": {
+    "dt_trends": {
+      "32x16": {
+        "plateaus_coarse_to_fine": [
+          0.01703444075189489,
+          0.012655368933423368,
+          0.008206622542833105
+        ],
+        "successive_ratios": [
+          0.7429283483824146,
+          0.6484696405143169
+        ],
+        "max_abs_change_pct": 35.15303594856831,
+        "monotonic_decreasing": true
+      },
+      "64x32": {
+        "plateaus_coarse_to_fine": [
+          0.0422017222059224,
+          0.029408378966715783,
+          0.020433193599976886
+        ],
+        "successive_ratios": [
+          0.6968525792198296,
+          0.6948085653786985
+        ],
+        "max_abs_change_pct": 30.51914346213015,
+        "monotonic_decreasing": true
+      },
+      "128x64": {
+        "plateaus_coarse_to_fine": [
+          0.049708121854720975,
+          0.03454493650165909,
+          0.0229089612289846
+        ],
+        "successive_ratios": [
+          0.6949555769300951,
+          0.6631640856507104
+        ],
+        "max_abs_change_pct": 33.683591434928964,
+        "monotonic_decreasing": true
+      }
+    },
+    "worst_change_pct": 35.15303594856831,
+    "monotonic_across_all_grids": true,
+    "verdict": "NUMERICAL \u2014 plateau falls monotonically with refinement"
+  }
+}

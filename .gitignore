@@ -37,6 +37,23 @@ ENV/
 # Output and results
 output/
 results/
+# ...except the v4 POC results, which are evidence rather than output.
+#
+# The blanket `results/` ignore above meant ZERO results files were tracked anywhere in this
+# repo — POC-01, 02 and 03 all shipped scripts and journals with no data behind them, and
+# POC-04 and POC-05 ended up journals-only. That is how the numbers founding Milestone 16
+# came to have no committed code: correlation length 1.00, spectral tilt 9.09x, a preferred
+# wavelength of 10.5 cells, all quoted in prose, none reproducible, one of them wrong.
+#
+# The experiment standard requires results/ (STANDARDS.md section 2). These are small — the
+# panel JSON is 10KB, the renders 25-160KB — and the renders in particular are load-bearing:
+# they are what caught the broken box-counting estimator and the checkerboard false positive.
+# A claim whose supporting frame is not in the repo is a claim nobody can check.
+#
+# Order matters: git will not descend into an excluded directory, so the directory itself has
+# to be re-included before anything in it can be.
+!proof_of_concepts/v4/*/results/
+!proof_of_concepts/v4/*/results/**
 temp_output.txt
 *.log
 *.jsonl

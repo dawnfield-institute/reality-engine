@@ -1,0 +1,320 @@
+{
+  "grid": [
+    128,
+    32
+  ],
+  "ticks": 3000,
+  "white_noise_reference": {
+    "xi_u": 0.6283440231769032,
+    "xi_v": 0.6016786819907908,
+    "coherent_fraction": 0.07673332193195241,
+    "D_box": 0.4791904553991331,
+    "contrast": 0.03466554211479566,
+    "void": 0.053466796875,
+    "filament": 0.107421875,
+    "cv": 0.7406213675991897,
+    "is_web": false
+  },
+  "rows": [
+    {
+      "name": "baseline RBF",
+      "init": "big_bang",
+      "balance": "rbf",
+      "gravity": true,
+      "seed": 42,
+      "diverged_at": null,
+      "wall_s": 43.5,
+      "snaps": {
+        "t300": {
+          "xi_u": 0.6826775931821293,
+          "xi_v": 0.6497520866529742,
+          "coherent_fraction": 0.08812231908592894,
+          "D_box": 0.5287141400245357,
+          "contrast": 0.020351708514564058,
+          "void": 0.132568359375,
+          "filament": 0.005859375,
+          "cv": 0.5591021189412705,
+          "is_web": false
+        },
+        "t3000": {
+          "xi_u": 0.644539050004165,
+          "xi_v": 0.6336229625976283,
+          "coherent_fraction": 0.09187549723079813,
+          "D_box": 0.9017603910779699,
+          "contrast": 0.02504857341301047,
+          "void": 0.263916015625,
+          "filament": 0.186279296875,
+          "cv": 0.8251415959302821,
+          "is_web": false
+        }
+      },
+      "spectral_tilt": 0.8782615514076743,
+      "growth_peak_lambda": 25.6,
+      "growth_peak_ratio": 4.8870884612473535,
+      "power_peak_lambda": 7.529411764705882
+    },
+    {
+      "name": "PAC balance",
+      "init": "big_bang",
+      "balance": "pac",
+      "gravity": true,
+      "seed": 42,
+      "diverged_at": null,
+      "wall_s": 38.4,
+      "snaps": {
+        "t300": {
+          "xi_u": 0.6733633777576451,
+          "xi_v": 0.6397173518567696,
+          "coherent_fraction": 0.08358647242232037,
+          "D_box": 0.5548122455872502,
+          "contrast": 0.01879490996812714,
+          "void": 0.131103515625,
+          "filament": 0.00146484375,
+          "cv": 0.5445816303177099,
+          "is_web": false
+        },
+        "t3000": {
+          "xi_u": 0.6894847467760246,
+          "xi_v": 0.69856879132721,
+          "coherent_fraction": 0.09658171312395893,
+          "D_box": 0.8790913373103373,
+          "contrast": 0.022480217794387525,
+          "void": 0.24072265625,
+          "filament": 0.02880859375,
+          "cv": 0.6612511162233571,
+          "is_web": false
+        }
+      },
+      "spectral_tilt": 1.1537286389967718,
+      "growth_peak_lambda": 3.657142857142857,
+      "growth_peak_ratio": 1.6565061345611665,
+      "power_peak_lambda": 7.529411764705882
+    },
+    {
+      "name": "RBF, no gravity",
+      "init": "big_bang",
+      "balance": "rbf",
+      "gravity": false,
+      "seed": 42,
+      "diverged_at": null,
+      "wall_s": 38.8,
+      "snaps": {
+        "t300": {
+          "xi_u": 0.6833215921606263,
+          "xi_v": 0.648946415346745,
+          "coherent_fraction": 0.0882943212051785,
+          "D_box": 0.5287141400245361,
+          "contrast": 0.020341563494502328,
+          "void": 0.132080078125,
+          "filament": 0.005859375,
+          "cv": 0.5584640182854559,
+          "is_web": false
+        },
+        "t3000": {
+          "xi_u": 0.6493165972828903,
+          "xi_v": 0.6224412791955055,
+          "coherent_fraction": 0.09179225828749724,
+          "D_box": 0.9089144136642819,
+          "contrast": 0.02525794868742858,
+          "void": 0.25830078125,
+          "filament": 0.18359375,
+          "cv": 0.8243988497542831,
+          "is_web": false
+        }
+      },
+      "spectral_tilt": 0.8332462356131491,
+      "growth_peak_lambda": 25.6,
+      "growth_peak_ratio": 4.979860104441892,
+      "power_peak_lambda": 7.529411764705882
+    },
+    {
+      "name": "PAC, no gravity",
+      "init": "big_bang",
+      "balance": "pac",
+      "gravity": false,
+      "seed": 42,
+      "diverged_at": null,
+      "wall_s": 34.7,
+      "snaps": {
+        "t300": {
+          "xi_u": 0.6741051565249405,
+          "xi_v": 0.6388855194579187,
+          "coherent_fraction": 0.08376420607049737,
+          "D_box": 0.5510256357348503,
+          "contrast": 0.018782056960431233,
+          "void": 0.130859375,
+          "filament": 0.00146484375,
+          "cv": 0.5439003952277265,
+          "is_web": false
+        },
+        "t3000": {
+          "xi_u": 0.7047329365882197,
+          "xi_v": 0.6780097641596808,
+          "coherent_fraction": 0.10009095806242999,
+          "D_box": 0.8753623996869998,
+          "contrast": 0.022526791257989558,
+          "void": 0.2353515625,
+          "filament": 0.02685546875,
+          "cv": 0.6522968500625184,
+          "is_web": false
+        }
+      },
+      "spectral_tilt": 1.2094038293248561,
+      "growth_peak_lambda": 64.0,
+      "growth_peak_ratio": 1.5047293828879598,
+      "power_peak_lambda": 7.529411764705882
+    },
+    {
+      "name": "RBF, qp=0.0",
+      "init": "big_bang",
+      "balance": "rbf",
+      "gravity": true,
+      "seed": 42,
+      "diverged_at": null,
+      "wall_s": 42.6,
+      "snaps": {
+        "t300": {
+          "xi_u": 0.7131904776385825,
+          "xi_v": 0.67632641678637,
+          "coherent_fraction": 0.10508464919106111,
+          "D_box": 0.528714140024536,
+          "contrast": 0.0191381740241268,
+          "void": 0.054931640625,
+          "filament": 0.003173828125,
+          "cv": 0.47843309167446907,
+          "is_web": false
+        },
+        "t3000": {
+          "xi_u": 0.7303382497099395,
+          "xi_v": 0.7216657254235868,
+          "coherent_fraction": 0.1367548301153313,
+          "D_box": 0.908523640915537,
+          "contrast": 0.023346422505849854,
+          "void": 0.08251953125,
+          "filament": 0.135009765625,
+          "cv": 0.6460390601520951,
+          "is_web": false
+        }
+      },
+      "quantum_pressure_coeff": 0.0,
+      "spectral_tilt": 1.1287874410076564,
+      "growth_peak_lambda": 25.6,
+      "growth_peak_ratio": 4.127107057198797,
+      "power_peak_lambda": 64.0
+    },
+    {
+      "name": "RBF, qp=0.30",
+      "init": "big_bang",
+      "balance": "rbf",
+      "gravity": true,
+      "seed": 42,
+      "diverged_at": null,
+      "wall_s": 42.1,
+      "snaps": {
+        "t300": {
+          "xi_u": 0.60837409004925,
+          "xi_v": 0.5833535552011566,
+          "coherent_fraction": 0.05195169377316147,
+          "D_box": 0.4860604837122844,
+          "contrast": 0.02673207159078886,
+          "void": 0.3359375,
+          "filament": 0.10205078125,
+          "cv": 0.8230206692800117,
+          "is_web": false
+        },
+        "t3000": {
+          "xi_u": 0.46481252840557885,
+          "xi_v": 0.4634456354929134,
+          "coherent_fraction": 0.018311543728681885,
+          "D_box": NaN,
+          "contrast": 0.02519721108085044,
+          "void": 0.597412109375,
+          "filament": 0.379638671875,
+          "cv": 1.237358263060619,
+          "is_web": false
+        }
+      },
+      "quantum_pressure_coeff": 0.3,
+      "spectral_tilt": 0.28841238726945545,
+      "growth_peak_lambda": 2.327272727272727,
+      "growth_peak_ratio": 9.995445134583063,
+      "power_peak_lambda": 2.0
+    },
+    {
+      "name": "PAC, qp=0.0",
+      "init": "big_bang",
+      "balance": "pac",
+      "gravity": true,
+      "seed": 42,
+      "diverged_at": null,
+      "wall_s": 36.5,
+      "snaps": {
+        "t300": {
+          "xi_u": 0.7000738467537497,
+          "xi_v": 0.6621942923620976,
+          "coherent_fraction": 0.09702248943909207,
+          "D_box": 0.5472587993921465,
+          "contrast": 0.017759438742649767,
+          "void": 0.05224609375,
+          "filament": 0.000244140625,
+          "cv": 0.4623734608838889,
+          "is_web": false
+        },
+        "t3000": {
+          "xi_u": 0.7682940248341005,
+          "xi_v": 0.7951481439521834,
+          "coherent_fraction": 0.1408094299308799,
+          "D_box": 0.8808376693720492,
+          "contrast": 0.019369264034592715,
+          "void": 0.080810546875,
+          "filament": 0.00341796875,
+          "cv": 0.4871037438935804,
+          "is_web": false
+        }
+      },
+      "quantum_pressure_coeff": 0.0,
+      "spectral_tilt": 1.4391683502457755,
+      "growth_peak_lambda": 14.222222222222221,
+      "growth_peak_ratio": 1.5790949947325446,
+      "power_peak_lambda": 5.818181818181818
+    },
+    {
+      "name": "PAC, qp=0.30",
+      "init": "big_bang",
+      "balance": "pac",
+      "gravity": true,
+      "seed": 42,
+      "diverged_at": null,
+      "wall_s": 41.8,
+      "snaps": {
+        "t300": {
+          "xi_u": 0.6077121026537607,
+          "xi_v": 0.5750740996931303,
+          "coherent_fraction": 0.04617608268083478,
+          "D_box": 0.532385127695121,
+          "contrast": 0.023881057474397276,
+          "void": 0.330078125,
+          "filament": 0.086669921875,
+          "cv": 0.8046620894423636,
+          "is_web": false
+        },
+        "t3000": {
+          "xi_u": 0.4653871429673275,
+          "xi_v": 0.4554559385534693,
+          "coherent_fraction": 0.016512317509738778,
+          "D_box": 0.8983628902245496,
+          "contrast": 0.02721308785794571,
+          "void": 0.60546875,
+          "filament": 0.341796875,
+          "cv": 1.2734211086997123,
+          "is_web": false
+        }
+      },
+      "quantum_pressure_coeff": 0.3,
+      "spectral_tilt": 0.27912426133226803,
+      "growth_peak_lambda": 2.4615384615384617,
+      "growth_peak_ratio": 9.585739636226304,
+      "power_peak_lambda": 2.0
+    }
+  ]
+}
