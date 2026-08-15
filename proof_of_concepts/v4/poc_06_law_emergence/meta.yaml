@@ -1,0 +1,69 @@
+schema_version: '2.1'
+directory_name: poc_06_law_emergence
+title: 'POC-06 (v4): What laws does v3 actually have?'
+description: >
+  docs/theory/law_emergence.md states the project's purpose: "We don't program the laws. We
+  discover what emerges." The detectors that would answer that were designed, built for v1, and
+  left in archive/v1 - law_quantifier.py, spikes/law_discovery, analyzers/laws - last run
+  November 2025 and never against v3. This asks v3 the question with a detector built fresh
+  (archive is read-only lineage) and calibrated before use.
+  The key design choice is labelling every result ENFORCED, EMERGENT or ABSENT. A law detector
+  run on a system whose laws are implemented will rediscover the implementation: the v1
+  detector's single "discovery" was QBE, which is hardcoded, reported at correlation exactly
+  -1.0.
+status: completed
+era: era4-milestone-stack-2026q2
+pillar: PAC
+hypothesis: >
+  Some quantity or relation holds in v3 that no operator maintains - an emergent law.
+falsification: >
+  If every conserved quantity found is one an operator explicitly enforces, and nothing else
+  holds, then v3 has not demonstrated law emergence on the project's own criterion.
+validation_type: computational
+result: >
+  0 EMERGENT, 1 ENFORCED, 17 ABSENT at 128x128 over 12000 ticks, past the 8450 convergence
+  point.
+
+  The one law is E+I+M at CV 2.5e-15 - machine precision, because NormalizationOperator applies
+  an explicit global correction every tick. It is the answer key, not an answer. Seventeen other
+  candidates drift, including the full ledger with the Delta term (E+I+M+P), every field
+  individually, E^2+I^2, E^3+I^3+M^3, E*I, total disequilibrium, both momentum-like objects and
+  mass entropy.
+
+  ZERO persistent peaks across 600 samples: no objects, so no force law - not a weak force law
+  but nothing stable enough for one to hold between. This is the same fact as POC-05's
+  percolation result and the absence of any velocity field, arriving by a third route.
+
+  Second law: entropy decreases on 36% of ticks with 16384 cells, net slope +1.8e-5. Not "the
+  second law fails" - the honest reading is that there is no arrow of time at the tick scale;
+  the entropy signal is fluctuation with a faint drift on top.
+
+  Nine months apart, on two engine generations, the discovery engine has returned the same
+  verdict: one law, and it is the one that was hardcoded. v1 found QBE at exactly -1.0; v3 finds
+  PAC at 2.5e-15. Both are operators reading themselves back.
+
+  FRAMING: this is a bearing, not a verdict on the framework. It coheres with what the corpus
+  already says - PAC is global and SEC is local (spikes 09-13), so ONE global conservation law
+  and no others is what the theory predicts. It locates where the engine sits relative to the
+  framework, and the corpus itself demonstrates law emergence working elsewhere: Dynkin topology
+  alone fixes the turbulence cascade exponent to 0.26% of Kolmogorov with nothing tuned (PR
+  #171), and M15 exp_06 derives the momentum operator rather than declaring it.
+notes: >
+  RETRACTED IN PART by POC-07: the force arm of this verdict is an instrument limit, not a
+  finding. fit_force_law recovers r^-2, r^-3 and r^-1 exactly (R2 = 1.0000) from a clean
+  two-body orbit, but returns R2 = 0.0005 on a 4000-particle system whose force law is known by
+  construction. A nearest-neighbour projection in a dense system measures mostly the other
+  neighbours. The conservation arm is unaffected and is calibrated by POC-07, which correctly
+  finds mass conserved there and nothing conserved here.
+
+  Remaining caution: the candidate list is mine, so a conserved quantity in a form I did not
+  write down reads as ABSENT; and the peak tracker requires local maxima above 2x mean
+  persisting 40 samples, so an object that breathes or drifts fast would be missed.
+tags:
+  - law-emergence
+  - conservation
+  - discovery-engine
+  - enforced-vs-emergent
+  - second-law
+  - calibration
+  - v4
