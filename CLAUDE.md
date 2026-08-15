@@ -28,7 +28,7 @@ reality-engine/
 │   ├── atomic_emergence/      # Atom classification
 │   ├── big_bang/              # Big bang evolution
 │   └── ...
-├── tests/v3/                  # 143 tests (pytest) — the only suite that runs
+├── tests/v3/                  # 142 tests (pytest) — the only suite that runs
 ├── docs/                      # Theory and guides
 └── archive/                   # earlier generations, preserved not deleted
     ├── v1/                    # Jan 2026 layer packages: core/, dynamics/,
@@ -116,7 +116,7 @@ and theory_integration spikes are **not** affected — they use the canonical 16
 - Physics must EMERGE, never be programmed — no hardcoded F=ma, E=mc^2, etc.
 - PAC conservation enforced at machine precision (< 1e-12)
 - Mobius manifold substrate with anti-periodic boundaries: f(x+pi) = -f(x)
-- Tests: `pytest` from repo root — `pytest.ini` targets `tests/v3` (143 tests)
+- Tests: `pytest` from repo root — `pytest.ini` targets `tests/v3` (142 tests)
 - Installation: `pip install -r requirements.txt`
 - Run the engine: `python -m src.v3 --help`
 - Scorecard: `python scripts/physics_scorecard.py`
@@ -129,8 +129,8 @@ and theory_integration spikes are **not** affected — they use the canonical 16
 ## Related Repos
 
 - `fracton` — Infodynamics SDK (provides PAC/Mobius primitives). **Imported behind
-  try/except fallbacks.** With fracton absent the suite is 138/138; with it present, 15 v3
-  tests fail — see Known Gaps.
+  try/except fallbacks.** Both suites pass, with and without fracton, and CI gates both —
+  the 15-failure split was the tautological PAC audit, fixed 2026-08-11 (see Known Gaps).
 - `dawn-field-theory` — theoretical foundation (exp_28, exp_29, exp_36 feed gravity)
 - `dawn-models` — AI architectures using same DFT principles
 - `lore` — the knowledge graph (CT106). **kronos is retired — never write through
@@ -151,7 +151,7 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 
 ## Current State
 
-- v3 architecture, 18 operators, 138 tests
+- v3 architecture, 18 operators, 142 tests
 - Physics scorecard: 7/13 (C) — theory integration implemented, NOW tick at 5400 (4.75%)
 - Theory integration: 10/10 DFT predictions confirmed (spikes 09-13), 6 findings implemented
 - Initialization: 3 modes (big_bang, entropy_dominated, info_dominated)
@@ -160,8 +160,8 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 
 ## Known Gaps
 
-- ~~fracton integration is incomplete~~ — **fixed 2026-08-11.** Both suites are now
-  138/138, with and without fracton, and CI gates both. What it was: the PAC audit in
+- ~~fracton integration is incomplete~~ — **fixed 2026-08-11.** Both suites pass,
+  with and without fracton, and CI gates both. What it was: the PAC audit in
   `src/v3/operators/normalization.py` called `validate(E+I+M, [E, I, M])` — residual
   `|x − (a+b+c)|` with `x = a+b+c`, tautologically zero, so it could never fail — through
   `validate()`, typed for `torch.Tensor`, which raised `TypeError` whenever fracton was
@@ -181,7 +181,7 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 - Do NOT hardcode physics laws — all physics must emerge from field dynamics
 - Do NOT break PAC conservation invariants (< 1e-12 error)
 - Do NOT modify substrate geometry without understanding Mobius topology
-- Always run `pytest` after changes (138 tests must stay green)
+- Always run `pytest` after changes (142 tests must stay green)
 - spikes/ are research experiments — treat as exploratory, not production code
 - `archive/v1/` and `archive/v2/` are lineage — **read, never modify, never import from**.
   Archived work keeps its original shape; that shape is evidence of when it was done.

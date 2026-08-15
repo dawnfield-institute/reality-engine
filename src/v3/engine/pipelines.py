@@ -103,8 +103,18 @@ REDUCED_OMITS: dict[type, str] = {
         "effect, but its absence is why info_fraction is missing from metrics under the "
         "reduced pipeline.",
     ChargeDynamicsOperator:
-        "EM-like forces from charge field Q. No measured effect — FieldState carries no Q "
-        "field, so it appears inert as wired. Worth investigating on its own.",
+        "EM-like forces from charge field Q. No measured effect on bulk mass, but the "
+        "earlier note here — that it is inert because FieldState carries no Q field — was "
+        "WRONG. It computes Q itself from the cross-gradient dE/du - dI/dv, solves a "
+        "Poisson potential, and builds a genuine VECTOR force (force_u, force_v). It then "
+        "takes the DIVERGENCE of that force and adds the scalar to dE_dt, discarding the "
+        "curl. Measured at 128x128 after 3000 ticks: |curl| rms 0.714 against |div| rms "
+        "0.799, a ratio of 0.894 — roughly half the EM force thrown away every tick. This "
+        "matters because the corpus derives EM as the ANTISYMMETRIC (curl) projection and "
+        "gravity as the symmetric (divergence) one, so projecting the charge force onto "
+        "its divergence routes EM through the gravity channel and drops the part that is "
+        "EM. Every retained force in this engine is the gradient of a scalar potential, "
+        "and gradient flows have point attractors — they make blobs, not filaments.",
 }
 
 # Implemented but in neither variant.
