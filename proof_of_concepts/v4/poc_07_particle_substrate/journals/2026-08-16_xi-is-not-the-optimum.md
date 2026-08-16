@@ -58,6 +58,37 @@ conventions, with the maximum at an endpoint, and Ξ is not distinguished in eit
 with SEC in the repulsive convention and falls in the attractive one, which is what flipping the
 sign of the dominant force should do.
 
+## The fair test: exp_10's own convention, bracketed, five seeds
+
+exp_03 transcribes exp_10's dynamics literally with its own config (n=2000, box=100, r0=6,
+g=0.8, 600 steps), sweeps to **2.5** so a maximum near 1.3 would be bracketed rather than
+sitting on the boundary, and runs five seeds:
+
+| sec_balance | peak CV | peak percolation |
+|---|---|---|
+| 0.300 | 2.278 ± 0.011 | **0.0166 ± 0.0029** |
+| 0.700 | 2.468 ± 0.009 | 0.0152 ± 0.0021 |
+| **1.057 (Ξ)** | 2.565 ± 0.025 | 0.0141 ± 0.0016 |
+| 1.300 | 2.620 ± 0.023 | 0.0121 ± 0.0009 |
+| 2.000 | 2.682 ± 0.012 | 0.0112 ± 0.0007 |
+| **2.500** | **2.729 ± 0.040** | 0.0116 ± 0.0012 |
+
+**CV rises monotonically to 2.5 and is STILL at the endpoint.** Doubling the swept range did not
+bracket an optimum — it moved the maximum further out. Ξ is beaten by **7.70σ**. There is no
+interior optimum anywhere in 0.3–2.5, so "optimal operating point" has nothing to attach to.
+
+exp_10's underlying trend replicates cleanly: CV rises with `sec_balance` in its convention,
+as its own data showed. What does not replicate is the interpretation laid on top.
+
+**And percolation runs the other way.** It is highest at the LOWEST SEC balance (0.0166 at 0.3)
+and falls as contrast rises — best arm beats Ξ by 1.70σ, marginal, but the trend is clean and
+monotone. Contrast and connectivity are not merely decoupled in this system; they **trade
+off**.
+
+**No setting produces connectivity at all.** Percolation stays within 0.011–0.017 across the
+entire sweep, against a 2D white-noise floor of ~0.003 and a synthetic web's 1.000. There is no
+value of `sec_balance` for which exp_10's system builds a connected structure.
+
 ## Reading
 
 This is a bearing, not a demolition. exp_10's headline — SEC is continuous control with no
@@ -69,5 +100,6 @@ contrast (`density_cv`, `void_fraction`) very carefully, and those are one-point
 Where a claim needs an interior optimum, or connectivity, the measurement to support it was not
 among the ones taken.
 
-Testing exp_10 properly means sweeping in its own convention, past 1.3 so the optimum is
-bracketed, with seeds. That is cheap and is the obvious follow-up.
+Testing exp_10 properly meant sweeping in its own convention, past 1.3, with seeds — done above
+as exp_03. The claim does not survive it: CV is monotonic to 2.5 and still climbing, Ξ loses by
+7.70σ, and percolation trends the opposite way while never leaving the noise floor.
