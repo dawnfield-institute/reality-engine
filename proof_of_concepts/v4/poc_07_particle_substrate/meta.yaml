@@ -42,7 +42,14 @@ result: >
   the canonical pipeline it does not, because the velocity damping and speed cap are
   dissipative by construction - that is design, not defect.
 notes: >
-  A sign error found by the physics, not by a test: the first run had gravity REPULSIVE
+  CORRECTED BY POC-09: the "sign error" below is a DEVIATION from the reference, not a fix.
+  POC-09 transcribed exp_11 literally with the signs as written and reproduced its published
+  numbers to three significant figures (void 0.888 vs 0.89, CV 2.948 vs 2.94). The repulsive
+  convention is what produced the corpus's results; this POC's substrate runs a different
+  system, which is legitimate but is not a correction to exp_09. Both conventions are now
+  available as CANONICAL and EXP11.
+
+  The original note, retained: the first run had gravity REPULSIVE
   (d[i,j] = pos_i - pos_j points away from j, so an attractive force needs -unit). The cloud
   expanded to uniform, damping killed the motion, and every metric froze identically from
   t=100 to t=600 - void 0.756, cv 1.772 - with percolation 0.001, below white noise. exp_09

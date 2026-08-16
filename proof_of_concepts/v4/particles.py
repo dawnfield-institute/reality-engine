@@ -104,6 +104,7 @@ class ParticleConfig:
     damping: float = 0.99
     max_speed: float = 2.0
     seed: int = 42
+    entropy_init: float = 0.0       # exp_09 seeds 0; exp_11 seeds 0.1 * rand
     dims: int = 2                   # 2 or 3. exp_31 Part A: the cascade 1/r profile requires
                                     # d_spatial = 3, and the web topology exp_11 targets
                                     # (filaments, SHEETS, nodes, voids) only exists in 3D.
@@ -228,6 +229,41 @@ class SECUpdate:
         return s.replace(entropy=ent, metrics=m)
 
 
+class SECUpdateRelative:
+    """exp_11's SEC rule, which is NOT exp_09's.
+
+        entropy += sec_balance * (local_count - mean_count) / (mean_count + 1)
+
+    Two differences from `SECUpdate`, and they are not cosmetic:
+
+    * **No threshold.** exp_09 only accumulates where density exceeds 1.5x expected;
+      exp_11 responds smoothly to deviation in both directions, so under-dense regions
+      lose entropy rather than merely decaying.
+    * **No decay.** exp_09 multiplies by `memory_decay` outside dense regions; exp_11 has
+      no forgetting at all, only the clamp at zero.
+
+    Kept as a separate operator rather than a flag because the two references genuinely ran
+    different physics, and a replication that quietly used the wrong one would be worthless.
+    exp_11 also seeds entropy at `0.1 * rand` rather than zero, which `ParticleEngine`
+    handles via `entropy_init`.
+    """
+
+    name = "sec_update_relative"
+
+    @torch.no_grad()
+    def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
+        a = c.cosmology.a if c.cosmology else 1.0
+        r, _, _ = pairwise(s, a)
+        local = (r < c.r0).sum(dim=1).float()
+        mean_count = local.mean()
+        deviation = (local - mean_count) / (mean_count + 1.0)
+        ent = torch.clamp(s.entropy + c.sec_balance * deviation, min=0.0)
+        m = dict(s.metrics)
+        m["entropy_mean"] = ent.mean().item()
+        m["local_count_mean"] = mean_count.item()
+        return s.replace(entropy=ent, metrics=m)
+
+
 class Integrator:
     """Damped drift with a speed cap, on a periodic box."""
 
@@ -275,6 +311,10 @@ CANONICAL: list[Callable[[], ParticleOperator]] = [
     SECUpdate, LocalGravity, SECPressure, Integrator, PACLedger,
 ]
 
+# exp_11's 3D pipeline: same forces, different SEC rule. Its ordering also differs — exp_11
+# updates entropy AFTER moving, where exp_09 updates before.
+EXP11 = [LocalGravity, SECPressure, Integrator, SECUpdateRelative, PACLedger]
+
 
 # ======================================================================================
 # Engine
@@ -306,7 +346,8 @@ class ParticleEngine:
             pos=pos,
             vel=torch.zeros_like(pos),
             mass=1.0 + 0.1 * torch.randn(c.n, device=self.device),
-            entropy=torch.zeros(c.n, device=self.device),
+            entropy=(c.entropy_init * torch.rand(c.n, device=self.device)
+                     if c.entropy_init else torch.zeros(c.n, device=self.device)),
             box=c.box,
         )
 
