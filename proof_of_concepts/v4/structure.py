@@ -187,8 +187,8 @@ def correlation_length(F, axis: int = 0, periodic: bool | None = None) -> float:
     than a number clipped to the axis length.
     """
     m = _as_np(F).astype(float)
-    if m.ndim != 2:
-        raise ValueError(f"expected a 2D field, got shape {m.shape}")
+    if m.ndim < 2:
+        raise ValueError(f"expected a field of 2 or more dimensions, got {m.shape}")
     if not np.isfinite(m).all():
         return float("nan")
     if periodic is None:
@@ -227,8 +227,8 @@ def power_spectrum(F, axis: int = 0, periodic: bool | None = None):
     with 1 cycle/box along `v` into the same bin.
     """
     m = _as_np(F).astype(float)
-    if m.ndim != 2:
-        raise ValueError(f"expected a 2D field, got shape {m.shape}")
+    if m.ndim < 2:
+        raise ValueError(f"expected a field of 2 or more dimensions, got {m.shape}")
     if periodic is None:
         periodic = (axis == 0)
 
@@ -276,30 +276,31 @@ def coherent_fraction(F, band: float = 0.25) -> float:
     with two very different fields — one with no structure at all, and one whose structure is
     real but sits far below a pointwise noise floor. This separates them:
 
-        white noise      -> band^2  (0.0625 at the default), the mode-count fraction
+        white noise      -> band**d, the mode-count fraction
         smooth field     -> ~1
-        buried structure -> a few times band^2, well clear of the noise baseline
+        buried structure -> a few times band**d, well clear of the noise baseline
 
-    A rectangular low-k region, not a disc, because the grid is anisotropic and a disc in
-    index space is not a disc in physical wavenumber.
+    **The white-noise baseline moves with dimension**: band**d is 0.0625 in 2D and 0.0156 in
+    3D at the default. A 2D expectation reused in 3D would pass while measuring nothing.
+
+    A rectangular low-k region, not a ball, because the grid may be anisotropic and a ball in
+    index space is not a ball in physical wavenumber.
     """
     m = _as_np(F).astype(float)
-    if m.ndim != 2 or not np.isfinite(m).all():
+    if m.ndim < 2 or not np.isfinite(m).all():
         return float("nan")
     m = m - m.mean()
-    P = np.abs(np.fft.fft2(m)) ** 2
-    P[0, 0] = 0.0                                   # DC removed with the mean
+    P = np.abs(np.fft.fftn(m)) ** 2
+    P[(0,) * m.ndim] = 0.0                          # DC removed with the mean
     total = P.sum()
     if total <= 0:
         return float("nan")
 
-    nu, nv = P.shape
-    cu = max(1, int(band * (nu // 2)))
-    cv = max(1, int(band * (nv // 2)))
-    idx_u = np.concatenate([np.arange(cu + 1), np.arange(nu - cu, nu)])
-    idx_v = np.concatenate([np.arange(cv + 1), np.arange(nv - cv, nv)])
-    low = P[np.ix_(idx_u, idx_v)].sum()
-    return float(low / total)
+    idx = []
+    for n in P.shape:
+        c = max(1, int(band * (n // 2)))
+        idx.append(np.concatenate([np.arange(c + 1), np.arange(n - c, n)]))
+    return float(P[np.ix_(*idx)].sum() / total)
 
 
 def web_metrics(F, void_frac: float = 0.1, overdensity: float = 2.0) -> dict:
@@ -344,16 +345,29 @@ def web_metrics(F, void_frac: float = 0.1, overdensity: float = 2.0) -> dict:
     m = _as_np(F).astype(float)
     mean = m.mean()
     nan_result = {"void": float("nan"), "filament": float("nan"), "cv": float("nan"),
-                  "xi_u": float("nan"), "percolation": float("nan"), "is_web": False}
+                  "xi_u": float("nan"), "percolation": float("nan"),
+                  "occupancy": float("nan"), "is_web": False}
     if not np.isfinite(mean) or mean <= 0:
         return nan_result
     void = float((m < void_frac * mean).mean())
     fil = float((m > overdensity * mean).mean())
     cv = float(m.std() / mean)
-    xi = correlation_length(m, axis=0, periodic=True) if m.ndim == 2 else float("nan")
+    xi = correlation_length(m, axis=0, periodic=True) if m.ndim >= 2 else float("nan")
     above_grid_scale = xi == xi and xi > (1.0 - INV_E)
     perc = percolation(m, overdensity=overdensity)
+    # Occupancy travels WITH percolation, always. Percolation is a function of how far the
+    # occupied fraction sits from the site-percolation threshold (0.593 in 2D, 0.312 in 3D),
+    # so a percolation number without its occupancy cannot be compared to anything.
+    #
+    # This matters concretely. Binning 4000 particles to 24^3 vs 64^3 swings percolation from
+    # 0.489 to 0.027 on the SAME physical state — an 18x artifact of grid choice. And the
+    # POC-07 headline "15x the field engine" compared a sparse particle field against a dense
+    # one: at matched cell count the field engine has occupancy 0.257 against the particles'
+    # 0.084 and still percolates worse (0.012 vs 0.056), which is a ~5x effect from a
+    # DISADVANTAGED position, not 15x. The conclusion survives; the multiplier did not.
+    occ = float((m > overdensity * mean).mean())
     return {"void": void, "filament": fil, "cv": cv, "xi_u": xi, "percolation": perc,
+            "occupancy": occ,
             "is_web": bool(fil > 0.05 and void > 0.3 and cv > 1.0
                            and above_grid_scale and perc > 0.25)}
 
@@ -368,12 +382,17 @@ def percolation(F, overdensity: float = 2.0) -> float:
     Reference values on 128x128: a synthetic web with three-cell filaments gives 1.000 in a
     single component; white noise gives 0.003 across 1394 components.
 
-    4-connectivity on the periodic axis is not handled — components touching the u=0 and
-    u=127 edges are counted separately. That makes this a slight UNDER-estimate, which is
-    the safe direction for a gate.
+    **Reference values do NOT carry across dimension and must be re-measured.** Site
+    percolation sits at 0.593 on a 2D square lattice and 0.312 on a 3D cubic one, so the same
+    occupied fraction percolates far more readily in 3D. A 2D number used as a 3D expectation
+    would pass for the wrong reason. `selftest_web_3d()` measures the 3D references directly.
+
+    Face-connectivity (2d neighbours in d dimensions), and the periodic axis is not wrapped —
+    components touching opposite faces are counted separately. That makes this a slight
+    UNDER-estimate, which is the safe direction for a gate.
     """
     m = _as_np(F).astype(float)
-    if m.ndim != 2 or not np.isfinite(m).all():
+    if m.ndim < 2 or not np.isfinite(m).all():
         return float("nan")
     mean = m.mean()
     if not np.isfinite(mean) or mean <= 0:
@@ -396,26 +415,35 @@ def percolation(F, overdensity: float = 2.0) -> float:
     except ImportError:
         pass
 
-    # Two-pass flood fill over the occupied set — no scipy dependency, this module has none.
-    labels = np.zeros_like(occ, dtype=np.int32)
+    # Flood fill over the occupied set, dimension-generic — no scipy dependency, this module
+    # has none. Neighbours are the 2d face-adjacent cells, matching scipy's default structure
+    # so both paths give identical answers in any dimension.
+    shape = occ.shape
+    labels = np.zeros(shape, dtype=np.int32)
+    offsets = []
+    for ax in range(occ.ndim):
+        for step in (1, -1):
+            off = [0] * occ.ndim
+            off[ax] = step
+            offsets.append(tuple(off))
+
     best, current = 0, 0
-    H, W = occ.shape
-    for su in range(H):
-        for sv in range(W):
-            if not occ[su, sv] or labels[su, sv]:
-                continue
-            current += 1
-            stack, size = [(su, sv)], 0
-            labels[su, sv] = current
-            while stack:
-                u, v = stack.pop()
-                size += 1
-                for du, dv in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                    a, b = u + du, v + dv
-                    if 0 <= a < H and 0 <= b < W and occ[a, b] and not labels[a, b]:
-                        labels[a, b] = current
-                        stack.append((a, b))
-            best = max(best, size)
+    for start in zip(*np.nonzero(occ)):
+        if labels[start]:
+            continue
+        current += 1
+        labels[start] = current
+        stack, size = [start], 0
+        while stack:
+            cell = stack.pop()
+            size += 1
+            for off in offsets:
+                nb = tuple(c + o for c, o in zip(cell, off))
+                if all(0 <= nb[i] < shape[i] for i in range(occ.ndim)) \
+                        and occ[nb] and not labels[nb]:
+                    labels[nb] = current
+                    stack.append(nb)
+        best = max(best, size)
     return float(best / total)
 
 
@@ -424,18 +452,26 @@ def percolation(F, overdensity: float = 2.0) -> float:
 # ======================================================================================
 
 
-def _smoothed_noise(H: int, W: int, sigma: float, seed: int = 0) -> np.ndarray:
-    """White noise convolved with a Gaussian of width `sigma`, periodic in both axes.
+def _smoothed_noise(*shape_and_sigma, sigma: float | None = None,
+                    seed: int = 0) -> np.ndarray:
+    """White noise convolved with a Gaussian of width `sigma`, periodic on every axis.
 
-    Built in Fourier space so the smoothing is exact and the periodicity is exact — the
-    reference field must not itself carry an edge artifact.
+    Built in Fourier space so both the smoothing and the periodicity are exact — the
+    reference field must not itself carry an edge artifact. Accepts any number of axes:
+    `_smoothed_noise(64, 64, sigma=4)` or `_smoothed_noise(48, 48, 48, sigma=3)`.
     """
+    if sigma is None:                                  # back-compat: (H, W, sigma)
+        *shape, sigma = shape_and_sigma
+    else:
+        shape = list(shape_and_sigma)
     rng = np.random.default_rng(seed)
-    n = rng.standard_normal((H, W))
-    ku = np.fft.fftfreq(H)[:, None] * 2 * np.pi
-    kv = np.fft.fftfreq(W)[None, :] * 2 * np.pi
-    kernel = np.exp(-0.5 * (sigma ** 2) * (ku ** 2 + kv ** 2))
-    return np.fft.ifft2(np.fft.fft2(n) * kernel).real
+    n = rng.standard_normal(tuple(shape))
+    k2 = np.zeros(tuple(shape))
+    for ax, size in enumerate(shape):
+        k = np.fft.fftfreq(size) * 2 * np.pi
+        k2 = k2 + np.reshape(k, [-1 if i == ax else 1 for i in range(len(shape))]) ** 2
+    kernel = np.exp(-0.5 * (sigma ** 2) * k2)
+    return np.fft.ifftn(np.fft.fftn(n) * kernel).real
 
 
 def selftest(H: int = 64, W: int = 64) -> dict:
@@ -582,6 +618,70 @@ def selftest_spectrum(H: int = 128, W: int = 64) -> dict:
     return out
 
 
+def expected_coherent_fraction(shape, band: float = 0.25) -> float:
+    """Exact white-noise baseline for `coherent_fraction` on a given grid.
+
+    White noise spreads power evenly over modes, so the baseline is the FRACTION OF MODES the
+    low-k box selects. That is not `band**d`: the box is built from integer indices, taking
+    `2c+1` of `n` per axis with `c = int(band * n // 2)`. On 48^3 that gives (13/48)^3 =
+    0.0199 rather than 0.25^3 = 0.0156, and on the 128x32 manifold it gives
+    (33/128)(9/32) = 0.0725, which is what white noise actually measures there.
+
+    Computed rather than hardcoded, because the baseline moves with BOTH grid shape and
+    dimension and a stale constant would pass while measuring nothing.
+    """
+    f = 1.0
+    for n in shape:
+        c = max(1, int(band * (n // 2)))
+        f *= (2 * c + 1) / n
+    return f
+
+
+def selftest_3d(n: int = 48) -> dict:
+    """The instruments in three dimensions, with expectations DERIVED not copied.
+
+    2D reference values do not carry over and reusing them would pass for the wrong reason:
+
+      * `coherent_fraction` scales with the mode-count fraction, which depends on grid shape
+        and dimension — see `expected_coherent_fraction`.
+      * percolation depends on where occupancy sits relative to the SITE PERCOLATION
+        THRESHOLD, which is 0.593 on a 2D square lattice and 0.312 on a 3D cubic one. The
+        same occupied fraction behaves differently.
+      * correlation length is measured per axis, so `1 - 1/e` for white noise and `2 sigma`
+        for a Gaussian are dimension-INDEPENDENT — those two do carry over, and it is worth
+        checking that they do.
+    """
+    out: dict[str, tuple[float, float, float]] = {}
+    rng = np.random.default_rng(0)
+    noise = np.abs(rng.standard_normal((n, n, n)))
+
+    out["3d_xi_white_noise"] = (correlation_length(noise, axis=0, periodic=True),
+                                1.0 - INV_E, 0.15)
+    # sigma = 1 keeps xi/N ~ 0.04 so the finite-size undershoot stays small; at larger sigma
+    # the estimator reads low because the correlation length is a big fraction of the axis.
+    g = _smoothed_noise(n, n, n, sigma=1.0, seed=1)
+    out["3d_xi_gaussian_2sigma"] = (correlation_length(g, axis=0, periodic=True), 2.0, 0.35)
+
+    out["3d_coherent_white_noise"] = (coherent_fraction(noise),
+                                      expected_coherent_fraction((n, n, n)), 0.006)
+
+    # Occupancy here is ~0.11, well under the 3D site threshold of 0.312, so the overdense
+    # set must NOT span the box.
+    out["3d_noise_does_not_percolate"] = (percolation(noise), 0.0, 0.05)
+
+    # Intersecting slabs on every axis — connected by construction, so exactly one component.
+    web = np.full((n, n, n), 0.01)
+    for i in range(0, n, 12):
+        web[i:i + 2, :, :] = 3.0
+        web[:, i:i + 2, :] = 3.0
+        web[:, :, i:i + 2] = 3.0
+    w = web_metrics(web)
+    out["3d_web_percolates"] = (w["percolation"], 1.0, 0.02)
+    out["3d_web_is_web"] = (1.0 if w["is_web"] else 0.0, 1.0, 0.0)
+
+    return out
+
+
 def selftest_web(H: int = 128, W: int = 32) -> dict:
     """`web_metrics` against a synthetic web and against a smooth field.
 
@@ -670,5 +770,6 @@ if __name__ == "__main__":
     ok &= _report("correlation_length calibration", selftest_correlation())
     ok &= _report("spectral calibration", selftest_spectrum())
     ok &= _report("web_metrics calibration", selftest_web())
+    ok &= _report("3D calibration (expectations derived, not copied)", selftest_3d())
     print(f"\n  overall: {'PASS' if ok else 'FAIL'}")
     raise SystemExit(0 if ok else 1)

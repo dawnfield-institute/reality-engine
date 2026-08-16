@@ -104,6 +104,9 @@ class ParticleConfig:
     damping: float = 0.99
     max_speed: float = 2.0
     seed: int = 42
+    dims: int = 2                   # 2 or 3. exp_31 Part A: the cascade 1/r profile requires
+                                    # d_spatial = 3, and the web topology exp_11 targets
+                                    # (filaments, SHEETS, nodes, voids) only exists in 3D.
     cosmology: Optional[Cosmology] = None   # None = static box, reproducing POC-07 exactly
 
 
@@ -210,7 +213,12 @@ class SECUpdate:
         a = c.cosmology.a if c.cosmology else 1.0
         r, _, _ = pairwise(s, a)
         local = (r < c.r0).sum(dim=1).float()
-        expected = float(s.n) * math.pi * c.r0 ** 2 / ((s.box * a) ** 2)
+        # Volume of a d-ball, not a disc: pi r^2 in 2D but (4/3) pi r^3 in 3D. Using the 2D
+        # form in 3D makes the density trigger wrong by a factor of order unity, so entropy
+        # would accumulate at the wrong places.
+        d = s.pos.shape[1]
+        v_ball = (math.pi ** (d / 2) / math.gamma(d / 2 + 1)) * c.r0 ** d
+        expected = float(s.n) * v_ball / ((s.box * a) ** d)
         dense = local > 1.5 * expected
         ent = torch.where(dense, s.entropy + 0.1 * (local - expected),
                           s.entropy * c.memory_decay)
@@ -284,11 +292,15 @@ class ParticleEngine:
     def _init(self) -> ParticleState:
         c = self.config
         torch.manual_seed(c.seed)
-        per = int(math.ceil(c.n ** 0.5))
+        d = c.dims
+        per = int(math.ceil(c.n ** (1.0 / d)))
         sp = c.box / per
         g = torch.arange(per, device=self.device, dtype=torch.float32) * sp + sp / 2
-        xx, yy = torch.meshgrid(g, g, indexing="ij")
-        pos = torch.stack([xx.flatten()[:c.n], yy.flatten()[:c.n]], dim=1)
+        grids = torch.meshgrid(*([g] * d), indexing="ij")
+        pos = torch.stack([x.flatten()[:c.n] for x in grids], dim=1)
+        if pos.shape[0] < c.n:       # a perfect d-th root rarely divides n exactly
+            pad = c.n - pos.shape[0]
+            pos = torch.cat([pos, torch.rand(pad, d, device=self.device) * c.box], dim=0)
         pos = (pos + torch.randn_like(pos) * sp * 0.1) % c.box
         return ParticleState(
             pos=pos,
@@ -309,10 +321,17 @@ class ParticleEngine:
         return s
 
     def density_field(self, res: int = 128) -> torch.Tensor:
-        """Bin to a grid so the same instruments from structure.py apply."""
+        """Bin to a d-dimensional grid so the instruments in structure.py apply unchanged.
+
+        A 3D grid at res=128 is 2M cells and the flood fill behind `percolation` walks all of
+        them, so callers should drop to res~64 in 3D. The binning itself is res-agnostic.
+        """
         s = self.state
-        ix = (s.pos[:, 0] / s.box * res).long().clamp(0, res - 1)
-        iy = (s.pos[:, 1] / s.box * res).long().clamp(0, res - 1)
-        f = torch.zeros(res * res, device=s.device)
-        f.scatter_add_(0, iy * res + ix, s.mass)
-        return f.view(res, res)
+        d = s.pos.shape[1]
+        idx = [(s.pos[:, k] / s.box * res).long().clamp(0, res - 1) for k in range(d)]
+        flat = idx[0]
+        for k in range(1, d):
+            flat = flat * res + idx[k]
+        f = torch.zeros(res ** d, device=s.device)
+        f.scatter_add_(0, flat, s.mass)
+        return f.view(*([res] * d))
