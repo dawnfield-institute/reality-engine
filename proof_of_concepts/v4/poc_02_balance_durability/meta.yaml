@@ -1,0 +1,42 @@
+schema_version: '2.1'
+directory_name: poc_02_balance_durability
+title: 'POC-02 (v4): How durable is balance?'
+description: >
+  POC-01 showed the global PAC ledger is neutrally conserved with no restoring mechanism.
+  A restoring term must reference a balance point, and the ledger has none - but Xi is one,
+  RBF is the Recursive Balance Field, and QBE drives dI/dt = -dE/dt. This tests whether the
+  E<->I balance restores when displaced, using a ledger-preserving impulse (E += d, I -= d)
+  so the result cannot be confounded with what POC-01 already settled. Durability is
+  measured twice - does it return, and over how wide a parameter range.
+status: superseded
+era: era4-milestone-stack-2026q2
+pillar: PAC
+hypothesis: >
+  A displaced E/I balance restores - recovery ratio R < 0.5 for at least one of
+  info_fraction, balance_magnitude, alpha_local_mean, lambda_local_mean.
+falsification: >
+  If every balance observable returns R >= 0.9, balance is not durable in this engine
+  either, and conservation-as-attractor has no support locally any more than globally.
+validation_type: computational
+result: >
+  Kill sentence did not fire. The E/I balance is durable: info_fraction recovers 97% of any
+  displacement (median R = 0.0281) in 14/14 distinct runs spanning x0.5 to x2 on three live
+  parameters - a wide basin. gamma_local_mean durable in 13/14. (Corrected after POC-03
+  found mass_gen_coeff is a dead config field read by zero operators, so 4 of the 18 runs
+  were duplicates of base.) balance_magnitude, alpha
+  and lambda are not. The finding is the contrast with POC-01: the global ledger is neutral
+  (R = 1.000, no basin) while local balance strongly restores. That is the REVERSE of the
+  stated expectation that conservation is enforced as an attractor globally rather than
+  locally, and is recorded as measured. It would be reconciled if the engine's 'global' is
+  the framework's 'local' - a patch whose total is one term in a parent's sum - but this
+  experiment did not test a hierarchy and consistency is not evidence.
+tags:
+  - pac
+  - balance
+  - xi
+  - rbf
+  - qbe
+  - attractor
+  - durability
+  - pre-registered
+  - v4

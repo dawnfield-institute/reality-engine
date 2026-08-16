@@ -1,0 +1,124 @@
+{
+  "steps": 100,
+  "n": 400,
+  "h0": 0.02,
+  "arms": [
+    {
+      "arm": "static (control)",
+      "spec": null,
+      "peak": 0.0025,
+      "peak_t": 12,
+      "final": 0.0025,
+      "retained": 1.0,
+      "a_final": 1.0,
+      "final_metrics": {
+        "void": 0.9755859375,
+        "filament": 0.0244140625,
+        "cv": 6.350628771474084,
+        "xi_u": 0.5984231823659427,
+        "percolation": 0.0025,
+        "is_web": false
+      }
+    },
+    {
+      "arm": "H0 0.0002  (Omega_L=1/phi)",
+      "spec": [
+        0.6180339887498948,
+        0.0002
+      ],
+      "peak": 0.0025,
+      "peak_t": 12,
+      "final": 0.0025,
+      "retained": 1.0,
+      "a_final": 1.00100021155393,
+      "final_metrics": {
+        "void": 0.9755859375,
+        "filament": 0.0244140625,
+        "cv": 6.350628771474084,
+        "xi_u": 0.5986421099008987,
+        "percolation": 0.0025,
+        "is_web": false
+      }
+    },
+    {
+      "arm": "H0 0.0005  (Omega_L=1/phi)",
+      "spec": [
+        0.6180339887498948,
+        0.0005
+      ],
+      "peak": 0.0025,
+      "peak_t": 12,
+      "final": 0.0025,
+      "retained": 1.0,
+      "a_final": 1.0025013237459792,
+      "final_metrics": {
+        "void": 0.9755859375,
+        "filament": 0.0244140625,
+        "cv": 6.350628771474084,
+        "xi_u": 0.5986421099008987,
+        "percolation": 0.0025,
+        "is_web": false
+      }
+    },
+    {
+      "arm": "H0 0.001   (Omega_L=1/phi)",
+      "spec": [
+        0.6180339887498948,
+        0.001
+      ],
+      "peak": 0.0025,
+      "peak_t": 12,
+      "final": 0.0025,
+      "retained": 1.0,
+      "a_final": 1.0050053052025112,
+      "final_metrics": {
+        "void": 0.9755859375,
+        "filament": 0.0244140625,
+        "cv": 6.350628771474084,
+        "xi_u": 0.5986421099008987,
+        "percolation": 0.0025,
+        "is_web": false
+      }
+    },
+    {
+      "arm": "H0 0.002   (Omega_L=1/phi)",
+      "spec": [
+        0.6180339887498948,
+        0.002
+      ],
+      "peak": 0.0025,
+      "peak_t": 12,
+      "final": 0.0025,
+      "retained": 1.0,
+      "a_final": 1.0100213024471916,
+      "final_metrics": {
+        "void": 0.9755859375,
+        "filament": 0.0244140625,
+        "cv": 6.350628771474084,
+        "xi_u": 0.5986421099008987,
+        "percolation": 0.0025,
+        "is_web": false
+      }
+    },
+    {
+      "arm": "H0 0.005   (Omega_L=1/phi)",
+      "spec": [
+        0.6180339887498948,
+        0.005
+      ],
+      "peak": 0.0025,
+      "peak_t": 12,
+      "final": 0.0025,
+      "retained": 1.0,
+      "a_final": 1.0251346655473559,
+      "final_metrics": {
+        "void": 0.9755859375,
+        "filament": 0.0244140625,
+        "cv": 6.350628771474084,
+        "xi_u": 0.5984576624953483,
+        "percolation": 0.0025,
+        "is_web": false
+      }
+    }
+  ]
+}

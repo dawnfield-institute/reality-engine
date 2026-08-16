@@ -28,7 +28,7 @@ reality-engine/
 │   ├── atomic_emergence/      # Atom classification
 │   ├── big_bang/              # Big bang evolution
 │   └── ...
-├── tests/v3/                  # 138 tests (pytest) — the only suite that runs
+├── tests/v3/                  # 142 tests (pytest) — the only suite that runs
 ├── docs/                      # Theory and guides
 └── archive/                   # earlier generations, preserved not deleted
     ├── v1/                    # Jan 2026 layer packages: core/, dynamics/,
@@ -48,12 +48,16 @@ archived generation (verified: 0 references).
 modules and 72 test references use `src.v3.*`. Promoting `v3` to the top level would mean
 rewriting all of them for no behavioural gain.
 
-## v3 Operator Pipeline (18 operators)
+## v3 Operator Pipeline (16 operators)
 
-Default order in Pipeline:
+**This is the canonical pipeline** — used by `src/v3/__main__.py`, `scripts/physics_scorecard.py`,
+and `spikes/theory_integration/harness.py`. Declared in `src/v3/engine/pipelines.py` as
+`CANONICAL`; use `build_canonical_pipeline()`.
+
+Default order:
 1. **RBF** — Recursive Balance Field: dE/dt from laplacian, coupling terms
 2. **QBE** — Quantum Balance: dI/dt = -dE/dt (PAC conservation)
-3. **Actualization** — MAR-gated integration, ln(phi) split, pi/2 harmonic modulation
+3. **Actualization** — MAR-gated integration, ln(phi) split, pi/2 harmonic modulation. Replaces EulerIntegrator. Populates `state.P`, the unactualized potential buffer.
 4. **Memory** — Mass generation (bulk + gradient boundary seeding), de-actualization (PAC cycle completion), quantum pressure, diffusion
 5. **PhiCascade** — Fibonacci two-step memory for phi-spaced mass levels
 6. **Gravity** — Self-gravity via spectral Poisson solver, xi_mod, cascade-depth tiling filter + pi-harmonic modulation
@@ -68,7 +72,21 @@ Default order in Pipeline:
 15. **Adaptive** — Self-tuning damping and dt from energy growth
 16. **TimeEmergence** — dt = dt_base / (1 + kappa*max|E-I|)
 
-Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
+### Pipeline proliferation — know which one you are running
+
+**25 sites outside `archive/` build their own `Pipeline([...])`, from 8 to 16 operators**
+(7 use 16, 8 use 15, 5 use 14, the rest fewer). Results are not comparable across them:
+two spikes can disagree because they ran different physics, and nothing says so.
+
+The notable divergence is the **dashboard**, whose pipeline had the misleading name
+`build_default_pipeline` and runs **12** operators — omitting Actualization, PhiCascade,
+SpinStatistics, SECTracking and ChargeDynamics. Under it `state.P` is **all zeros**, so
+the engine has no Delta term. It is now `build_dashboard_pipeline()`, and
+`tests/v3/test_pipeline_completeness.py` fails if the difference from canonical changes
+without being declared.
+
+Anything measured with the dashboard pipeline is measuring reduced physics. The scorecard
+and theory_integration spikes are **not** affected — they use the canonical 16.
 
 ## Physics Scorecard
 
@@ -84,7 +102,11 @@ Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
 - **Gravity**: Spectral Poisson solver with cascade-depth tiling filter (DFT exp_36) + pi-harmonic modulation (spike 02). Entropy-coherence modulation xi_mod. Amplitude coupling nabla^2 Phi = sqrt(M).
 - **Mass generation**: Bulk (gamma_local * diseq^2) + boundary gradient seeding (gamma_local * |grad(diseq)|^2 / (1+M))
 - **De-actualization**: dM_deact = -eta * M * (1 - gamma_local), eta=0.025 (spike 04 optimal). Memory fades where disequilibrium resolves, completing PAC cycle.
-- **PAC conservation**: E + I + M = const enforced at machine precision (<1e-12)
+- **PAC conservation**: `E + I + M` held to <1e-12 by an explicit correction in
+  `NormalizationOperator` that fires on ~99.8% of ticks — it is ENFORCED, not
+  observed. Set `enforce_pac=False` to measure the unenforced dynamics. Note the
+  full ledger is `E + I + M + P`: `P` is the unactualized potential buffer (the
+  Delta term), inert under the default pipeline because Actualization is excluded.
 - **SEC metrics**: info_fraction = |I|/(|E|+|I|) (best duty cycle proxy, r=+0.954), log-time cascade depth with running NOW estimate
 - **Initialization**: `big_bang` (symmetric E~I), `entropy_dominated` (E>>I, DFT-correct), `info_dominated` (I>>E, fast convergence)
 - **DFT constants**: Xi = gamma_EM + ln(phi) = 1.05843, ln^2(2) = 0.4805, phi = golden ratio
@@ -94,7 +116,7 @@ Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
 - Physics must EMERGE, never be programmed — no hardcoded F=ma, E=mc^2, etc.
 - PAC conservation enforced at machine precision (< 1e-12)
 - Mobius manifold substrate with anti-periodic boundaries: f(x+pi) = -f(x)
-- Tests: `pytest` from repo root — `pytest.ini` now targets `tests/v3` (138 tests)
+- Tests: `pytest` from repo root — `pytest.ini` targets `tests/v3` (142 tests)
 - Installation: `pip install -r requirements.txt`
 - Run the engine: `python -m src.v3 --help`
 - Scorecard: `python scripts/physics_scorecard.py`
@@ -107,8 +129,8 @@ Also available: EulerIntegrator, UnifiedForce (combined gravity+EM).
 ## Related Repos
 
 - `fracton` — Infodynamics SDK (provides PAC/Mobius primitives). **Imported behind
-  try/except fallbacks.** With fracton absent the suite is 138/138; with it present, 15 v3
-  tests fail — see Known Gaps.
+  try/except fallbacks.** Both suites pass, with and without fracton, and CI gates both —
+  the 15-failure split was the tautological PAC audit, fixed 2026-08-11 (see Known Gaps).
 - `dawn-field-theory` — theoretical foundation (exp_28, exp_29, exp_36 feed gravity)
 - `dawn-models` — AI architectures using same DFT principles
 - `lore` — the knowledge graph (CT106). **kronos is retired — never write through
@@ -129,7 +151,7 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 
 ## Current State
 
-- v3 architecture, 18 operators, 138 tests
+- v3 architecture, 18 operators, 142 tests
 - Physics scorecard: 7/13 (C) — theory integration implemented, NOW tick at 5400 (4.75%)
 - Theory integration: 10/10 DFT predictions confirmed (spikes 09-13), 6 findings implemented
 - Initialization: 3 modes (big_bang, entropy_dominated, info_dominated)
@@ -138,8 +160,8 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 
 ## Known Gaps
 
-- ~~fracton integration is incomplete~~ — **fixed 2026-08-11.** Both suites are now
-  138/138, with and without fracton, and CI gates both. What it was: the PAC audit in
+- ~~fracton integration is incomplete~~ — **fixed 2026-08-11.** Both suites pass,
+  with and without fracton, and CI gates both. What it was: the PAC audit in
   `src/v3/operators/normalization.py` called `validate(E+I+M, [E, I, M])` — residual
   `|x − (a+b+c)|` with `x = a+b+c`, tautologically zero, so it could never fail — through
   `validate()`, typed for `torch.Tensor`, which raised `TypeError` whenever fracton was
@@ -159,7 +181,7 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 - Do NOT hardcode physics laws — all physics must emerge from field dynamics
 - Do NOT break PAC conservation invariants (< 1e-12 error)
 - Do NOT modify substrate geometry without understanding Mobius topology
-- Always run `pytest` after changes (138 tests must stay green)
+- Always run `pytest` after changes (142 tests must stay green)
 - spikes/ are research experiments — treat as exploratory, not production code
 - `archive/v1/` and `archive/v2/` are lineage — **read, never modify, never import from**.
   Archived work keeps its original shape; that shape is evidence of when it was done.

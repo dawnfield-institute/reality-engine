@@ -42,6 +42,22 @@ class SimulationConfig:
     t_min: float = 0.1             # Temperature floor
     t_max: float = 10.0            # Temperature ceiling
 
+    # --- conservation ----------------------------------------------------
+    # When True (default), NormalizationOperator forces the global total back to its
+    # first-tick value whenever drift exceeds 1e-8. That correction fires on ~99.8% of
+    # ticks, so the residual it removes is never observed.
+    #
+    # Set False to let PAC drift freely and measure it. This is the instrument for
+    # POC-01 (v4): whether the residual saturates at a finite non-zero value (an
+    # attractor) or scales toward zero under refinement (discretization error). Noether
+    # motivates the question — the engine also exhibits running couplings, i.e.
+    # time-varying law, which breaks the time-translation invariance exact conservation
+    # would follow from.
+    #
+    # The default is True so that existing behaviour, and the 138-test suite, are
+    # unchanged.
+    enforce_pac: bool = True
+
     # --- memory dynamics -------------------------------------------------
     mass_gen_coeff: float = 0.63   # Mass generation coefficient
     quantum_pressure_coeff: float = 0.020  # retuned with de-actualization active

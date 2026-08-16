@@ -1,0 +1,36 @@
+schema_version: '2.1'
+directory_name: poc_01_conservation_attractor
+title: 'POC-01 (v4): Is PAC conservation an attractor or an artifact?'
+description: >
+  Tests whether the PAC residual saturates at a finite non-zero value under grid and
+  timestep refinement once enforcement is disabled, or whether it scales toward zero as
+  discretization error. The engine currently enforces conservation on 99.8% of ticks, so
+  the pre-correction residual — median 8.5e-03, plateau ~1.29e-02 at 64x32 — has never
+  been observed. Pre-registered with a kill sentence before any sweep was run.
+status: superseded
+era: era4-milestone-stack-2026q2
+pillar: PAC
+hypothesis: >
+  With enforcement disabled, an impulse applied to the global PAC ledger decays - the
+  ledger returns toward the trajectory it would have followed unperturbed. (Registration
+  v2; v1 was withdrawn for presupposing a continuum ground truth DFT denies.)
+falsification: >
+  If the displacement persists undiminished, or grows, the global ledger is not an
+  attractor - it is either neutrally conserved or unstable.
+validation_type: computational
+result: >
+  NEUTRAL - kill sentence fired. Recovery ratio R = 1.000 across all 18 trials (3 configs
+  x 3 impulses x 2 seeds): a displaced ledger stays displaced, undiminished. The engine
+  conserves Q neutrally, like momentum in free space, and has no mechanism that would make
+  conservation an attractor - the only thing enforcing it is the explicit correction. This
+  is a statement about what the engine implements, NOT evidence against the DFT claim. The
+  registered invariant R held across a 4x range of impulse magnitude, both signs, two grids
+  and two timesteps.
+tags:
+  - pac
+  - conservation
+  - attractor
+  - noether
+  - rg-flow
+  - pre-registered
+  - v4

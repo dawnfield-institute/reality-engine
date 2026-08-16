@@ -1,0 +1,87 @@
+{
+  "experiment": "poc_01_conservation_attractor / exp_01_refinement_sweep",
+  "registered": "README.md (pre-registered 2026-08-11, Amendment 1 before any run)",
+  "measured": "median relative drift rate over final 20% of ticks, equal simulated time",
+  "runs": [
+    {
+      "nu": 32,
+      "nv": 16,
+      "dt": 0.001,
+      "enforce_pac": false,
+      "ticks": 100,
+      "sim_time": 0.1,
+      "cells": 512,
+      "plateau_rel_rate": 0.1952939038109734,
+      "rel_rate_first": 0.0,
+      "rel_rate_last": 0.23770390921946966,
+      "total_initial": 241.70233021974718,
+      "total_final": 241.7597974686976,
+      "wall_seconds": 0.65
+    },
+    {
+      "nu": 32,
+      "nv": 16,
+      "dt": 0.0005,
+      "enforce_pac": false,
+      "ticks": 200,
+      "sim_time": 0.1,
+      "cells": 512,
+      "plateau_rel_rate": 1.525426252611639,
+      "rel_rate_first": 0.0,
+      "rel_rate_last": 1.9195323141139622,
+      "total_initial": -30.406754411059097,
+      "total_final": -30.37759901958745,
+      "wall_seconds": 1.11
+    },
+    {
+      "nu": 32,
+      "nv": 16,
+      "dt": 0.00025,
+      "enforce_pac": false,
+      "ticks": 400,
+      "sim_time": 0.1,
+      "cells": 512,
+      "plateau_rel_rate": 0.35210708952364256,
+      "rel_rate_first": 0.0,
+      "rel_rate_last": 0.44980732389308437,
+      "total_initial": 150.41323037472108,
+      "total_final": 150.43014652013085,
+      "wall_seconds": 2.21
+    }
+  ],
+  "control_with_enforcement": {
+    "nu": 32,
+    "nv": 16,
+    "dt": 0.001,
+    "enforce_pac": true,
+    "ticks": 100,
+    "sim_time": 0.1,
+    "cells": 512,
+    "plateau_rel_rate": 0.004482417448816254,
+    "rel_rate_first": 0.0,
+    "rel_rate_last": 0.004925661212108654,
+    "total_initial": -250.30440210980868,
+    "total_final": -250.3044021098087,
+    "wall_seconds": 0.59
+  },
+  "analysis": {
+    "dt_trends": {
+      "32x16": {
+        "plateaus_coarse_to_fine": [
+          0.1952939038109734,
+          1.525426252611639,
+          0.35210708952364256
+        ],
+        "successive_ratios": [
+          7.810926111078777,
+          0.23082537678947768
+        ],
+        "max_abs_change_pct": 681.0926111078777,
+        "monotonic_decreasing": false
+      }
+    },
+    "worst_change_pct": 681.0926111078777,
+    "monotonic_across_all_grids": false,
+    "verdict": "AMBIGUOUS \u2014 neither registered criterion met"
+  }
+}

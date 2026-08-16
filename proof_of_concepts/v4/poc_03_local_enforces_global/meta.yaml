@@ -1,0 +1,44 @@
+schema_version: '2.1'
+directory_name: poc_03_local_enforces_global
+title: 'POC-03 (v4): Does local enforcement produce global conservation?'
+description: >
+  POC-01 found the global ledger an exact invariant under perturbation (R=1.000); POC-02
+  found local E/I balance durable (R=0.028). The reading is that the global ledger is where
+  redistribution is tallied while local balance is where it is enforced, making conservation
+  emergent rather than imposed. That explains both results but forbids nothing. This turns
+  it into a falsifiable claim - if local enforcement produces global conservation, weaker
+  local durability should accompany larger global drift across parameter space. Both
+  quantities are taken from the same runs, global drift from the unperturbed reference twin.
+status: superseded
+era: era4-milestone-stack-2026q2
+pillar: PAC
+hypothesis: >
+  Local balance recovery ratio R and global ledger drift rate are positively correlated
+  across parameter settings (Spearman rho > 0.6).
+falsification: >
+  If rho <= 0.3, including any negative value, local durability does not predict global
+  conservation - the two are independent properties of the engine and the emergence reading
+  gets no support here.
+validation_type: computational
+result: >
+  Kill sentence fired. Within-seed Spearman rho median -0.346 across 55 runs, but the
+  per-seed values do not agree on a SIGN (+0.282, -0.473, -0.409, +0.391, -0.345), so the
+  accurate statement is no relationship rather than a negative one. The pooled rho of -0.611
+  lies outside the range of every within-seed value - Simpson's paradox from global drift
+  clustering by initial condition. The null is coherent: POC-01 showed the global ledger is
+  an exact invariant whose residual drift tracks dt, so global drift is integration error
+  while local durability is dynamical, and the two have no reason to correlate. Local
+  enforcement has nothing to do to a quantity the dynamics already conserve exactly. This
+  does not refute the framework claim - it says this engine cannot exhibit the mechanism,
+  because it has no level at which the global ledger is anything but trivially conserved.
+  Also corrected: the vigor confound reported as real from a 2-seed run (rho=0.781) is
+  absent at 5 seeds (rho=0.003) and was itself a two-cluster artifact.
+tags:
+  - pac
+  - conservation
+  - balance
+  - locality
+  - emergence
+  - correlation
+  - pre-registered
+  - v4

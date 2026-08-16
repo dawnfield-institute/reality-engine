@@ -1,0 +1,187 @@
+{
+  "ticks": 2000,
+  "white_noise_reference": {
+    "void": 0.053466796875,
+    "filament": 0.107421875,
+    "cv": 0.7406213675991897,
+    "xi_u": 0.6283440231769032,
+    "is_web": false
+  },
+  "rows": [
+    {
+      "case": "baseline (all protections)",
+      "config": {
+        "noise_scale": 0.0
+      },
+      "diverged_at": null,
+      "ledger_drift": 6.9076106273224865e-16,
+      "coherent_fraction": 0.08297494837990706,
+      "void": 0.228515625,
+      "filament": 0.143798828125,
+      "cv": 0.7637636196885226,
+      "xi_u": 0.6419900103658055,
+      "is_web": false
+    },
+    {
+      "case": "noise 0.01 (default)",
+      "config": {
+        "noise_scale": 0.01
+      },
+      "diverged_at": null,
+      "ledger_drift": 2.2104354007431962e-15,
+      "coherent_fraction": 0.08131817304798372,
+      "void": 0.228271484375,
+      "filament": 0.14453125,
+      "cv": 0.7637321609703976,
+      "xi_u": 0.6415874309634534,
+      "is_web": false
+    },
+    {
+      "case": "noise 0.1",
+      "config": {
+        "noise_scale": 0.1
+      },
+      "diverged_at": null,
+      "ledger_drift": 1.3815221254644972e-16,
+      "coherent_fraction": 0.07493124311519311,
+      "void": 0.22802734375,
+      "filament": 0.139892578125,
+      "cv": 0.7570727117526056,
+      "xi_u": 0.6363522014709553,
+      "is_web": false
+    },
+    {
+      "case": "noise 0.5",
+      "config": {
+        "noise_scale": 0.5
+      },
+      "diverged_at": null,
+      "ledger_drift": 1.381522125464498e-15,
+      "coherent_fraction": 0.06287765745550591,
+      "void": 0.2197265625,
+      "filament": 0.0478515625,
+      "cv": 0.6839507157283915,
+      "xi_u": 0.6162178000314766,
+      "is_web": false
+    },
+    {
+      "case": "noise 2.0",
+      "config": {
+        "noise_scale": 2.0
+      },
+      "diverged_at": null,
+      "ledger_drift": 1.6578265505573967e-15,
+      "coherent_fraction": 0.07705463285937086,
+      "void": 0.13330078125,
+      "filament": 0.0,
+      "cv": 0.45305239531891217,
+      "xi_u": 0.6376431640420883,
+      "is_web": false
+    },
+    {
+      "case": "PAC unenforced",
+      "config": {
+        "noise_scale": 0.0,
+        "enforce_pac": false
+      },
+      "diverged_at": null,
+      "ledger_drift": 0.25046986291123813,
+      "coherent_fraction": 0.08263256025655341,
+      "void": 0.228271484375,
+      "filament": 0.143310546875,
+      "cv": 0.7640561777263839,
+      "xi_u": 0.6413064899003713,
+      "is_web": false
+    },
+    {
+      "case": "PAC unenforced + noise 0.5",
+      "config": {
+        "noise_scale": 0.5,
+        "enforce_pac": false
+      },
+      "diverged_at": null,
+      "ledger_drift": 0.26954734837120775,
+      "coherent_fraction": 0.0631667444225924,
+      "void": 0.21923828125,
+      "filament": 0.048828125,
+      "cv": 0.6836410456742598,
+      "xi_u": 0.6164241626120096,
+      "is_web": false
+    },
+    {
+      "case": "NO normalization",
+      "config": {
+        "noise_scale": 0.0,
+        "enable_normalization": false
+      },
+      "diverged_at": 263,
+      "ledger_drift": 4779742731.073545,
+      "coherent_fraction": 0.07228483660605976,
+      "void": 0.99951171875,
+      "filament": 0.000244140625,
+      "cv": 63.976856810442676,
+      "xi_u": 0.6271822750107372,
+      "is_web": false
+    },
+    {
+      "case": "NO normalization + noise 0.5",
+      "config": {
+        "noise_scale": 0.5,
+        "enable_normalization": false
+      },
+      "diverged_at": 265,
+      "ledger_drift": 2.168926735868426e+39,
+      "coherent_fraction": 0.07251200109952992,
+      "void": 0.99853515625,
+      "filament": 0.0009765625,
+      "cv": 57.927959795056445,
+      "xi_u": 0.6272025066772396,
+      "is_web": false
+    },
+    {
+      "case": "field_scale 200 (loose clamp)",
+      "config": {
+        "noise_scale": 0.1,
+        "field_scale": 200.0
+      },
+      "diverged_at": null,
+      "ledger_drift": 1.243369912918048e-14,
+      "coherent_fraction": 0.20287751367209625,
+      "void": 0.18896484375,
+      "filament": 0.0,
+      "cv": 0.7177227882628814,
+      "xi_u": 0.7549310524612943,
+      "is_web": false
+    },
+    {
+      "case": "eta 0.2 (fast forgetting)",
+      "config": {
+        "noise_scale": 0.1,
+        "deactualization_rate": 0.2
+      },
+      "diverged_at": null,
+      "ledger_drift": 5.526088501857989e-16,
+      "coherent_fraction": 0.09058169685217714,
+      "void": 0.2373046875,
+      "filament": 0.169189453125,
+      "cv": 0.8451898541753764,
+      "xi_u": 0.647126124763475,
+      "is_web": false
+    },
+    {
+      "case": "eta 0.0 (no forgetting)",
+      "config": {
+        "noise_scale": 0.1,
+        "deactualization_rate": 0.0
+      },
+      "diverged_at": null,
+      "ledger_drift": 1.7959787631038465e-15,
+      "coherent_fraction": 0.0738415364379998,
+      "void": 0.22607421875,
+      "filament": 0.13427734375,
+      "cv": 0.7449288257777339,
+      "xi_u": 0.6358240015119864,
+      "is_web": false
+    }
+  ]
+}

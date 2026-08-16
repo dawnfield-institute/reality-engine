@@ -1,0 +1,66 @@
+schema_version: '2.1'
+directory_name: poc_07_particle_substrate
+title: 'POC-07 (v4): A particle substrate — does changing the substrate produce the structure?'
+description: >
+  The field engine cannot produce connectivity: its overdense set fragments into ~1300 pieces
+  where a web is one, and nothing moves it (POC-05, ~40 runs). It has no persistent objects, so
+  there is nothing stable enough for a force law to hold between. gravity_from_maxwell_pac
+  exp_09 already produces a cosmic web from 5000 particles with finite-range gravity and SEC
+  entropy pressure. This rebuilds that mechanism against the v3 architecture - operator
+  protocol, immutable state, read-only ledger - and measures it with exactly the instruments
+  the field engine was measured with, on a density field binned at the same resolution.
+  The substrate change is about IDENTITY: a cell has a value, a particle has a trajectory, and
+  persistence, objecthood and connectivity are properties of things that endure.
+status: completed
+era: era4-milestone-stack-2026q2
+pillar: SEC
+hypothesis: >
+  Changing the substrate from a field of independent values to particles with trajectories
+  produces the connectivity that no amount of forcing produced in the field engine.
+falsification: >
+  If percolation stays at the field engine's 0.012 and no filamentary structure appears in the
+  render, the substrate is not what was missing and the obstruction is elsewhere.
+validation_type: computational
+result: >
+  CONFIRMED, and the structure is TRANSIENT. Percolation rises from 0.003 (white noise) through
+  0.012 at t=100 to a peak of 0.188 around t=600 - 15x the field engine's best and 60x white
+  noise - with visible curved filamentary arcs, connected chains and large voids in the render.
+  Every field-engine render at every setting was uniform speckle; this is different in kind.
+
+  Then it DECLINES: 0.099 at t=666, 0.080 at t=2000, 0.050 at t=4000, as clumps virialize and
+  the connecting bridges drain into them. Meanwhile filament fraction climbs to 0.130 against
+  exp_09's measured 0.12, and density CV falls to 3.53 against exp_09's ~2.0. So the web is a
+  transient of the mildly-nonlinear regime: without cosmic expansion to hold it open, gravity
+  eventually wins and the structure fragments into isolated bound halos. exp_09 ran 600 steps,
+  which is almost exactly where the peak sits.
+
+  It never crosses the 0.25 percolation gate, so is_web stays False throughout. The honest
+  statement is web-LIKE structure with a peak epoch, not a cosmic web.
+
+  Conservation, on a read-only ledger with nothing corrected: mass_total EMERGENT at CV 0.
+  Momentum verified to conserve exactly (0.00e+00) in a two-body test with damping off; under
+  the canonical pipeline it does not, because the velocity damping and speed cap are
+  dissipative by construction - that is design, not defect.
+notes: >
+  A sign error found by the physics, not by a test: the first run had gravity REPULSIVE
+  (d[i,j] = pos_i - pos_j points away from j, so an attractive force needs -unit). The cloud
+  expanded to uniform, damping killed the motion, and every metric froze identically from
+  t=100 to t=600 - void 0.756, cv 1.772 - with percolation 0.001, below white noise. exp_09
+  carries the same sign with a comment claiming it points toward the other particle; worth
+  flagging upstream.
+
+  fit_force_law FAILS here and the failure is informative: R2 = 0.0005 on a system whose force
+  law is known by construction, twice, over 14000 samples. In a dense system each particle's
+  acceleration sums over many neighbours, so a nearest-neighbour projection measures mostly the
+  others. This retracts the force arm of POC-06's verdict on the field engine - that was an
+  instrument limit, not a finding. The conservation arm is unaffected and is calibrated by this
+  POC: it correctly finds mass conserved here and nothing conserved there.
+tags:
+  - particle-substrate
+  - cosmic-web
+  - percolation
+  - connectivity
+  - identity
+  - exp_09
+  - transient-structure
+  - v4

@@ -1,0 +1,518 @@
+{
+  "experiment": "poc_03_local_enforces_global / exp_01",
+  "registered": "README.md (2026-08-11), pre-registered",
+  "measured": "Spearman rho between local balance recovery ratio and global ledger drift rate, from the same runs",
+  "n": 55,
+  "rho_within_seed_median": -0.3454545454545455,
+  "rho_pooled": -0.6109668109668112,
+  "rho_per_seed": {
+    "4000": 0.28181818181818186,
+    "4001": -0.4727272727272727,
+    "4002": -0.4090909090909091,
+    "4003": 0.39090909090909093,
+    "4004": -0.3454545454545455
+  },
+  "p_value": NaN,
+  "verdict": "NO SUPPORT \u2014 kill sentence fired (rho=-0.345). Local durability does not predict global conservation; the two are independent here.",
+  "note": "within-seed rho is the registered quantity; pooled rho is reported only to show the between-cluster artifact it produces",
+  "confound_vigor_vs_global_drift": 0.0028138528138528145,
+  "confound_vigor_vs_local_R": -0.12402597402597405,
+  "rows": [
+    {
+      "varied": "none",
+      "factor": 1.0,
+      "seed": 4000,
+      "local_R": 0.02624121866945574,
+      "global_drift": 0.022953255414355802,
+      "vigor_max_diseq_mean": 3.4233678281524464,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "none",
+      "factor": 1.0,
+      "seed": 4001,
+      "local_R": 0.11781299914608331,
+      "global_drift": 0.018274203760794926,
+      "vigor_max_diseq_mean": 3.266323446062417,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "none",
+      "factor": 1.0,
+      "seed": 4002,
+      "local_R": 0.14265338499369914,
+      "global_drift": 0.01587281095973879,
+      "vigor_max_diseq_mean": 3.4150502908753633,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "none",
+      "factor": 1.0,
+      "seed": 4003,
+      "local_R": 0.006255412048290321,
+      "global_drift": 0.04223317012444935,
+      "vigor_max_diseq_mean": 3.3821663791797643,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "none",
+      "factor": 1.0,
+      "seed": 4004,
+      "local_R": 0.07589442971962605,
+      "global_drift": 0.009377649277646023,
+      "vigor_max_diseq_mean": 3.4229616386735433,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 0.5,
+      "seed": 4000,
+      "local_R": 0.003027679859022786,
+      "global_drift": 0.01936429150281519,
+      "vigor_max_diseq_mean": 3.3558907268822504,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 0.5,
+      "seed": 4001,
+      "local_R": 0.11958265769264631,
+      "global_drift": 0.014837851378883824,
+      "vigor_max_diseq_mean": 3.2241139619100045,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 0.5,
+      "seed": 4002,
+      "local_R": 0.1557549391092819,
+      "global_drift": 0.013358309675835863,
+      "vigor_max_diseq_mean": 3.3747348848743637,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 0.5,
+      "seed": 4003,
+      "local_R": 0.012515634427042434,
+      "global_drift": 0.03779187868678379,
+      "vigor_max_diseq_mean": 3.217095906850876,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 0.5,
+      "seed": 4004,
+      "local_R": 0.0904941673883096,
+      "global_drift": 0.008173650004526458,
+      "vigor_max_diseq_mean": 3.3920423930853683,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 2.0,
+      "seed": 4000,
+      "local_R": 0.029182388539860046,
+      "global_drift": 0.02536018757937941,
+      "vigor_max_diseq_mean": 3.4834375593622515,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 2.0,
+      "seed": 4001,
+      "local_R": 0.08730393243367798,
+      "global_drift": 0.021839663504654425,
+      "vigor_max_diseq_mean": 3.340104141837333,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 2.0,
+      "seed": 4002,
+      "local_R": 0.13637170341408716,
+      "global_drift": 0.01794192840666113,
+      "vigor_max_diseq_mean": 3.500813487009058,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 2.0,
+      "seed": 4003,
+      "local_R": 0.02453174837359233,
+      "global_drift": 0.0477791336406912,
+      "vigor_max_diseq_mean": 3.4690736855608475,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "quantum_pressure_coeff",
+      "factor": 2.0,
+      "seed": 4004,
+      "local_R": 0.10838010377020915,
+      "global_drift": 0.010973681789204928,
+      "vigor_max_diseq_mean": 3.5603347820871267,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 0.5,
+      "seed": 4000,
+      "local_R": 0.026043683088308813,
+      "global_drift": 0.023016751922574224,
+      "vigor_max_diseq_mean": 3.4226263782484274,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 0.5,
+      "seed": 4001,
+      "local_R": 0.1155653304271186,
+      "global_drift": 0.01833262279050381,
+      "vigor_max_diseq_mean": 3.264555289142139,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 0.5,
+      "seed": 4002,
+      "local_R": 0.14433862338706224,
+      "global_drift": 0.01591678061524574,
+      "vigor_max_diseq_mean": 3.413941192870392,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 0.5,
+      "seed": 4003,
+      "local_R": 0.004573611161943947,
+      "global_drift": 0.042347072733375235,
+      "vigor_max_diseq_mean": 3.381058662489585,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 0.5,
+      "seed": 4004,
+      "local_R": 0.07515089398588154,
+      "global_drift": 0.009403879374465213,
+      "vigor_max_diseq_mean": 3.4216856612543274,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 2.0,
+      "seed": 4000,
+      "local_R": 0.025726918724668337,
+      "global_drift": 0.022825926239251417,
+      "vigor_max_diseq_mean": 3.4248390303149097,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 2.0,
+      "seed": 4001,
+      "local_R": 0.12226285342560662,
+      "global_drift": 0.01815791992688445,
+      "vigor_max_diseq_mean": 3.269880655792678,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 2.0,
+      "seed": 4002,
+      "local_R": 0.14068034714271938,
+      "global_drift": 0.015785649435467803,
+      "vigor_max_diseq_mean": 3.417233264477277,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 2.0,
+      "seed": 4003,
+      "local_R": 0.009713274771652913,
+      "global_drift": 0.042009751757533645,
+      "vigor_max_diseq_mean": 3.384350131152341,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "deactualization_rate",
+      "factor": 2.0,
+      "seed": 4004,
+      "local_R": 0.07554273305269969,
+      "global_drift": 0.00932439011358737,
+      "vigor_max_diseq_mean": 3.4254810127689748,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 0.5,
+      "seed": 4000,
+      "local_R": 0.02652718585004458,
+      "global_drift": 0.023102098211381827,
+      "vigor_max_diseq_mean": 3.7673844278678374,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 0.5,
+      "seed": 4001,
+      "local_R": 0.09463626030142014,
+      "global_drift": 0.02073802570458435,
+      "vigor_max_diseq_mean": 3.5506563361827976,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 0.5,
+      "seed": 4002,
+      "local_R": 0.11476346001696613,
+      "global_drift": 0.015913215046924757,
+      "vigor_max_diseq_mean": 3.3934992649147713,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 0.5,
+      "seed": 4003,
+      "local_R": 0.0656566859705989,
+      "global_drift": 0.042564710046868695,
+      "vigor_max_diseq_mean": 3.5974382942160834,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 0.5,
+      "seed": 4004,
+      "local_R": 0.020382426062528932,
+      "global_drift": 0.010761632029639897,
+      "vigor_max_diseq_mean": 3.769583352616906,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 2.0,
+      "seed": 4000,
+      "local_R": 0.053158763865172334,
+      "global_drift": 0.015196785408826054,
+      "vigor_max_diseq_mean": 3.046079487212154,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 2.0,
+      "seed": 4001,
+      "local_R": 0.06701359231332925,
+      "global_drift": 0.011716843521638614,
+      "vigor_max_diseq_mean": 3.0114700310842624,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 2.0,
+      "seed": 4002,
+      "local_R": 0.16080679521403143,
+      "global_drift": 0.011404514746464643,
+      "vigor_max_diseq_mean": 3.1595386174154716,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 2.0,
+      "seed": 4003,
+      "local_R": 0.004387094159768933,
+      "global_drift": 0.0376973093201422,
+      "vigor_max_diseq_mean": 2.9903846204732276,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "confluence_weight",
+      "factor": 2.0,
+      "seed": 4004,
+      "local_R": 0.14220741717246035,
+      "global_drift": 0.007066548743072526,
+      "vigor_max_diseq_mean": 3.254343000466909,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 0.5,
+      "seed": 4000,
+      "local_R": 0.02624031470036246,
+      "global_drift": 0.0229610126313157,
+      "vigor_max_diseq_mean": 3.423778980443886,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 0.5,
+      "seed": 4001,
+      "local_R": 0.11768403782640317,
+      "global_drift": 0.018279814019999962,
+      "vigor_max_diseq_mean": 3.266658330134409,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 0.5,
+      "seed": 4002,
+      "local_R": 0.14266471870024663,
+      "global_drift": 0.015877057374517566,
+      "vigor_max_diseq_mean": 3.4154169259954337,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 0.5,
+      "seed": 4003,
+      "local_R": 0.006286442968210657,
+      "global_drift": 0.04224458671853049,
+      "vigor_max_diseq_mean": 3.382508088236993,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 0.5,
+      "seed": 4004,
+      "local_R": 0.07579058923788257,
+      "global_drift": 0.009378952395301177,
+      "vigor_max_diseq_mean": 3.423270194841856,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 2.0,
+      "seed": 4000,
+      "local_R": 0.0262448067349993,
+      "global_drift": 0.022936809726609154,
+      "vigor_max_diseq_mean": 3.4225450827465576,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 2.0,
+      "seed": 4001,
+      "local_R": 0.1180705848231869,
+      "global_drift": 0.018261783733793297,
+      "vigor_max_diseq_mean": 3.2656562366220654,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 2.0,
+      "seed": 4002,
+      "local_R": 0.14263564752418043,
+      "global_drift": 0.015864009858605026,
+      "vigor_max_diseq_mean": 3.4143173994228886,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 2.0,
+      "seed": 4003,
+      "local_R": 0.00619780169837524,
+      "global_drift": 0.04221323080023671,
+      "vigor_max_diseq_mean": 3.3814828737243063,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "mass_diffusion_coeff",
+      "factor": 2.0,
+      "seed": 4004,
+      "local_R": 0.0760853116022492,
+      "global_drift": 0.009373740312398442,
+      "vigor_max_diseq_mean": 3.422344555174561,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 0.5,
+      "seed": 4000,
+      "local_R": 0.026608883626366077,
+      "global_drift": 0.022953547327133665,
+      "vigor_max_diseq_mean": 3.4245910110711857,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 0.5,
+      "seed": 4001,
+      "local_R": 0.1183175795190661,
+      "global_drift": 0.01827409898637947,
+      "vigor_max_diseq_mean": 3.2677715343123883,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 0.5,
+      "seed": 4002,
+      "local_R": 0.1426621355814927,
+      "global_drift": 0.015873541210178168,
+      "vigor_max_diseq_mean": 3.4159278016349894,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 0.5,
+      "seed": 4003,
+      "local_R": 0.006556658152549654,
+      "global_drift": 0.04223432038042906,
+      "vigor_max_diseq_mean": 3.383303351359067,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 0.5,
+      "seed": 4004,
+      "local_R": 0.0762866993567341,
+      "global_drift": 0.009378224289336358,
+      "vigor_max_diseq_mean": 3.423878028946108,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 2.0,
+      "seed": 4000,
+      "local_R": 0.026023561817194757,
+      "global_drift": 0.022952268122352903,
+      "vigor_max_diseq_mean": 3.4209178998577836,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 2.0,
+      "seed": 4001,
+      "local_R": 0.11680629809845862,
+      "global_drift": 0.018274291189863068,
+      "vigor_max_diseq_mean": 3.2634313613183736,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 2.0,
+      "seed": 4002,
+      "local_R": 0.14263782551492402,
+      "global_drift": 0.015871551094114693,
+      "vigor_max_diseq_mean": 3.413290763658434,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 2.0,
+      "seed": 4003,
+      "local_R": 0.005668838579510966,
+      "global_drift": 0.04223050649035626,
+      "vigor_max_diseq_mean": 3.3798896221507295,
+      "pre_impulse_gap": 0.0
+    },
+    {
+      "varied": "gamma_damping",
+      "factor": 2.0,
+      "seed": 4004,
+      "local_R": 0.07472536667484365,
+      "global_drift": 0.009376453966964605,
+      "vigor_max_diseq_mean": 3.42112746538433,
+      "pre_impulse_gap": 0.0
+    }
+  ],
+  "wall_seconds": 384.0
+}

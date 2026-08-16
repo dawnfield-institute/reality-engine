@@ -1,0 +1,140 @@
+{
+  "config": {
+    "grid": [
+      128,
+      128
+    ],
+    "ticks": 12000,
+    "eta": 0.025
+  },
+  "laws": [
+    {
+      "name": "E+I+M",
+      "kind": "conservation",
+      "verdict": "ENFORCED",
+      "statistic": 2.523517230235447e-15,
+      "detail": "NormalizationOperator applies an explicit global correction every tick (~99.8% of ticks) to hold this constant. It is enforced, not observed."
+    },
+    {
+      "name": "E+I+M+P",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.002229424366475135,
+      "detail": "drifts"
+    },
+    {
+      "name": "E",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.01615299981517332,
+      "detail": "drifts"
+    },
+    {
+      "name": "I",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.1683243366992813,
+      "detail": "drifts"
+    },
+    {
+      "name": "M",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.003765407348938573,
+      "detail": "drifts"
+    },
+    {
+      "name": "P",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.005915046236346218,
+      "detail": "drifts"
+    },
+    {
+      "name": "E^2+I^2",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.008999815388245593,
+      "detail": "drifts"
+    },
+    {
+      "name": "E^3+I^3+M^3",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.05403862656543804,
+      "detail": "drifts"
+    },
+    {
+      "name": "E*I",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.025389930368063474,
+      "detail": "drifts"
+    },
+    {
+      "name": "|E-I|",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.04118765188012987,
+      "detail": "drifts"
+    },
+    {
+      "name": "E-I",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.04130309513754599,
+      "detail": "drifts"
+    },
+    {
+      "name": "M^2",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.020425984818770015,
+      "detail": "drifts"
+    },
+    {
+      "name": "grad_E^2",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.0032525507705038334,
+      "detail": "drifts"
+    },
+    {
+      "name": "M*grad(E-I)_u",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.059530859162922965,
+      "detail": "drifts"
+    },
+    {
+      "name": "M*grad(E-I)_v",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.10522993378232626,
+      "detail": "drifts"
+    },
+    {
+      "name": "mass_entropy",
+      "kind": "conservation",
+      "verdict": "ABSENT",
+      "statistic": 0.0034020815475368743,
+      "detail": "drifts"
+    },
+    {
+      "name": "force(r)",
+      "kind": "force",
+      "verdict": "ABSENT",
+      "statistic": 0.0,
+      "detail": "only 0 peaks survived 40 samples \u2014 no persistent objects to have a force between"
+    },
+    {
+      "name": "2nd law (dS/dt>0)",
+      "kind": "thermodynamic",
+      "verdict": "ABSENT",
+      "statistic": 1.8159536870086568e-05,
+      "detail": "violations 36.0%"
+    }
+  ],
+  "n_tracks": 0,
+  "mean_dt": 0.0006974553158727105
+}

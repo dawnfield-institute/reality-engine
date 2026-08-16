@@ -118,7 +118,12 @@ class NormalizationOperator:
         # corrected state can only ever measure float rounding.
         pre_correction = [E_new.sum().item(), I_new.sum().item(), M_new.sum().item()]
 
-        if abs(pac_residual) > 1e-8:
+        # config.enforce_pac gates the correction. Default True — unchanged behaviour.
+        # False lets the residual accumulate so it can be measured (POC-01 v4); the
+        # pre-correction sums above are recorded either way, so the audit metric means
+        # the same thing in both modes.
+        enforce = getattr(config, "enforce_pac", True)
+        if enforce and abs(pac_residual) > 1e-8:
             correction = pac_residual / (2.0 * E_new.numel())
             E_new = E_new + correction
             I_new = I_new + correction

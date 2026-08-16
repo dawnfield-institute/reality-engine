@@ -1,0 +1,80 @@
+schema_version: '2.1'
+directory_name: poc_08_expansion
+title: 'POC-08 (v4): Does expansion hold the web open?'
+description: >
+  POC-07 found the particle web is TRANSIENT - percolation peaks near 0.188 around t~600 and
+  decays to 0.050 by t=4000 as clumps virialize and the connecting bridges drain into them.
+  Real cosmology has expansion holding structure open, and DFT predicts Omega_Lambda = 1/phi =
+  0.6180 from the PAC/SEC equilibrium (exp_25). This was intended as the smallest case of a DFT
+  prediction going in as a simulation parameter and the simulation then doing something it was
+  not tuned to do.
+status: completed
+era: era4-milestone-stack-2026q2
+pillar: SEC
+hypothesis: >
+  Expansion holds the web open: with a scale factor evolving under a two-component Friedmann
+  equation, percolation should plateau rather than decay, and there should be a regime where
+  expansion and collapse compete rather than one dominating.
+falsification: >
+  If no expansion rate retains more structure than the static control, expansion is not what
+  holds the web open in this model. (Met: 0.76-1.2 sigma across 5 seeds. The proposed
+  alternative - dissipation - was also tested and its premise refuted: the system gains
+  energy 3-4x rather than losing it.)
+validation_type: computational
+result: >
+  BOTH HYPOTHESES ELIMINATED. Neither expansion nor dissipation explains why the particle web
+  is transient, and the explanation that survives needs no mechanism at all.
+
+  exp_01 (Omega_Lambda sweep at H0 = 0.02) measured DILUTION, not the hypothesis: `a` reached
+  25-45, so a fixed physical r0 = 5 sat inside a box of physical size ~3000 and particles could
+  not reach each other. `retained` came out monotone in `a_final`, which is the signature.
+
+  exp_01b (H0 swept three decades at Omega_L = 1/phi) found an apparent interior optimum:
+  H0 = 0.001 retained 53.4% against static's 42.5% and beat it on final percolation 0.093 to
+  0.068, with too-little looking like static and too-much worse. A clean story on ONE seed.
+
+  exp_02 (5 seeds) KILLED IT. H0 = 0.001 vs static: 0.76 sigma on final percolation, 1.2 sigma
+  on retention. Seed scatter (static alone at 44.4% +- 13.4 on retention) swamps every
+  between-arm difference. No evidence that expansion holds the web open.
+
+  exp_03 (dissipation, 3 seeds) killed the alternative AND its premise. The argument was that
+  damping 0.99 plus the speed cap bleed energy with nothing replacing it. Measured KE
+  end/start: 3.3 to 4.4. The system GAINS energy 3-4x - gravitational infall injects far more
+  than the damping removes. The premise was asserted twice without being checked and one column
+  refuted it. Removing damping entirely gives 55.5% +- 4.2 against 41.7% +- 12.9, which is
+  1.77 sigma on three seeds - the same size of effect that had just evaporated, so not claimed.
+  Incidentally the speed cap, not the damping factor, is where energy management happens:
+  lifting it from 2 to 20 lets KE grow 242x.
+
+  WHAT SURVIVES: hierarchical merging reduces connectivity by construction. Structures form,
+  then merge into fewer, larger, more widely separated objects, so percolation falls because
+  the NUMBER of distinct objects falls. The web epoch is simply the window where objects are
+  numerous enough and close enough to touch - too diffuse before, too few and too far apart
+  after. This is qualitatively what real cosmology shows, and it was the null hypothesis that
+  should have been on the table before either mechanism was proposed.
+notes: >
+  SCOPE LIMIT, stated before the result: this toy CANNOT test Omega_Lambda = 1/phi as such. In
+  real cosmology Omega_Lambda is meaningful because H0, G and the matter density are physically
+  anchored. Here g = 0.8, r0 = 5 and h0 are chosen numbers, so Omega_Lambda only sets the SHAPE
+  of a(t) and not any real balance. The framework's prediction is about a ratio this simulation
+  has no units to express. Making it testable means deriving g and r0 from something rather than
+  choosing them - a real piece of work, not a parameter change.
+
+  The narrower question the H0 sweep CAN answer: is there a regime where expansion and collapse
+  compete rather than one dominating. That is a structural fact about the mechanism.
+
+  A comoving/physical bug was caught before running and would have been fatal: `unit = d / r`
+  divided a COMOVING displacement by a PHYSICAL distance, giving a vector of length 1/a and
+  diluting gravity by an extra factor of a - indistinguishable in the output from expansion
+  doing its job. pairwise() now returns (r_physical, d_comoving, r_comoving) with the magnitude
+  taking the physical radius and the direction the comoving one. Verified: unit vectors length
+  1.0000 at a = 4, r_phys/r_com exactly 4.0000, and the static path bit-identical to POC-07.
+tags:
+  - expansion
+  - cosmology
+  - omega-lambda
+  - phi
+  - percolation
+  - transient-structure
+  - scope-limit
+  - v4

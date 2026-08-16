@@ -1,0 +1,123 @@
+{
+  "ticks": 3000,
+  "grid": [
+    64,
+    64
+  ],
+  "seeds": [
+    42,
+    7
+  ],
+  "rungs": [
+    {
+      "rung": "16 canonical",
+      "n_ops": 16,
+      "emergent": [],
+      "n_quiescent": 0,
+      "n_enforced": 1,
+      "pac_cv": 1.8417642873417227e-15,
+      "entropy_slope": 8.976519598983064e-05,
+      "activity_ratio": 1.307326530237349,
+      "seeds": [
+        42,
+        7
+      ]
+    },
+    {
+      "rung": "12 no deep physics",
+      "n_ops": 12,
+      "emergent": [],
+      "n_quiescent": 0,
+      "n_enforced": 1,
+      "pac_cv": 2.094705898644926e-15,
+      "entropy_slope": 0.00011394565879029682,
+      "activity_ratio": 1.66287613663038,
+      "seeds": [
+        42,
+        7
+      ]
+    },
+    {
+      "rung": "8 no forces/thermal",
+      "n_ops": 8,
+      "emergent": [],
+      "n_quiescent": 0,
+      "n_enforced": 1,
+      "pac_cv": 1.3397660609534353e-14,
+      "entropy_slope": 0.00011365514715992252,
+      "activity_ratio": 1.6553534820714555,
+      "seeds": [
+        42,
+        7
+      ]
+    },
+    {
+      "rung": "6 core + memory + confluence",
+      "n_ops": 7,
+      "emergent": [],
+      "n_quiescent": 0,
+      "n_enforced": 1,
+      "pac_cv": 1.2546841536138344e-14,
+      "entropy_slope": 9.557821586253957e-05,
+      "activity_ratio": 1.406202585299767,
+      "seeds": [
+        42,
+        7
+      ]
+    },
+    {
+      "rung": "5 core + memory",
+      "n_ops": 6,
+      "emergent": [],
+      "n_quiescent": 0,
+      "n_enforced": 1,
+      "pac_cv": 4.66019893464945e-16,
+      "entropy_slope": 8.873112597505592e-05,
+      "activity_ratio": 1.6082140576733819,
+      "seeds": [
+        42,
+        7
+      ]
+    },
+    {
+      "rung": "4 core only",
+      "n_ops": 5,
+      "emergent": [
+        "E*I",
+        "E^2+I^2"
+      ],
+      "n_quiescent": 0,
+      "n_enforced": 1,
+      "pac_cv": 2.2649001299839e-16,
+      "entropy_slope": -1.4730765483512443e-05,
+      "activity_ratio": 0.1419781570359776,
+      "seeds": [
+        42,
+        7
+      ]
+    },
+    {
+      "rung": "4 core, enforce_pac off",
+      "n_ops": 5,
+      "emergent": [
+        "E*I",
+        "E+I+M",
+        "E^2+I^2"
+      ],
+      "n_quiescent": 0,
+      "n_enforced": 0,
+      "pac_cv": 2.2649001299839e-16,
+      "entropy_slope": -1.4730765483512443e-05,
+      "activity_ratio": 0.1419781570359776,
+      "seeds": [
+        42,
+        7
+      ]
+    },
+    {
+      "rung": "3 NO normalization",
+      "n_ops": 4,
+      "diverged_at": 69
+    }
+  ]
+}

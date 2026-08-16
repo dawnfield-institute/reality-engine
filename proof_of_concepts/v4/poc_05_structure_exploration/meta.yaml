@@ -1,0 +1,71 @@
+schema_version: '2.1'
+directory_name: poc_05_structure_exploration
+title: 'POC-05 (v4): Does the engine build spatial structure, under any regime tried?'
+description: >
+  Exploratory panel over balance operator, gravity, and quantum pressure, asking whether the
+  mass field develops geometry. Originally run 2026-08-13 as journals only, with no committed
+  script and no calibrated estimator — the numbers that founded Milestone 16 came from here.
+  Reconstructed with per-direction correlation length, a power spectrum, and a coherent-power
+  fraction, each carrying an analytically derived selftest, and with a white-noise control row
+  so "at the floor" is a comparison rather than an assertion.
+status: completed
+era: era4-milestone-stack-2026q2
+pillar: SEC
+hypothesis: >
+  Some accessible regime of the canonical pipeline produces spatial correlation above the
+  white-noise floor in at least one direction of the manifold.
+falsification: >
+  If correlation length sits at the white-noise reference in both directions and the coherent
+  power fraction is indistinguishable from noise across the panel, the engine produces no
+  spatial structure and no downstream geometric measurement of it is meaningful.
+validation_type: computational
+result: >
+  CONTRAST AND CONNECTIVITY ARE DECOUPLED. The hypothesis is confirmed on correlation and
+  refuted on geometry, and the split is the finding.
+
+  Density responds strongly. Coherent power reaches +12.5 sigma over a white-noise sampling
+  distribution measured on the same grid, and density CV reaches 3.895 under gradient
+  transport - nearly twice a real cosmic web's ~2.0 - with void fraction 0.673. The
+  de-actualization rate eta is the strongest single lever, moving every density metric
+  monotonically across seeds with no saturation over a 128x range; its default of 0.025 came
+  from spike 04 as optimal for COUPLING ACCURACY, a different objective that pulls against
+  geometry.
+
+  Topology does not respond at all. Percolation - largest connected component of the overdense
+  set - stays in 0.007-0.019 across roughly forty runs, four grid configurations, three tick
+  counts (to 12000, past the 8450 convergence point), both Helmholtz halves of the EM force,
+  and transport strengths spanning 100x. A synthetic web scores 1.000 in one component; white
+  noise scores 0.003 across 1394. The engine sits at the noise floor throughout.
+
+  Mechanism: every force in the engine is the gradient of a scalar potential. Gravity is a
+  Poisson solve; ChargeDynamicsOperator builds a vector force and adds only its DIVERGENCE to
+  dE_dt, discarding a curl that is 89% the magnitude of what it keeps. Gradient flow has point
+  attractors - it makes blobs, and a filament is a line. Restoring the curl as transport is
+  null, because the curl velocity is five times LESS coherent than white noise (xi 0.477
+  against a 0.626 floor): the Poisson 1/k^2 weighting puts the smooth power in the gradient by
+  construction and leaves high-k residue in the curl, and Q is itself a derivative of an E
+  field that is already noise.
+
+  Scope: this rules out a CLASS of intervention - every variant of pushing the density around
+  differently - not a list of settings. It does not say EM is irrelevant to filaments; it says
+  the claim cannot be tested where every derived quantity is a derivative of noise.
+notes: >
+  Four metric faults were caught in this POC, all by rendering and none by any statistic:
+  box-counting returning D=2.000 for a straight filament; a tautological top-quartile filament
+  fraction reading 0.25 for web, blob and noise alike; a checkerboard scoring is_web=True with
+  void 0.605 and CV 1.273 while C(1) = -0.358; and isolated bright cells clearing every
+  one-point condition including the scale gate. web_metrics now carries a scale gate and a
+  percolation gate, each with its false positive as a permanent selftest case.
+
+  Two invalid tests preceded the real curl measurement, both methodological: an underpowered
+  run (dt=0.0007 means 3000 ticks moved mass about one cell) and a numerically invalid one
+  (centred differences with forward Euler are unconditionally unstable for advection at any
+  timestep). Fixed with donor-cell upwind, verified conservative before use.
+tags:
+  - structure
+  - correlation-length
+  - power-spectrum
+  - coherent-fraction
+  - calibration
+  - milestone16
+  - v4
