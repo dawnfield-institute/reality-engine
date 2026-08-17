@@ -108,6 +108,47 @@ conductance ∝ 1/length (+0.297, +2.57σ), so it is not the edge-length artifac
 **Dense particles are better connected than their Euclidean separation implies. Filaments are
 conduction paths.**
 
+### But the clock field does not exploit it — exp_07
+
+exp_06 measured the **network's** conduction. Whether the **clock field** uses it is a separate
+question, and it took three designs to ask properly.
+
+The first two were confounded. Ball-vs-k-NN coupling compares two *smoothing radii*: τ's
+non-local content is a monotone, roughly logarithmic function of coupling degree (7.6 → +0.085,
+58.8 → +0.275, ball at 237 → +0.399). Web-vs-uniform is confounded by **control-variable
+variance** — partial correlation is not comparable across arms whose control variable has
+different spread, and it scored the control *higher* at −9.31σ.
+
+The method that works is the corpus's own, from `dawn-field-theory`
+`experiments/studies/euclidean_distance_validation` experiment_25: a **degree-preserving edge
+shuffle**. It holds particles, positions, density, δ and its variance, degree, edge count and
+kernel size all fixed — only *which* particles are connected changes. Both confounds become
+impossible by construction, and no partial correlation is needed.
+
+| configuration | real | shuffled | gap | z |
+|---|---|---|---|---|
+| web | +0.708 | +0.091 | **+0.617** | +23.5 |
+| uniform | +0.783 | +0.095 | **+0.688** | +41.6 |
+
+Rewiring collapses τ's agreement with the long-range potential from 0.71 to 0.09 — **87% is
+carried by the wiring.** But the shuffle destroys the web's topology *and* spatial locality
+together, so the same null run inside a uniform box separates them. Each arm is compared against
+a shuffle of itself, so the gaps are comparable:
+
+**EXCESS = −0.071 (−4.27σ).** The web's gap is *smaller* than uniform's.
+
+**τ follows spatial locality; the web's topology adds nothing on top.**
+
+This does not contradict exp_06 — they are different questions and both hold. The *network*
+conducts preferentially through dense regions; the *clock field's* agreement with Φ does not
+exploit that, needing only that the coupling be local. The graph has the conductive structure
+and τ isn't using it.
+
+Which sharpens the open question: either the mean-relaxation form washes the advantage out
+(testable by swapping in the conduction Laplacian, which exp_06 showed behaves differently), or
+**Φ is the wrong observable** — a smooth long-range potential may not care about network
+structure at all. The second is more interesting and is untested.
+
 ### And it is a parallel-path effect, not a shortest-path one
 
 The geodesic arm — shortest **physical path length** along the graph — shows *nothing*:
@@ -163,6 +204,7 @@ of it.
 | [`exp_04_scale_character.py`](scripts/exp_04_scale_character.py) | How does character depend on scale and epoch? |
 | [`exp_05_terminated_or_reentering.py`](scripts/exp_05_terminated_or_reentering.py) | Has this ended, or moved? Calibrated against systems built to die. |
 | [`exp_06_conduction_on_the_graph.py`](scripts/exp_06_conduction_on_the_graph.py) | Does it conduct along the web? Asked on a bounded-degree graph, not a ball. **Corrects exp_03.** |
+| [`exp_07_shuffle_null.py`](scripts/exp_07_shuffle_null.py) | Does the *clock field* follow the web? Degree-preserving shuffle null, method from the corpus. |
 
 ## What went wrong on the way
 

@@ -72,6 +72,30 @@ result: >
   around zero. Effective resistance and shortest path diverge only through redundancy: a filament
   conducts not because it is a short wire but because it is a thick bundle of parallel ones.
 
+  BUT THE CLOCK FIELD DOES NOT EXPLOIT IT (exp_07). exp_06 measured the NETWORK's conduction;
+  whether tau uses it is separate, and took three designs. Ball-vs-knn coupling is confounded by
+  KERNEL SIZE - tau's non-local content is monotone and roughly logarithmic in coupling degree
+  (7.6 -> +0.085, 58.8 -> +0.275, ball 237 -> +0.399). Web-vs-uniform is confounded by
+  CONTROL-VARIABLE VARIANCE - partial correlation is not comparable across arms whose control
+  variable has different spread, and it scored the control HIGHER at -9.31 sigma.
+
+  The method that works is the corpus's own (dawn-field-theory
+  experiments/studies/euclidean_distance_validation, experiment_25): a DEGREE-PRESERVING EDGE
+  SHUFFLE, holding particles, positions, density, delta and its variance, degree, edge count and
+  kernel size fixed while changing only WHICH particles are connected. Both confounds become
+  impossible by construction and no partial correlation is needed. Degree preservation asserted
+  every run. Web: real +0.708, shuffled +0.091, GAP +0.617, z +23.5. Uniform: real +0.783,
+  shuffled +0.095, GAP +0.688, z +41.6. Rewiring destroys 87% of tau's agreement with the
+  long-range potential - but the shuffle removes the web's topology AND spatial locality
+  together, so the same null inside a uniform box separates them. EXCESS = -0.071 (-4.27 sigma):
+  the web's gap is SMALLER. TAU FOLLOWS SPATIAL LOCALITY AND THE WEB ADDS NOTHING ON TOP.
+
+  Not a contradiction with exp_06 - different questions, both hold. The NETWORK conducts
+  preferentially through dense regions; the CLOCK FIELD's agreement with Phi does not exploit
+  that, needing only that the coupling be local. Either the mean-relaxation form washes the
+  advantage out (testable with the conduction Laplacian), or Phi is the WRONG OBSERVABLE because
+  a smooth long-range potential may not care about network structure. The second is untested.
+
   STILL OPEN: which Laplacian SEC viscosity actually is. The mean (random-walk) and conduction
   (unnormalised) forms predict opposite signs and the corpus never fixed the choice.
 
@@ -130,6 +154,8 @@ notes: >
   and each is a different way it could be fooled.
 tags:
   - emergent-time
+  - shuffle-null
+  - graph-coupling
   - local-time
   - dilation
   - viscosity
