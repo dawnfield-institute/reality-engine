@@ -149,6 +149,9 @@ def main() -> int:
     ap.add_argument("--seeds", type=int, nargs="+", default=[42, 7, 101])
     ap.add_argument("--kappa", type=float, default=1.0)
     ap.add_argument("--viscosity", type=float, default=0.3)
+    ap.add_argument("--time-coupling", dest="time_coupling", choices=("ball", "knn"),
+                    default="ball", help="how tau's viscosity finds neighbours; knn bounds degree")
+    ap.add_argument("--time-k", dest="time_k", type=int, default=6)
     ap.add_argument("--res", type=int, default=None)
     ap.add_argument("--convention", choices=("attractive", "exp11"), default="exp11")
     a = ap.parse_args()
@@ -156,7 +159,8 @@ def main() -> int:
     pipe = EXP11_TIME if a.convention == "exp11" else CANONICAL_TIME
     res = a.res or matched_res(a.n, a.dims)
     print(f"  {a.n} particles, {a.dims}D, {a.steps} steps, mode '{a.mode}', "
-          f"grid {res}^{a.dims}, seeds {a.seeds}")
+          f"grid {res}^{a.dims}, seeds {a.seeds}, coupling '{a.time_coupling}'"
+          + (f" k={a.time_k}" if a.time_coupling == "knn" else ""))
     print(f"  {'seed':>5} {'c(t,d)':>8} {'c(t,Yuk)':>9} {'c(t,New)':>9} "
           f"{'lin-part':>9} {'NONLIN-PC':>10} {'perc':>6}")
 
@@ -164,7 +168,8 @@ def main() -> int:
     for sd in a.seeds:
         cfg = ParticleConfig(n=a.n, box=a.box, r0=a.r0, g=a.g, sec_balance=a.sec_balance,
                              dims=a.dims, seed=sd, entropy_init=0.1, time_mode=a.mode,
-                             time_kappa=a.kappa, time_viscosity=a.viscosity)
+                             time_kappa=a.kappa, time_viscosity=a.viscosity,
+                             time_coupling=a.time_coupling, time_k=a.time_k)
         eng = ParticleEngine(cfg, pipeline=pipe)
         for _ in range(a.steps):
             eng.tick()

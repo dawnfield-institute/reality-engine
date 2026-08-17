@@ -146,6 +146,18 @@ class ParticleConfig:
     time_viscosity: float = 0.3     # nu: neighbour diffusion of tau, the anti-collapse term
     time_floor: float = 0.05        # nothing freezes completely; keeps dt bounded away from 0
 
+    # How tau's viscosity term finds its neighbours. THIS IS A PHYSICS CHOICE, not a detail.
+    #   "ball"  every particle within r0. Neighbour count then tracks LOCAL DENSITY -- ~798 in
+    #           a web node against 116 in a uniform control at the same n and box -- so "how
+    #           much matter is nearby" and "how it is connected" are entangled in the operator
+    #           itself. exp_03 used this and concluded time does not conduct along the web; it
+    #           could not have detected conduction either way.
+    #   "knn"   the k nearest, so degree is BOUNDED and a dense region earns no extra coupling
+    #           for being dense. exp_06 measured the web's conduction this way and found
+    #           filaments ARE conduction paths, +9.14 sigma, k-independent.
+    time_coupling: str = "ball"
+    time_k: int = 6
+
 
 class ParticleOperator(Protocol):
     name: str
@@ -410,18 +422,31 @@ class LocalTime:
 
         tau = 1.0 / (1.0 + c.time_kappa * drive)
 
-        # nu * grad^2(tau), as a neighbour average — the anti-collapse stabiliser.
+        # nu * grad^2(tau) — the anti-collapse stabiliser, and (exp_02) the ONLY channel by
+        # which tau acquires non-local structure. Which neighbours it averages over is a
+        # physics choice: see ParticleConfig.time_coupling.
         if c.time_viscosity > 0:
-            w = near.float()
+            if c.time_coupling == "knn":
+                rr = r.clone()
+                rr.fill_diagonal_(float("inf"))
+                k = min(c.time_k, rr.shape[0] - 1)
+                idx = rr.topk(k, dim=1, largest=False).indices
+                adj = torch.zeros_like(near)
+                adj.scatter_(1, idx, True)
+                w = (adj | adj.T).float()
+            else:
+                w = near.float()
             neigh = (w @ tau) / w.sum(dim=1).clamp(min=1.0)
             tau = tau + c.time_viscosity * (neigh - tau)
+            m0 = dict(s.metrics)
+            m0["tau_coupling_degree"] = w.sum(dim=1).mean().item()
 
         tau = tau.clamp(min=c.time_floor)
         tau = tau / tau.mean().clamp(min=1e-9)                     # redistribution, not speed-up
 
         pt = (s.proper_time if s.proper_time is not None
               else torch.zeros_like(tau)) + tau * c.dt
-        m = dict(s.metrics)
+        m = dict(m0) if c.time_viscosity > 0 else dict(s.metrics)
         m["tau_mean"] = tau.mean().item()
         m["tau_dispersion"] = (tau.std() / tau.mean().clamp(min=1e-9)).item()
         m["tau_min"] = tau.min().item()
