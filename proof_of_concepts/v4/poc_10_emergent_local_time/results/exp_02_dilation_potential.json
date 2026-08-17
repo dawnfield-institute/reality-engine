@@ -1,0 +1,119 @@
+{
+  "config": {
+    "mode": "potential",
+    "dims": 3,
+    "n": 8000,
+    "box": 60.0,
+    "r0": 10.0,
+    "g": 1.5,
+    "sec_balance": 0.65334,
+    "steps": 180,
+    "seeds": [
+      42,
+      7,
+      101
+    ],
+    "kappa": 1.0,
+    "viscosity": 0.3,
+    "res": null,
+    "convention": "exp11"
+  },
+  "rows": [
+    {
+      "seed": 42,
+      "corr_tau_delta": -0.6730136895197609,
+      "corr_tau_phi_yukawa": 0.8859946432046832,
+      "corr_tau_phi_newton": 0.8655393934008758,
+      "partial_corr_newton_given_delta": 0.7476458445750216,
+      "forms_vs_newton": {
+        "linear_1_plus_phi": {
+          "r2": 0.749158441089944,
+          "slope": 0.36656527968971264
+        },
+        "gr_weak_field_sqrt": {
+          "r2": 0.8019419846855178
+        },
+        "quadratic": {
+          "r2": 0.9080954972852431
+        }
+      },
+      "forms_vs_yukawa": {
+        "linear_1_plus_phi": {
+          "r2": 0.7849865074112583,
+          "slope": 0.37731939851343843
+        },
+        "gr_weak_field_sqrt": {
+          "r2": 0.8325380513697163
+        },
+        "quadratic": {
+          "r2": 0.9180218945973037
+        }
+      },
+      "percolation": 0.2642669007901668
+    },
+    {
+      "seed": 7,
+      "corr_tau_delta": -0.6543198293403206,
+      "corr_tau_phi_yukawa": 0.8520689540448216,
+      "corr_tau_phi_newton": 0.8149714856832474,
+      "partial_corr_newton_given_delta": 0.687116753512255,
+      "forms_vs_newton": {
+        "linear_1_plus_phi": {
+          "r2": 0.6641784769046666,
+          "slope": 0.313118604935993
+        },
+        "gr_weak_field_sqrt": {
+          "r2": 0.6956930976088788
+        },
+        "quadratic": {
+          "r2": 0.7891838063962392
+        }
+      },
+      "forms_vs_yukawa": {
+        "linear_1_plus_phi": {
+          "r2": 0.726021465267241,
+          "slope": 0.3408899359080041
+        },
+        "gr_weak_field_sqrt": {
+          "r2": 0.761454297514517
+        },
+        "quadratic": {
+          "r2": 0.8592843521974439
+        }
+      },
+      "percolation": 0.3784232365145228
+    },
+    {
+      "seed": 101,
+      "corr_tau_delta": -0.607104593234626,
+      "corr_tau_phi_yukawa": 0.8675324220616196,
+      "corr_tau_phi_newton": 0.8512224831966293,
+      "partial_corr_newton_given_delta": 0.7537678523931252,
+      "forms_vs_newton": {
+        "linear_1_plus_phi": {
+          "r2": 0.724579726621738,
+          "slope": 0.42724752868708454
+        },
+        "gr_weak_field_sqrt": {
+          "r2": 0.7896950256730502
+        },
+        "quadratic": {
+          "r2": 0.8989999976905624
+        }
+      },
+      "forms_vs_yukawa": {
+        "linear_1_plus_phi": {
+          "r2": 0.7526125129590667,
+          "slope": 0.45062877373451976
+        },
+        "gr_weak_field_sqrt": {
+          "r2": 0.8123638867363615
+        },
+        "quadratic": {
+          "r2": 0.8961298341567139
+        }
+      },
+      "percolation": 0.2679465776293823
+    }
+  ]
+}

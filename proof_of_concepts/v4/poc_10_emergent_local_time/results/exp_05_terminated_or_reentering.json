@@ -1,0 +1,154 @@
+{
+  "config": {
+    "dims": 3,
+    "n": 8000,
+    "box": 60.0,
+    "r0": 10.0,
+    "g": 1.5,
+    "sec_balance": 0.65334,
+    "epochs": [
+      40,
+      90,
+      150,
+      230,
+      330,
+      450
+    ],
+    "scales": [
+      1.0,
+      1.6,
+      2.4,
+      3.4,
+      4.6,
+      6.0
+    ],
+    "res": 32,
+    "seeds": [
+      42,
+      7
+    ]
+  },
+  "calibration_pass": true,
+  "rows": [
+    {
+      "kind": "frozen",
+      "seed": 42,
+      "verdict": "TERMINATED",
+      "motion_early": 0.0,
+      "motion_late": 0.0,
+      "exchange": 0.0,
+      "exchange_vs_control": 0.0,
+      "net_drift": 0.0,
+      "ledger_balance": NaN,
+      "peak_scale_by_epoch": [
+        4.6,
+        4.6,
+        4.6,
+        4.6,
+        4.6,
+        4.6
+      ],
+      "migration_trend": 0.0
+    },
+    {
+      "kind": "frozen",
+      "seed": 7,
+      "verdict": "TERMINATED",
+      "motion_early": 0.0,
+      "motion_late": 0.0,
+      "exchange": 0.0,
+      "exchange_vs_control": 0.0,
+      "net_drift": 0.0,
+      "ledger_balance": NaN,
+      "peak_scale_by_epoch": [
+        4.6,
+        4.6,
+        4.6,
+        4.6,
+        4.6,
+        4.6
+      ],
+      "migration_trend": 0.0
+    },
+    {
+      "kind": "dissolving",
+      "seed": 42,
+      "verdict": "TERMINATED",
+      "motion_early": 0.039087931315104164,
+      "motion_late": 0.07097371419270833,
+      "exchange": 0.1364501953125,
+      "exchange_vs_control": 0.9675199619154784,
+      "net_drift": -0.08875732421875,
+      "ledger_balance": 0.09419085205510683,
+      "peak_scale_by_epoch": [
+        2.4,
+        1.0,
+        1.0,
+        6.0,
+        4.6,
+        2.4
+      ],
+      "migration_trend": 0.6
+    },
+    {
+      "kind": "dissolving",
+      "seed": 7,
+      "verdict": "TERMINATED",
+      "motion_early": 0.032511393229166664,
+      "motion_late": 0.059031168619791664,
+      "exchange": 0.145611572265625,
+      "exchange_vs_control": 1.0324800380845218,
+      "net_drift": 0.021014404296875,
+      "ledger_balance": 0.2873841236968728,
+      "peak_scale_by_epoch": [
+        3.4,
+        2.4,
+        1.0,
+        6.0,
+        4.6,
+        1.6
+      ],
+      "migration_trend": 0.028571428571428574
+    },
+    {
+      "kind": "web",
+      "seed": 42,
+      "verdict": "RE-ENTERING",
+      "motion_early": 0.10178629557291666,
+      "motion_late": 0.13789537217881945,
+      "exchange": 0.3301025390625,
+      "exchange_vs_control": 2.3406400796312727,
+      "net_drift": 0.0643798828125,
+      "ledger_balance": 0.12474433464832421,
+      "peak_scale_by_epoch": [
+        2.4,
+        3.4,
+        2.4,
+        2.4,
+        3.4,
+        3.4
+      ],
+      "migration_trend": 0.8285714285714287
+    },
+    {
+      "kind": "web",
+      "seed": 7,
+      "verdict": "RE-ENTERING",
+      "motion_early": 0.11542256673177084,
+      "motion_late": 0.1077541775173611,
+      "exchange": 0.343145751953125,
+      "exchange_vs_control": 2.4331248782810038,
+      "net_drift": 0.020538330078125,
+      "ledger_balance": 0.2727468481145813,
+      "peak_scale_by_epoch": [
+        1.0,
+        2.4,
+        2.4,
+        2.4,
+        3.4,
+        3.4
+      ],
+      "migration_trend": 1.0
+    }
+  ]
+}
