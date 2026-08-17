@@ -52,6 +52,15 @@ class ParticleState:
     box: float
     metrics: dict = field(default_factory=dict)
 
+    # --- emergent local time ---------------------------------------------------------
+    # tau is the LOCAL CLOCK RATE, a dimensionless multiplier on dt, normalised to mean 1.
+    # A particle's own elapsed time is proper_time; the spread between particles is the
+    # whole phenomenon. None until a LocalTime operator runs, so the substrate behaves
+    # exactly as before when it does not.
+    tau: Optional[torch.Tensor] = None            # (N,)
+    proper_time: Optional[torch.Tensor] = None    # (N,)
+    prev_delta: Optional[torch.Tensor] = None     # (N,) last tick's overdensity, for "rate"
+
     @property
     def n(self) -> int:
         return self.pos.shape[0]
@@ -110,10 +119,94 @@ class ParticleConfig:
                                     # (filaments, SHEETS, nodes, voids) only exists in 3D.
     cosmology: Optional[Cosmology] = None   # None = static box, reproducing POC-07 exactly
 
+    # --- initial conditions -----------------------------------------------------------
+    # "lattice"   perturbed grid — UNCORRELATED. What exp_09 and exp_11 used, deliberately:
+    #             they ask whether the force law ALONE builds structure from near-uniform.
+    #             Isotropic collapse into clumps is the expected outcome of that setup in any
+    #             framework, so a low connectivity reading there is not a result about DFT.
+    # "zeldovich" displacement off a P(k) ~ k^ic_index field — CORRELATED. The standard
+    #             cosmological setup, and a DIFFERENT question: what does the force law do
+    #             with realistic correlated initial conditions.
+    #
+    # Measured, 5 seeds, 500 steps, 2D: correlated ICs raise percolation from 0.107 +/- 0.024
+    # to ~0.18-0.20, a +2.1 to +3.0 sigma effect. **The spectral index does not matter** over
+    # -1.727 to -3.0 — all three overlap within their spreads. The default is therefore
+    # anchored on exp_12's own measured output slope (P(k) ~ k^-1.727, "SCALE-FREE",
+    # cosmic similarity 0.849) rather than on a hand-picked number.
+    ic: str = "lattice"
+    ic_index: float = -1.727        # spectral index of the seed field; exp_12's measured slope
+    ic_amplitude: float = 1.0       # displacement in units of the lattice spacing
+
+    # --- emergent local time ----------------------------------------------------------
+    # "global"    one dt for everything — the substrate as it was.
+    # "potential" clock rate from REMAINING collapse budget: slow where mass has piled up.
+    # "rate"      clock rate from the INSTANTANEOUS collapse rate: slow at infall fronts.
+    time_mode: str = "global"
+    time_kappa: float = 1.0         # how hard the drive bites
+    time_viscosity: float = 0.3     # nu: neighbour diffusion of tau, the anti-collapse term
+    time_floor: float = 0.05        # nothing freezes completely; keeps dt bounded away from 0
+
 
 class ParticleOperator(Protocol):
     name: str
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState: ...
+
+
+# ======================================================================================
+# Correlated initial conditions
+# ======================================================================================
+
+def zeldovich(q: "torch.Tensor", c: ParticleConfig, spacing: float, device):
+    """Displace a lattice by the gradient of a power-spectrum potential.
+
+    Build a Gaussian field with P(k) ~ k^ic_index, solve for the displacement potential
+    (psi_k = delta_k / k^2), take its gradient, and move each particle from its lattice
+    site q by that displacement. Velocity is set proportional to the displacement, which is
+    the growing mode: the flow that produced the offset keeps going.
+
+    The reason this matters is anisotropy. A correlated overdensity collapses along its
+    shortest axis first -- a sheet -- then along the next, giving a filament, then a node.
+    That ordering is the Zel'dovich picture, and it is why a web appears at all. An
+    uncorrelated start has no preferred axes to order, so every overdensity collapses to a
+    round clump and the result is speckle regardless of the force law.
+
+    Returns (positions, velocities), both comoving.
+    """
+    d, res = c.dims, int(round(c.box / spacing))
+    res = max(res, 8)
+    torch.manual_seed(c.seed + 991)
+
+    # A real-valued Gaussian field, then shape its spectrum.
+    delta = torch.fft.fftn(torch.randn(*([res] * d), device=device, dtype=torch.float32))
+    freqs = [torch.fft.fftfreq(res, d=spacing, device=device) * 2 * math.pi for _ in range(d)]
+    kk = torch.meshgrid(*freqs, indexing="ij")
+    k2 = sum(x ** 2 for x in kk)
+    k = torch.sqrt(k2)
+    k2 = torch.where(k2 > 0, k2, torch.ones_like(k2))            # DC: no displacement
+
+    amp = torch.where(k > 0, k.clamp(min=1e-12) ** (c.ic_index / 2.0), torch.zeros_like(k))
+    delta = delta * amp
+    delta[(0,) * d] = 0
+
+    # psi = -grad(phi) with phi_k = delta_k / k^2  ->  psi_k = -i k delta_k / k^2
+    disp = []
+    for ax in range(d):
+        psi_k = -1j * kk[ax] * delta / k2
+        disp.append(torch.fft.ifftn(psi_k).real)
+    disp = torch.stack(disp, dim=-1)
+
+    # Normalise so the typical displacement is ic_amplitude lattice spacings, then sample
+    # at each particle's lattice site.
+    rms = disp.pow(2).sum(-1).sqrt().mean().clamp(min=1e-12)
+    disp = disp * (c.ic_amplitude * spacing / rms)
+
+    idx = ((q / spacing).long() % res)
+    flat = idx[:, 0]
+    for ax in range(1, d):
+        flat = flat * res + idx[:, ax]
+    dq = disp.reshape(-1, d)[flat]
+
+    return (q + dq) % c.box, dq * 0.1
 
 
 # ======================================================================================
@@ -264,25 +357,105 @@ class SECUpdateRelative:
         return s.replace(entropy=ent, metrics=m)
 
 
+class LocalTime:
+    """Emergent local time: a per-particle clock rate set by the local collapse budget.
+
+    The premise is that a collapse event IS a tick, so the local framerate is set by how
+    much collapse the neighbourhood can still do. Mass is spent potential, so a mass-dense
+    region has little budget left and ticks slowly. **Gravitational time dilation then falls
+    out of PAC bookkeeping rather than being inserted** — nothing here knows about GR.
+
+    Two candidate sources, because the corpus does not fix the choice and they diverge in
+    exactly the regime that matters (a region can be potential-rich but quiescent):
+
+      "potential"  tau ~ 1/(1 + kappa*delta)          — REMAINING budget.
+                   Slow wherever matter has piled up. Clocks track where collapse HAS gone.
+      "rate"       tau ~ 1/(1 + kappa*|d delta/dt|)   — INSTANTANEOUS collapse rate.
+                   Slow only where collapse is happening NOW, so a settled node ticks fast
+                   again and the slow surfaces are the infall fronts.
+
+    They predict different topologies, which is the point: under "potential" the slow-time
+    set should trace the filaments and nodes; under "rate" it should trace their boundaries.
+    Measure, do not assert.
+
+    **tau is normalised to mean 1.** Local time is then a REDISTRIBUTION of a fixed global
+    time budget, never a global speed-up, which is what keeps the ledger auditable: total
+    elapsed proper time is conserved by construction and only its dispersion is physical.
+
+    `time_viscosity` diffuses tau across neighbours — the nu*grad^2(tau) term. This is the
+    "dispersed evenly enough not to collapse" condition made concrete: without it, tau
+    gradients sharpen until neighbouring regions tick at wildly different rates and stop
+    being causally coupled. Viscosity is what keeps the field well-posed, not a cosmetic
+    smoother. `tau_dispersion` is reported every tick so that decoupling is visible rather
+    than silent.
+    """
+
+    name = "local_time"
+
+    @torch.no_grad()
+    def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
+        if c.time_mode == "global":
+            return s
+        a = c.cosmology.a if c.cosmology else 1.0
+        r, _, _ = pairwise(s, a)
+        near = (r < c.r0)
+        count = near.sum(dim=1).float()
+        delta = count / count.mean().clamp(min=1e-9) - 1.0        # local overdensity
+
+        if c.time_mode == "rate":
+            prev = s.prev_delta if s.prev_delta is not None else delta
+            drive = (delta - prev).abs() / max(c.dt, 1e-9)
+        else:                                                      # "potential"
+            drive = delta.clamp(min=0.0)
+
+        tau = 1.0 / (1.0 + c.time_kappa * drive)
+
+        # nu * grad^2(tau), as a neighbour average — the anti-collapse stabiliser.
+        if c.time_viscosity > 0:
+            w = near.float()
+            neigh = (w @ tau) / w.sum(dim=1).clamp(min=1.0)
+            tau = tau + c.time_viscosity * (neigh - tau)
+
+        tau = tau.clamp(min=c.time_floor)
+        tau = tau / tau.mean().clamp(min=1e-9)                     # redistribution, not speed-up
+
+        pt = (s.proper_time if s.proper_time is not None
+              else torch.zeros_like(tau)) + tau * c.dt
+        m = dict(s.metrics)
+        m["tau_mean"] = tau.mean().item()
+        m["tau_dispersion"] = (tau.std() / tau.mean().clamp(min=1e-9)).item()
+        m["tau_min"] = tau.min().item()
+        m["tau_max"] = tau.max().item()
+        m["proper_time_spread"] = (pt.max() - pt.min()).item()
+        return s.replace(tau=tau, proper_time=pt, prev_delta=delta, metrics=m)
+
+
 class Integrator:
-    """Damped drift with a speed cap, on a periodic box."""
+    """Damped drift with a speed cap, on a periodic box.
+
+    When `state.tau` is present each particle advances by its OWN dt = dt_base * tau_i, so
+    the substrate integrates on local proper time rather than one global clock. Individual
+    per-particle timesteps are standard practice in N-body work; what is not standard is
+    letting the physics set them.
+    """
 
     name = "integrator"
 
     @torch.no_grad()
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
         vel = s.vel * c.damping
+        dt = c.dt if s.tau is None else c.dt * s.tau.unsqueeze(-1)
         if c.cosmology is not None:
             # Standard comoving form: peculiar velocities decay as dv/dt = -2 H v, and
             # comoving displacement is v/a. This is what "expansion holds the web open"
             # actually means mechanically — infall is fought by the drag and by the
             # separation growing underneath it.
             H = c.cosmology.hubble()
-            vel = vel * (1.0 - 2.0 * H * c.dt)
+            vel = vel * (1.0 - 2.0 * H * dt)
         speed = vel.norm(dim=-1, keepdim=True)
         vel = torch.where(speed > c.max_speed, vel * c.max_speed / speed, vel)
         a = c.cosmology.a if c.cosmology else 1.0
-        pos = (s.pos + vel * c.dt / a) % s.box
+        pos = (s.pos + vel * dt / a) % s.box
         return s.replace(pos=pos, vel=vel)
 
 
@@ -311,9 +484,16 @@ CANONICAL: list[Callable[[], ParticleOperator]] = [
     SECUpdate, LocalGravity, SECPressure, Integrator, PACLedger,
 ]
 
+# Same forces, with emergent local time in front of the integrator so the clock rate is set
+# from the CURRENT configuration before anything moves. Inert unless time_mode != "global".
+CANONICAL_TIME: list[Callable[[], ParticleOperator]] = [
+    SECUpdate, LocalGravity, SECPressure, LocalTime, Integrator, PACLedger,
+]
+
 # exp_11's 3D pipeline: same forces, different SEC rule. Its ordering also differs — exp_11
 # updates entropy AFTER moving, where exp_09 updates before.
 EXP11 = [LocalGravity, SECPressure, Integrator, SECUpdateRelative, PACLedger]
+EXP11_TIME = [LocalGravity, SECPressure, LocalTime, Integrator, SECUpdateRelative, PACLedger]
 
 
 # ======================================================================================
@@ -341,10 +521,14 @@ class ParticleEngine:
         if pos.shape[0] < c.n:       # a perfect d-th root rarely divides n exactly
             pad = c.n - pos.shape[0]
             pos = torch.cat([pos, torch.rand(pad, d, device=self.device) * c.box], dim=0)
-        pos = (pos + torch.randn_like(pos) * sp * 0.1) % c.box
+        if c.ic == "zeldovich":
+            pos, vel = zeldovich(pos, c, sp, self.device)
+        else:
+            pos = (pos + torch.randn_like(pos) * sp * 0.1) % c.box
+            vel = torch.zeros_like(pos)
         return ParticleState(
             pos=pos,
-            vel=torch.zeros_like(pos),
+            vel=vel,
             mass=1.0 + 0.1 * torch.randn(c.n, device=self.device),
             entropy=(c.entropy_init * torch.rand(c.n, device=self.device)
                      if c.entropy_init else torch.zeros(c.n, device=self.device)),
@@ -360,6 +544,28 @@ class ParticleEngine:
         self.state = s
         self.tick_count += 1
         return s
+
+    def field_of(self, values: torch.Tensor, res: int,
+                 weight: Optional[torch.Tensor] = None):
+        """Bin a per-particle quantity to a grid as a weighted MEAN (NaN where empty).
+
+        `density_field` sums over particles, which is right for density. An intensive
+        quantity -- a clock rate, an entropy, a temperature -- has to be AVERAGED instead:
+        summing it would just re-measure density wearing a different label, which is the kind
+        of quiet tautology this directory has paid for before.
+        """
+        s = self.state
+        d = s.pos.shape[1]
+        idx = (s.pos / s.box * res).long().clamp(0, res - 1)
+        flat = idx[:, 0]
+        for ax in range(1, d):
+            flat = flat * res + idx[:, ax]
+        w = torch.ones_like(values) if weight is None else weight
+        num = torch.zeros(res ** d, device=s.pos.device).scatter_add_(0, flat, values * w)
+        den = torch.zeros(res ** d, device=s.pos.device).scatter_add_(0, flat, w)
+        out = torch.where(den > 0, num / den.clamp(min=1e-12),
+                          torch.full_like(num, float("nan")))
+        return out.reshape(*([res] * d))
 
     def density_field(self, res: int = 128) -> torch.Tensor:
         """Bin to a d-dimensional grid so the instruments in structure.py apply unchanged.
