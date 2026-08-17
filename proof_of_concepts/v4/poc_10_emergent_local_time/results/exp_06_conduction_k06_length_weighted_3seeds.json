@@ -1,0 +1,94 @@
+{
+  "config": {
+    "dims": 3,
+    "n": 6000,
+    "box": 60.0,
+    "r0": 10.0,
+    "g": 1.5,
+    "sec_balance": 0.65334,
+    "steps": 180,
+    "k": 6,
+    "unweighted": false,
+    "diffuse": 400,
+    "viscosity": 0.3,
+    "seeds": [
+      42,
+      7,
+      101
+    ]
+  },
+  "rows": [
+    {
+      "kind": "web",
+      "seed": 42,
+      "percolation": 0.48522550544323484,
+      "is_web": true,
+      "degree_mean": 7.36899995803833,
+      "degree_max": 15.0,
+      "degree_cv": 0.16337577998638153,
+      "geodesic_vs_density": 0.031475030157264654,
+      "arrival_vs_density": 0.31514375253577503,
+      "reached_frac": 1.0
+    },
+    {
+      "kind": "uniform",
+      "seed": 42,
+      "percolation": 0.012746234067207415,
+      "is_web": false,
+      "degree_mean": 7.137333393096924,
+      "degree_max": 14.0,
+      "degree_cv": 0.16987529397010803,
+      "geodesic_vs_density": -0.006804022859193847,
+      "arrival_vs_density": -0.01646270615319925,
+      "reached_frac": 1.0
+    },
+    {
+      "kind": "web",
+      "seed": 7,
+      "percolation": 0.5340236686390533,
+      "is_web": true,
+      "degree_mean": 7.385333061218262,
+      "degree_max": 14.0,
+      "degree_cv": 0.1623764932155609,
+      "geodesic_vs_density": 0.1765412718096072,
+      "arrival_vs_density": 0.4362845079194504,
+      "reached_frac": 1.0
+    },
+    {
+      "kind": "uniform",
+      "seed": 7,
+      "percolation": 0.015250544662309368,
+      "is_web": false,
+      "degree_mean": 7.105666637420654,
+      "degree_max": 13.0,
+      "degree_cv": 0.1664617955684662,
+      "geodesic_vs_density": 0.02988941398649601,
+      "arrival_vs_density": 0.1411291680448767,
+      "reached_frac": 1.0
+    },
+    {
+      "kind": "web",
+      "seed": 101,
+      "percolation": 0.45816186556927296,
+      "is_web": true,
+      "degree_mean": 7.378666400909424,
+      "degree_max": 14.0,
+      "degree_cv": 0.1643083244562149,
+      "geodesic_vs_density": -0.01351573722606568,
+      "arrival_vs_density": 0.13940105547932488,
+      "reached_frac": 1.0
+    },
+    {
+      "kind": "uniform",
+      "seed": 101,
+      "percolation": 0.015348288075560802,
+      "is_web": false,
+      "degree_mean": 7.118000030517578,
+      "degree_max": 13.0,
+      "degree_cv": 0.16600942611694336,
+      "geodesic_vs_density": 0.07450454449655512,
+      "arrival_vs_density": -0.12446761631893084,
+      "reached_frac": 1.0
+    }
+  ]
+}

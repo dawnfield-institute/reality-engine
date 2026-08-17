@@ -116,6 +116,15 @@ Then the answer, with a uniform control that can return zero:
 **Time does not conduct along the web.** It tracks how much matter is nearby, not how it is
 connected. The control's +0.179 is the giveaway — density fluctuations do most of the work.
 
+> **SUPERSEDED the same day by exp_06 — this conclusion is WRONG.** The distance-ball operator
+> entangles density with connectivity by construction (~798 neighbours in the web against 116 in
+> the control) and could not have detected conduction either way. On a bounded-degree k-NN graph,
+> effective resistance separates the web from the control at **+9.14σ**, k-independent. Filaments
+> ARE conduction paths — and it is a parallel-path effect, since the shortest-path arm shows
+> nothing. See
+> [`2026-08-17_filaments-are-conduction-paths-and-my-null-was-the-operator.md`](2026-08-17_filaments-are-conduction-paths-and-my-null-was-the-operator.md).
+> Everything else in this journal stands.
+
 But which Laplacian SEC viscosity *is* was never fixed, and the two forms predict opposite
 signs. A distance-ball coupling cannot see connectivity by construction. Testing conduction
 properly needs a bounded-degree neighbour graph so filaments are paths, not blobs.
