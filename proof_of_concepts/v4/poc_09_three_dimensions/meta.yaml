@@ -1,0 +1,102 @@
+schema_version: '2.1'
+directory_name: poc_09_three_dimensions
+title: 'POC-09 (v4): Three dimensions — is the connectivity failure a 2D artifact?'
+description: >
+  POC-05 (contrast and connectivity are decoupled) and POC-07 (particles percolate far better
+  than the field engine) both rest on percolation measured in 2D, and both engines had only
+  ever been run in 2D. That is not a neutral choice for a connectivity measurement: in 2D
+  filaments that cross must intersect, voids must be fully enclosed, sheets do not exist at
+  all, and the site-percolation threshold is 0.593 against 0.312 in 3D, so the same field
+  percolates far more readily in three dimensions. exp_31 Part A independently requires
+  d_spatial = 3 for the cascade 1/r profile.
+  This round generalizes the instruments and the particle substrate to N dimensions, replicates
+  exp_11's published 3D web as a gate, and re-asks the connectivity question where the topology
+  is real.
+status: completed
+era: era4-milestone-stack-2026q2
+pillar: SEC
+hypothesis: >
+  The failure to produce connectivity is partly an artifact of measuring in two dimensions;
+  in 3D, where the percolation threshold is much lower and filaments need not intersect,
+  structure that reads as disconnected in 2D will percolate.
+  CONFIRMED 2026-08-17, after the round's own measurement error was corrected: in 3D at
+  matched sampling the web percolates at 0.406 +-0.069, 5/5 seeds.
+falsification: >
+  If the corpus's own 3D web result also fails to percolate, the connectivity failure is not a
+  dimensional artifact and the 2D results stand as measured.
+validation_type: computational
+result: >
+  RETRACTED AND CORRECTED 2026-08-17. The headline claim below was a sampling artifact in my
+  own measurement. See journals/2026-08-17_the-web-percolates-the-artifact-was-mine.md.
+
+  THE PUBLISHED WEB PERCOLATES. exp_11's web is real and connected. At exp_11's own 32^3
+  binning the same run gives percolation 0.385 with is_web True, and THIS POC'S OWN COMMITTED
+  SCRIPT, run unmodified at that resolution, reports 0.3443 +-0.0628 across its seeds. At
+  matched sampling (n/res^3 ~ 1) the 3D substrate gives 0.406 +-0.069 from exp_11's own
+  UNCORRELATED lattice start, with 5/5 seeds passing the web gate.
+
+  WHAT THE RETRACTED 0.0068 WAS. 4000 particles binned onto 64^3 is 0.015 particles per cell.
+  At that sampling the density field is empty by construction, the overdense set shatters into
+  singletons, and ANY web - real or deliberately synthetic - reads as disconnected. Binning
+  alone, same run: res 16/24/32/48/64 gives percolation 0.472/0.433/0.385/0.281/0.062. A
+  known-connected 3D control reads 1.000 across occupancy 0.082-0.268, so the instrument was
+  sound; the sampling was not. Occupancy read 0.012-0.04 throughout and was printed beside
+  every value - in 3D the site threshold is 0.312, so nothing there could have spanned.
+
+  THE CONFOUND IS THEREFORE NOT REFUTED. Dimension matters after all: 2D was doing real damage
+  on its own, since the filament/sheet/node topology only exists in 3D and site percolation
+  sits at 0.593 in 2D against 0.312 in 3D.
+
+  REPLICATION IS UNVERIFIED, NOT EXACT. The previously recorded void 0.888 / CV 2.948 is not
+  reproducible by the committed script: at 32^3 it gives void 0.939 (gate PASS) and CV 7.105
+  (gate FAIL). Whatever produced the recorded numbers is not what is in this repository.
+
+  THE ATTRACTIVE-VARIANT SPAN CLAIM IS UNVERIFIED. "Spans only 0.47 of the box, coexists with
+  231 other components" was measured at the same bad sampling and has not been re-measured.
+notes: >
+  THE SCRIPT DEFAULT WAS THE BUG. scripts/exp_01_replicate_exp11.py shipped with res=64 - the
+  exact resolution these notes already identified as the failed first attempt ("read CV 15.4
+  against a target of 2.94"). The artifact was documented and the code was never changed; run
+  today at that default it still reports CV 15.418. Default is now 32, exp_11's own binning.
+
+  XI AMBIGUITY, exactly as CLAUDE.md warns. This script uses XI_ANALYTIC/phi = 0.65414; the
+  follow-on emergent-time work used XI_DISCRETE/phi = 0.65334. Too small (0.1%) to explain
+  anything above, but two rounds were run at different operating points and neither said so.
+
+  THE ERRORS WERE ONE-DIRECTIONAL. Every measurement fault in this round understated structure
+  - never overstated it. A null reads as rigour, so the error mode that survived review was the
+  one that looked careful. That asymmetry is more useful than any single artifact.
+
+  WITHDRAWS A POC-07 CLAIM. POC-07 recorded a "sign error caught by the physics, not by a test"
+  in exp_09, on the grounds that d[i,j] = pos_i - pos_j points away from j so the force reads as
+  repulsive. The reference reproduces exactly AS WRITTEN, so the repulsive convention is what
+  produced the corpus's published numbers. The v4 substrate runs a different system, which is
+  legitimate, but describing it as a correction to exp_09 was wrong. Both conventions are now
+  available as CANONICAL (attractive) and EXP11 (as written), along with SECUpdateRelative,
+  since exp_11's SEC rule also differs from exp_09's in having no threshold and no decay.
+
+  TWO MEASUREMENT ARTIFACTS - and the first one was the finding, not a footnote. Percolation is
+  severely resolution-dependent for sparse particle data: the same 3D state binned to 24^3 / 32^3 / 48^3 / 64^3 gives 0.489 / 0.425 / 0.102 /
+  0.027, an 18x swing from grid choice alone, with void and CV moving too. exp_11 measures at
+  32^3; the first replication attempt used 64^3 and read CV 15.4 against a target of 2.94. And
+  POC-07's "15x the field engine" compared a sparse particle field to a dense one - at matched
+  cell count the field engine has occupancy 0.257 against the particles' 0.084 and still
+  percolates worse (0.0117 vs 0.0563), so the conclusion survives from a disadvantaged position
+  but the multiplier is ~5x, not 15x. web_metrics now reports occupancy on every call.
+
+  3D SELFTESTS ARE DERIVED, NOT COPIED. xi = 1 - 1/e for white noise and xi = 2 sigma for a
+  Gaussian are per-axis and dimension-independent, verified to carry over. coherent_fraction's
+  baseline is NOT band**d but the exact discretised mode count, prod (2c+1)/n - 0.0199 on 48^3
+  against 0.0156 for band^3 - now computed by expected_coherent_fraction(). And 3D white noise
+  must not percolate because occupancy 0.11 sits below the 3D site threshold of 0.312.
+tags:
+  - three-dimensions
+  - retraction
+  - sampling-artifact
+  - percolation
+  - connectivity
+  - exp_11
+  - replication
+  - sign-convention
+  - resolution-artifact
+  - v4

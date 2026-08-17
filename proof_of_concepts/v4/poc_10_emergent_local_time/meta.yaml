@@ -1,0 +1,112 @@
+schema_version: '2.1'
+directory_name: poc_10_emergent_local_time
+title: 'POC-10 (v4): Emergent local time — a clock rate set by the local collapse budget'
+description: >
+  If a quantum collapse event IS a tick, the local framerate is set by how much collapse a
+  neighbourhood can still do. Mass is spent potential, so a mass-dense region has little budget
+  left and ticks slowly - which makes gravitational time dilation a consequence of PAC
+  bookkeeping rather than something inserted. Nothing in the substrate knows about GR.
+
+  This round adds a LocalTime operator to the v4 particle substrate (per-particle clock rate,
+  per-particle proper time, neighbour diffusion of tau) and asks four questions of it: does the
+  clock field trace the web, is it dilation or is it density relabelled, does time flow ALONG
+  the filaments like a current, and does structure character depend on scale.
+
+  It also produced the round's most reusable output, which was not planned: an instrument that
+  distinguishes a process that has ENDED from one that has MOVED to another scale.
+status: active
+era: era4-milestone-stack-2026q2
+pillar: SEC
+hypothesis: >
+  A clock rate derived only from LOCAL neighbour counts will reproduce gravitational-dilation
+  behaviour against the long-range gravitational potential, which the substrate never computes;
+  and the clock field will propagate along the filament network the way a current runs through
+  a conductor.
+falsification: >
+  If the clock field's agreement with the long-range potential vanishes once its own local
+  input is regressed out, emergent time is local density relabelled and nothing has emerged.
+  If transport through a web is indistinguishable from transport through an unstructured
+  control at matched density, the conduction picture does not hold.
+validation_type: computational
+result: >
+  VISCOSITY IS THE MECHANISM, AND IT IS NOT A STABILISER. With tau diffusion off (nu = 0) the
+  partial correlation between tau and the long-range Newtonian potential, controlling for tau's
+  own exact input, is -0.009 +-0.04 - EXACTLY ZERO. Emergent time is then its own local input
+  wearing a different name. Switch diffusion on and it rises monotonically: nu 0.3 -> +0.240,
+  nu 0.6 -> +0.322. Neighbour diffusion, iterated, is what carries clock information past r0
+  and makes time a FIELD rather than a per-particle label. The nu = 0 null is the internal
+  control that makes the rest meaningful, and the channel was named in advance.
+
+  THE FORM IS WRONG FOR GR. Fitting tau against Phi_newton: quadratic R2 0.908, GR weak-field
+  sqrt(1 + 2 Phi) R2 0.802, linear R2 0.749. If this were gravitational dilation the sqrt form
+  should win. A clock field that responds non-locally to the potential: yes. Dilation in the
+  GR sense: NOT demonstrated.
+
+  REMAINING BUDGET BEATS COLLAPSE RATE. The two candidate framerate sources were left open by
+  the corpus and separate cleanly on topology: "potential" (tau ~ 1/(1+kappa*delta)) puts 89%
+  of slow clocks on filaments and 11% on boundaries, corr(tau, delta) = -0.673; "rate"
+  (tau ~ 1/(1+kappa*|d delta/dt|)) gives 56/37 and -0.089.
+
+  TIME DOES NOT CONDUCT ALONG THE WEB. Under the conduction (unnormalised Laplacian) form the
+  web channels no better than a uniform control at the same n, box and r0: +0.217 vs +0.179, a
+  +0.30 sigma difference. The clock field tracks how much matter is nearby, not how it is
+  connected. Under the mean (random-walk Laplacian) form the web looks strongly ANTI-channelling
+  (-4.83 sigma), which is degree dilution, not physics. Which Laplacian SEC viscosity is was
+  never fixed by the corpus and the two predict opposite signs - that is the open question.
+
+  STRUCTURE CHARACTER IS SCALE-DEPENDENT, AND THE ORGANISING SCALE MIGRATES. Hessian
+  classification across a smoothing ladder: filaments peak at intermediate scale (58% at
+  0.45 r0), nodes rise monotonically outward, voids dominate the small end. Across epochs the
+  filament peak moves OUT (0.45 -> 0.64 r0) while small-scale void fraction grows 6.3% -> 25.3%
+  -> 32.7%. Small scales evacuate as structure re-forms at larger ones.
+
+  ENDED OR MOVED - A CALIBRATED DETECTOR. The web at t=450 reads RE-ENTERING at 2.34-2.43x a
+  measured destruction control, where a frozen system reads 0.00x and a dissolving one 0.97-1.03x,
+  both TERMINATED. The discriminating quantity is cross-scale EXCHANGE of collapse order:
+  a dissolving system moves every scale the same direction, a re-entering one moves scales
+  against each other.
+notes: >
+  A TAU CLAIM WAS RETRACTED MID-ROUND. tau's character spectrum is sheet-dominated where matter
+  is filament-dominated, at every scale and epoch, and this was briefly written up as "the clock
+  field sits one axis of collapse behind matter". A control killed it: applying tau's FORMULA
+  (1/(1+kappa*delta)) to the same rho with no viscosity and no evolution reproduces the
+  inversion (30.5% filament / 58.6% sheet against matter's 61.5/29.9). The inversion is the
+  nonlinear transform, not the physics. What survives is second-order: |tau - algebra| = 0.136
+  against a 0.04-0.07 reference, with tau sitting BETWEEN matter and the pure algebra.
+
+  THREE OBSERVABLES FAILED BEFORE ONE WORKED, in the transport experiment. (1) Per-particle
+  AMPLITUDE is degree-confounded: relaxation shares a value among neighbours, so a dense
+  filament divides the same signal over ~7x more particles and amplitude falls with density
+  whether or not filaments channel. (2) ARRIVAL TIME was claimed to be dilution-free and is not
+  - crossing a threshold still depends on amplitude. (3) The first run was measured on a
+  SATURATED graph: at r0/box = 1/6 each particle neighbours ~800 of 6000, the graph diameter is
+  ~2 hops, arrival fraction was 1.00 everywhere and there was no front to measure. Only the
+  fourth version, with a uniform control that could return zero, meant anything.
+
+  THE CLOCK COUPLING RADIUS MUST BE SEPARATE FROM THE FORCE RADIUS. Tying tau diffusion to r0
+  is what produced the saturated graph. Local time only has propagation structure when its
+  coupling is short-ranged against the web; exp_03 takes --diffuse-radius for this.
+
+  THE DETECTOR'S CALIBRATION ONCE PASSED WHILE BROKEN. An intermediate version defaulted every
+  verdict to TERMINATED through a NaN path, so both controls "passed" for reasons unrelated to
+  what they guard. The calibration now also requires that the reference SEPARATED the web from
+  the controls. A check that can only ever say PASS guards nothing.
+
+  KNOWN SENSITIVITY. exp_05 needs enough scales and resolution to discriminate: at n=8000,
+  res=32, 6 scales it reports 2.34x and PASS; at n=3000, res=24, 3 scales it reports 0.79x and
+  correctly refuses to answer (CALIBRATION FAIL) rather than guessing.
+
+  ONE MODEL OF DEATH. The detector's control set contains progressive smoothing only. A system
+  that dies by freezing mid-structure, or by fragmenting without smoothing, is not represented,
+  and each is a different way it could be fooled.
+tags:
+  - emergent-time
+  - local-time
+  - dilation
+  - viscosity
+  - transport
+  - scale-dependence
+  - recursion
+  - calibration
+  - retraction
+  - v4

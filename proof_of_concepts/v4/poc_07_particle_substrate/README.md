@@ -65,12 +65,18 @@ explicit correction applied every tick.
 
 ## Two failures worth keeping
 
-**A sign error the physics caught, not a test.** The first run had gravity *repulsive* —
-`d[i,j] = pos_i − pos_j` points away from `j`, so an attractive force needs `−unit`. The cloud
-expanded to uniform, damping killed the motion, and every metric froze identically from t=100 to
-t=600 (void 0.756, cv 1.772) at percolation 0.001, *below white noise*. Three tells at once.
-exp_09 carries the same sign with a comment claiming it points toward the other particle — worth
-flagging upstream.
+**A sign change that turned out to be a DEVIATION, not a fix.** The first run had gravity
+following exp_09's convention, where `d[i,j] = pos_i − pos_j` points away from `j` — so the
+force is repulsive. The cloud expanded to uniform, damping killed the motion, and every metric
+froze from t=100 to t=600 at percolation 0.001. Flipping the sign produced the structure this
+POC reports.
+
+**That was recorded here as catching a bug in exp_09, and it is withdrawn.** POC-09 transcribed
+exp_11 literally, signs as written, and reproduced its published numbers to three significant
+figures (void 0.888 vs 0.89, CV 2.948 vs 2.94). The repulsive convention is what produced the
+corpus's results. This POC's substrate runs a different system from the reference, which is
+legitimate but must not be described as a correction to it. Both are now available as
+`CANONICAL` and `EXP11`.
 
 **`fit_force_law` fails here, and that retracts part of POC-06.** R² = **0.0005** on a system
 whose force law is known by construction, twice, over 14000 samples. In a dense system each

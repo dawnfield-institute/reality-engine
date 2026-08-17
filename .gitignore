@@ -77,3 +77,8 @@ tmp/
 
 # Claude local settings
 .claude/
+
+# Scratch output from the v4 world-model CLI and its experiment drivers. Curated figures are
+# copied into the owning POC's results/ (which IS tracked, see the exception above); this
+# directory is every intermediate run and is regenerable.
+proof_of_concepts/v4/worldmodel_out/
