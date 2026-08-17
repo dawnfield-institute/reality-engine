@@ -26,7 +26,11 @@ falsification: >
   If the clock field's agreement with the long-range potential vanishes once its own local
   input is regressed out, emergent time is local density relabelled and nothing has emerged.
   If transport through a web is indistinguishable from transport through an unstructured
-  control at matched density, the conduction picture does not hold.
+  control at matched degree, the conduction picture does not hold.
+  RESOLVED 2026-08-17: the first condition is NOT met (the agreement survives at nu > 0 and
+  vanishes only at nu = 0, as it should). The second WAS apparently met by exp_03 and that was
+  a measurement failure - at matched DEGREE rather than matched ball radius, the web separates
+  from the control at +9.14 sigma.
 validation_type: computational
 result: >
   VISCOSITY IS THE MECHANISM, AND IT IS NOT A STABILISER. With tau diffusion off (nu = 0) the
@@ -47,12 +51,29 @@ result: >
   of slow clocks on filaments and 11% on boundaries, corr(tau, delta) = -0.673; "rate"
   (tau ~ 1/(1+kappa*|d delta/dt|)) gives 56/37 and -0.089.
 
-  TIME DOES NOT CONDUCT ALONG THE WEB. Under the conduction (unnormalised Laplacian) form the
-  web channels no better than a uniform control at the same n, box and r0: +0.217 vs +0.179, a
-  +0.30 sigma difference. The clock field tracks how much matter is nearby, not how it is
-  connected. Under the mean (random-walk Laplacian) form the web looks strongly ANTI-channelling
-  (-4.83 sigma), which is degree dilution, not physics. Which Laplacian SEC viscosity is was
-  never fixed by the corpus and the two predict opposite signs - that is the open question.
+  TIME DOES CONDUCT ALONG THE WEB - exp_03's null was a MEASUREMENT FAILURE, corrected by
+  exp_06 on 2026-08-17. exp_03 coupled particles by DISTANCE BALL, which entangles "how much
+  matter is nearby" with "how it is connected" in the definition of the operator: in the web a
+  ball held ~798 neighbours against 116 in the control at the same n and box. It could not have
+  detected conduction either way.
+
+  On a k-NEAREST-NEIGHBOUR graph, degree is bounded (7.37 web vs 7.14 control, CV 0.163 vs
+  0.170), so a dense region earns no extra conductance for being dense and anything surviving is
+  topology. Effective resistance from a source - a steady-state linear solve, no threshold, no
+  step count - against local density within fixed Euclidean shells, topology-only edges, 5 seeds:
+  k=4 gives web +0.410 vs control -0.003 (+5.21 sigma); k=6 gives +0.422 vs -0.022 (+6.22 sigma);
+  k=10 gives +0.442 vs -0.028 (+9.14 sigma). The EFFECT SIZE IS K-INDEPENDENT at 0.41-0.44, with
+  significance rising only because more edges means less noise. Stronger with length removed than
+  with conductance ~ 1/length (+0.297, +2.57 sigma), so not an edge-length artifact either.
+  Dense particles are better connected than their Euclidean separation implies.
+
+  AND IT IS A PARALLEL-PATH EFFECT, NOT A SHORTEST-PATH ONE. The geodesic arm - shortest PHYSICAL
+  path length along the same graph - shows nothing: +0.68, +0.02, -1.64 sigma across k, scattering
+  around zero. Effective resistance and shortest path diverge only through redundancy: a filament
+  conducts not because it is a short wire but because it is a thick bundle of parallel ones.
+
+  STILL OPEN: which Laplacian SEC viscosity actually is. The mean (random-walk) and conduction
+  (unnormalised) forms predict opposite signs and the corpus never fixed the choice.
 
   STRUCTURE CHARACTER IS SCALE-DEPENDENT, AND THE ORGANISING SCALE MIGRATES. Hessian
   classification across a smoothing ladder: filaments peak at intermediate scale (58% at
@@ -73,6 +94,14 @@ notes: >
   inversion (30.5% filament / 58.6% sheet against matter's 61.5/29.9). The inversion is the
   nonlinear transform, not the physics. What survives is second-order: |tau - algebra| = 0.136
   against a 0.04-0.07 reference, with tau sitting BETWEEN matter and the pure algebra.
+
+  exp_03'S OPERATOR COULD NOT ANSWER ITS OWN QUESTION and its null was reported as a result
+  anyway. exp_06 redoes it on a bounded-degree graph and finds the opposite at +9.14 sigma. Three
+  MORE observables failed in exp_06 alone before one worked: hop count (edge length scales with
+  local spacing, so crossing dense material costs more hops for purely geometric reasons);
+  explicit time-stepping (conductance weights make the network stiff, so the stable step collapses
+  and it returned all-NaN, which nearly got read as "nothing arrives"); and the length-weighting
+  question itself, settled by an unweighted run that made the effect STRONGER.
 
   THREE OBSERVABLES FAILED BEFORE ONE WORKED, in the transport experiment. (1) Per-particle
   AMPLITUDE is degree-confounded: relaxation shares a value among neighbours, so a dense

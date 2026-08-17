@@ -80,22 +80,47 @@ non-locally to the potential — yes. **Dilation in the GR sense — not demonst
 > Note `corr(τ, δ) = −0.673` is **near-definitional** — τ *is* a decreasing function of δ. It is
 > reported because it separates the two modes, not as evidence of anything.
 
-### Time does not conduct along the web
+### Time DOES conduct along the web — exp_03's null was a measurement failure
 
-| viscosity form | web | uniform control | difference |
+> **CORRECTED 2026-08-17 by exp_06.** exp_03 reported that time does not conduct along the web
+> (+0.30σ against a uniform control). That test could not have detected conduction: it coupled
+> particles by **distance ball**, which entangles "how much matter is nearby" with "how it is
+> connected" in the definition of the operator. In the web a ball held ~798 neighbours against
+> 116 in the control at the same `n` and `box`. The null was structural, not physical.
+
+On a **k-nearest-neighbour graph** every particle has bounded degree — 7.37 in the web against
+7.14 in the control, CV 0.163 vs 0.170 — so a dense region earns no extra conductance for being
+dense. Degree dilution is removed by construction rather than corrected for, and anything that
+survives is topology. Measuring **effective resistance** from a source (a steady-state linear
+solve, no threshold and no step count) against local density within fixed Euclidean shells:
+
+| k | web | uniform control | difference |
 |---|---|---|---|
-| mean (random-walk Laplacian) | −0.346 | +0.093 | −4.83σ |
-| conduction (unnormalised) | +0.217 | +0.179 | **+0.30σ** |
+| 4 | +0.410 | −0.003 | +5.21σ |
+| 6 | +0.422 | −0.022 | +6.22σ |
+| 10 | +0.442 | −0.028 | **+9.14σ** |
 
-Under the conduction form — the "like macro EM" reading — the web channels no better than an
-unstructured control at the same `n`, `box` and `r0`. The clock field tracks **how much matter is
-nearby, not how it is connected**. The control returning +0.179 rather than 0 is the giveaway:
-local density fluctuations produce most of the effect and topology adds nothing measurable.
+Topology-only edges (every edge conducting equally), 5 seeds. **The effect size is
+k-independent** — 0.41 to 0.44 — with significance rising only because more edges means less
+noise. Controls sit at zero throughout. It is *stronger* with length removed than with
+conductance ∝ 1/length (+0.297, +2.57σ), so it is not the edge-length artifact either.
 
-**Which Laplacian SEC viscosity is was never fixed by the corpus, and the two predict opposite
-signs.** That is the live question, not a settled null. A distance-ball coupling cannot see
-connectivity by construction; testing conduction properly needs a neighbour *graph* with bounded
-degree, so filaments are paths rather than blobs. Different operator, not a parameter change.
+**Dense particles are better connected than their Euclidean separation implies. Filaments are
+conduction paths.**
+
+### And it is a parallel-path effect, not a shortest-path one
+
+The geodesic arm — shortest **physical path length** along the graph — shows *nothing*:
++0.68σ, +0.02σ, −1.64σ across k, scattering around zero with no consistent sign.
+
+Effective resistance and shortest path diverge in only one way: **many redundant routes.** A
+filament does not conduct because it is a short wire; it conducts because it is a thick bundle
+of parallel ones. Resistance sees that, shortest-path cannot. That also sits better with the
+re-entry picture than a single-route model would — redundancy is a property of the structure at
+a scale, not of any one path through it.
+
+**Still open**: which Laplacian SEC viscosity actually is. The mean (random-walk) and conduction
+(unnormalised) forms predict opposite signs and the corpus never fixed the choice.
 
 ### Structure character is scale-dependent, and the organising scale migrates
 
@@ -137,6 +162,7 @@ of it.
 | [`exp_03_transport.py`](scripts/exp_03_transport.py) | Does time flow *along* the filaments? |
 | [`exp_04_scale_character.py`](scripts/exp_04_scale_character.py) | How does character depend on scale and epoch? |
 | [`exp_05_terminated_or_reentering.py`](scripts/exp_05_terminated_or_reentering.py) | Has this ended, or moved? Calibrated against systems built to die. |
+| [`exp_06_conduction_on_the_graph.py`](scripts/exp_06_conduction_on_the_graph.py) | Does it conduct along the web? Asked on a bounded-degree graph, not a ball. **Corrects exp_03.** |
 
 ## What went wrong on the way
 
@@ -147,6 +173,15 @@ at every scale and epoch, and this was briefly written up as "the clock field si
 collapse behind matter." Applying τ's *formula* to the same ρ with no viscosity and no evolution
 reproduces the inversion (30.5% filament / 58.6% sheet against matter's 61.5 / 29.9). **The
 inversion is the nonlinear transform, not the physics.** What survives is second-order.
+
+**exp_03's operator could not answer its own question**, and I reported its null as a result
+anyway. A distance ball entangles density with connectivity by construction. exp_06 redoes it on
+a bounded-degree graph and finds the opposite, at +9.14σ.
+
+**Three more observables failed before one worked** in exp_06 alone — hop count (edge length
+scales with local spacing, so dense material costs more hops for free), explicit time-stepping
+(conductance weights make the network stiff; it returned all-NaN, which I nearly read as
+"nothing arrives"), and then the length-weighting question itself, settled by an unweighted run.
 
 **Three observables failed before one worked** in the transport experiment — amplitude
 (degree-confounded), arrival time (also degree-confounded, after I claimed it wasn't), and a
