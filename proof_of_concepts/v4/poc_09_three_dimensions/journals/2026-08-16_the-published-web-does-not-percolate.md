@@ -1,3 +1,13 @@
+> **SUPERSEDED 2026-08-17 — the central claim below is WRONG.**
+>
+> exp_11's web **does** percolate: 0.385 with `is_web=True` at exp_11's own 32³ binning, and
+> 0.3443 ± 0.0628 from this POC's own committed script. The 0.0068 reported here came from
+> binning 4000 particles onto a 64³ grid — 0.015 particles per cell — where the density field
+> is empty by construction and any web, real or synthetic, reads as disconnected.
+>
+> Kept unedited as the record of what was believed and why. Corrections layer forward:
+> see [`2026-08-17_the-web-percolates-the-artifact-was-mine.md`](2026-08-17_the-web-percolates-the-artifact-was-mine.md).
+
 # 2026-08-16: exp_11 replicates exactly — and its web does not percolate
 
 Three findings, in the order they arrived. The middle one is a correction to my own work.

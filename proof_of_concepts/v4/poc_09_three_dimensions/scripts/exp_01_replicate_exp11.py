@@ -61,7 +61,7 @@ def ratios(cfg) -> dict:
             "dims": d}
 
 
-def run(cfg, steps, res=64, marks=()):
+def run(cfg, steps, res=32, marks=()):
     eng = ParticleEngine(cfg)
     snaps = {}
     for t in range(1, steps + 1):
@@ -75,7 +75,11 @@ def run(cfg, steps, res=64, marks=()):
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--steps", type=int, default=600)
-    ap.add_argument("--res", type=int, default=64)
+    # exp_11 bins at 32^3. 64^3 puts 4000 particles on 262144 cells -- 0.015 per cell --
+    # where the density field is empty by construction and ANY web reads as disconnected.
+    # That default is what produced this POC's retracted "does not percolate" claim, and the
+    # CV 15.4 its own meta.yaml records as the failed first attempt. See the 2026-08-17 journal.
+    ap.add_argument("--res", type=int, default=32)
     ap.add_argument("--seeds", type=int, nargs="*", default=[42, 7, 99])
     args = ap.parse_args()
 

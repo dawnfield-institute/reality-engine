@@ -1,6 +1,20 @@
 # POC-09 (v4): Three dimensions
 
-**Status**: active · **Pillar**: SEC
+**Status**: completed · **Pillar**: SEC
+
+> ## ⚠ RETRACTED AND CORRECTED — 2026-08-17
+>
+> **This POC's headline claim was wrong, and the error was in my measurement, not in exp_11.**
+> exp_11's web **percolates**: 0.385 with `is_web=True` at exp_11's own 32³ binning, and
+> **0.3443 ± 0.0628** from this POC's own committed script run unmodified at that resolution.
+>
+> The retracted 0.0068 came from binning 4000 particles onto a **64³** grid — 0.015 particles
+> per cell — where the density field is empty by construction and *any* web, real or
+> deliberately synthetic, reads as disconnected.
+>
+> Full account: [`journals/2026-08-17_the-web-percolates-the-artifact-was-mine.md`](journals/2026-08-17_the-web-percolates-the-artifact-was-mine.md).
+> The original claim and reasoning are preserved in the 2026-08-16 journal — corrections layer
+> forward.
 
 ## Why
 
@@ -15,43 +29,49 @@ ever been run there. That is not a neutral choice for a connectivity measurement
 
 exp_31 Part A wants 3D independently: the cascade 1/r profile requires `d_spatial = 3`.
 
-## Result — the confound is refuted
+## Result — the hypothesis is CONFIRMED, after correcting my own error
 
-**Connectivity failure is not a 2D artifact**, because the corpus's own 3D result fails it too,
-at 3D's much more permissive threshold.
+**In 3D at matched sampling the web percolates**: 0.406 ± 0.069 across 5 seeds, every one
+passing the web gate — and from exp_11's own *uncorrelated lattice* start, with nothing added.
 
-### The replication is exact
+### Binning alone moves the answer by 8×
 
-Transcribing `exp_11_pac_web_3d.py` literally, signs as written, at its own 32³ binning:
+One run, identical physics, read at different grids:
 
-| | void | density CV |
-|---|---|---|
-| exp_11 reported | 0.89 | 2.94 |
-| **transcription** | **0.888** | **2.948** |
+| res | particles/cell | percolation | `is_web` |
+|---|---|---|---|
+| 16 | 0.98 | 0.472 | True |
+| 24 | 0.29 | 0.433 | True |
+| **32 — exp_11's own** | 0.12 | **0.385** | **True** |
+| 48 | 0.036 | 0.281 | False |
+| **64 — the retracted claim** | **0.015** | 0.062 | False |
 
-### The published web does not percolate
+4000 particles on 64³ cannot fill it: the overdense set shatters into singletons. A
+known-connected 3D control reads **1.000 across occupancy 0.082–0.268**, covering this regime,
+so the instrument was sound and the sampling was not.
 
-| | void | cv | **percolation** | occupancy |
-|---|---|---|---|---|
-| exp_11 as written | 0.888 | 2.948 | **0.0068** | 0.1124 |
-| attractive-gravity variant | 0.938 | 5.564 | **0.4252** | 0.0616 |
-| 3D white-noise control | 0.060 | 0.753 | 0.0025 | 0.1085 |
+**The tell was printed on every line.** Occupancy read 0.012–0.04 in all those runs — and this
+POC added occupancy reporting *because percolation is meaningless without it*. In 3D the site
+threshold is 0.312; nothing at 0.015 could ever have spanned.
 
-exp_11's cosmic web percolates at **0.0068 against a noise control of 0.0025**, at essentially
-identical occupancy. Rendered (`results/sign_convention_3d.png`), it is scattered isolated cells
-spread uniformly through the box — a random point process with high contrast.
+### The replication is UNVERIFIED, not exact
 
-This is POC-05's finding in the corpus's own particle result: **void fraction and density CV are
-one-point statistics.** They measure contrast and say nothing about connectivity. Not a
-criticism of exp_11 on its own terms — it measured void, filament fraction, CV and a sampled
-clustering coefficient, and measured them correctly. Percolation was not among them.
+The previously recorded void 0.888 / CV 2.948 is **not reproducible by the committed script**:
 
-### And the variant that percolates is collapsed, not webbed
+| | void | density CV | gate |
+|---|---|---|---|
+| exp_11 reported | 0.89 | 2.94 | — |
+| script at 32³ (today) | 0.939 | 7.105 | void PASS, **CV FAIL** |
+| script at 64³ (old default) | 0.988 | 15.418 | **both fail** |
 
-The attractive variant reaches 0.4252 from a *lower* occupancy, which is the right direction.
-But its largest component spans only **0.47 of the box** on its shortest axis and coexists with
-**231 other components**. One convention gives scattered points, the other gives collapse.
-Neither gives a space-filling network.
+Whatever produced the recorded numbers is not what is in this repository. The script shipped
+with `res=64` — the resolution this POC's *own notes* identify as the failed first attempt.
+The artifact was documented and the code was never changed. Now defaults to 32.
+
+### The span claim is unverified
+
+"Largest component spans only 0.47 of the box, coexists with 231 other components" was measured
+at the same bad sampling and has not been re-measured. Treat as withdrawn pending a rerun.
 
 ## Withdraws a POC-07 claim
 
