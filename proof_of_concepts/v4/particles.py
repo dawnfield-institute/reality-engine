@@ -522,8 +522,11 @@ class PACLedger:
         m["mass_total"] = s.mass.sum().item()
         m["kinetic"] = (0.5 * s.mass * (s.vel ** 2).sum(-1)).sum().item()
         m["entropy_total"] = s.entropy.sum().item()
-        m["momentum_x"] = (s.mass.unsqueeze(-1) * s.vel).sum(0)[0].item()
-        m["momentum_y"] = (s.mass.unsqueeze(-1) * s.vel).sum(0)[1].item()
+        # One key per spatial axis. This recorded x and y only, so on every 3D run the z
+        # component was silently missing from the conservation ledger.
+        p = (s.mass.unsqueeze(-1) * s.vel).sum(0)
+        for k, ax in enumerate("xyz"[: s.pos.shape[1]]):
+            m[f"momentum_{ax}"] = p[k].item()
         return s.replace(metrics=m)
 
 
