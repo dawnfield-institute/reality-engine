@@ -9,7 +9,11 @@
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 POC="$(dirname "$HERE")"; REPO="$(cd "$POC/../../.." && pwd)"
-PY="${PY:-$REPO/.venv/bin/python}"; export PYTHONDONTWRITEBYTECODE=1
+PY="${PY:-}"                      # a python with torch: the repo venv, else the current one; or set PY=
+if [ -z "$PY" ]; then for c in "$REPO/.venv/bin/python" "$(command -v python)" "$(command -v python3)"; do
+  [ -n "$c" ] && "$c" -c "import torch" 2>/dev/null && PY="$c" && break; done; fi
+[ -n "$PY" ] || { echo "run_grid.sh: no python with torch found — set PY=" >&2; exit 1; }
+export PYTHONDONTWRITEBYTECODE=1
 RUN="$PY $HERE/exp_03_sink_arms.py"; AGG="$PY $HERE/exp_04_aggregate.py"
 SEEDS="${SEEDS:-1 2 3}"; TAUS="${TAUS:-5 10 20}"
 phase="${1:?phase: proxy | proxy_d <tau*> | full <tau*>}"

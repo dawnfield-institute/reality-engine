@@ -1,6 +1,23 @@
 # POC-11 (v4): A derived sink, not a tuned one
 
-**Status**: active · **Pillar**: SEC / PAC · **Registered in**: dawn-field-theory Milestone R exp_28
+**Status**: completed 2026-09-05 · **Pillar**: SEC / PAC · **Registered in**: dawn-field-theory Milestone R exp_28 (sealed `bf833113`) · **Result**: 0/4 — the trigger is a core detector
+
+## Result
+
+The derived sink does not let the substrate hold structure, and the way it fails is the finding.
+`min_j |S_i − S_j| > τ` fires only at a local extremum of the entropy field; exp_15 ran it on noise,
+whose extrema are random, while here the SEC entropy grows with density, so the extrema are the
+collapse cores. Severance removed the bound, connected part (`u_out < 0` in every run, fired/retained
+KE ratio ≈ 0.5 at first firing) and left the rest hotter per particle (T1 fail, the registered live
+direction) and *less* connected than a random subset of the baseline at the same count (T2 fail with
+sign: 3/3 seeds, margin −0.023, pooled σ 0.009 at the proxy's informative τ = 20; a null at n = 4000,
+τ\* = 10, where half leaves and S = R). Random removal at the onset τ held more; the tuned drag, calibrated to the same retained KE per particle, held as much or
+more. Landauer erasure is ~1% of the pressure work. Every closure residual in the grid ≤ 6 × 10⁻⁷.
+At n = 4000 (τ\* = 10, three seeds, 48–54% severed) the picture repeats: S 0.051 / 0.046 / 0.051
+against R 0.055 / 0.046 / 0.052, with B0 dissolved to 0.028–0.038 on its own set.
+C4.1 option 3 closes; option 2 (derive the pressure term from the SEC functional) remains. Journal:
+`journals/2026-09-05_the-trigger-selects-the-cores.md`; scoring and outcomes in dawn-field-theory
+`milestone-r/journals/2026-09-05_exp28_outcomes.md`.
 
 ## Why
 
@@ -31,7 +48,7 @@ stopped injecting it." Both are `.spec/v4-derived-sink.spec.md`.
 | `LedgerSeverance` | whole-particle decoupling when `min over neighbours of \|S_i − S_j\| > τ` | trigger derived (M-R exp_15/16), form derived (exp_01); τ **swept**; radius **declared** (lattice spacing) |
 | `LandauerErasure` | released entropy costs `LN2·\|ΔS\|` of kinetic energy | form derived; magnitude **inherits** `memory_decay` — exploratory arm |
 | random mode | same bookkeeping, random selection | the selection control |
-| matched drag | damping calibrated to the severance arm's measured loss | the derivation control |
+| matched drag | damping calibrated so the retained kinetic energy per particle at t_end matches the severance arm's (positive-definite; one pre-declared refinement) | the derivation control |
 
 ## Scripts
 
@@ -42,6 +59,8 @@ stopped injecting it." Both are `.spec/v4-derived-sink.spec.md`.
   one JSON per run. Recorded at every unit of simulated time.
 - `exp_04_aggregate.py` — the grid JSON with per-run hashes and the commit. Aggregates only;
   **scoring lives in dawn-field-theory** (`milestone-r/scripts/exp_28_dynamical_severance.py`).
+- `run_grid.sh proxy | proxy_d <τ*> | full <τ*>` — the grid, phase by phase, into `results/proxy/`
+  and `results/full/`. τ\* comes from the dawn-field-theory scorer's proxy pass (pre-declared rule).
 
 ## What this POC does not claim
 

@@ -1,0 +1,218 @@
+  full_B0_s1_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=None mode=stress landauer=False xi_variant=XI_ANALYTIC commit=2c2dd17
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.4 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.3 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.056 xi_u=0.709 occ=0.092
+    t=  3.00 tick=   61 alive= 4000 sev=0.000 E/N=    0.645 KE/|U|=    1.01 at_cap=0.007 dt=0.0330 perc=0.171 xi_u=0.679 occ=0.194
+    t=  4.01 tick=  114 alive= 4000 sev=0.000 E/N= 1.07e+03 KE/|U|=   16.48 at_cap=0.002 dt=0.0143 perc=0.055 xi_u=0.682 occ=0.183
+    t=  5.00 tick=  181 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.36 at_cap=0.001 dt=0.0150 perc=0.035 xi_u=0.599 occ=0.188
+    t=  6.00 tick=  246 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.49 at_cap=0.005 dt=0.0155 perc=0.022 xi_u=0.600 occ=0.185
+    t=  7.00 tick=  310 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.48 at_cap=0.007 dt=0.0156 perc=0.042 xi_u=0.593 occ=0.185
+    t=  8.00 tick=  374 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.42 at_cap=0.009 dt=0.0157 perc=0.027 xi_u=0.595 occ=0.189
+    t=  9.01 tick=  438 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.51 at_cap=0.009 dt=0.0157 perc=0.023 xi_u=0.581 occ=0.189
+    t= 10.01 tick=  502 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.47 at_cap=0.009 dt=0.0157 perc=0.031 xi_u=0.595 occ=0.189
+    t= 11.01 tick=  566 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.48 at_cap=0.007 dt=0.0157 perc=0.049 xi_u=0.591 occ=0.191
+    t= 12.00 tick=  629 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.51 at_cap=0.009 dt=0.0157 perc=0.038 xi_u=0.590 occ=0.193
+    t= 13.01 tick=  693 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.43 at_cap=0.003 dt=0.0157 perc=0.036 xi_u=0.600 occ=0.186
+    t= 14.00 tick=  756 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.48 at_cap=0.007 dt=0.0157 perc=0.024 xi_u=0.591 occ=0.193
+    t= 15.01 tick=  820 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.50 at_cap=0.009 dt=0.0157 perc=0.025 xi_u=0.599 occ=0.189
+  wrote results/exp_03_sink_arms_full_B0_s1_md0.95_20260905_230530.json (+ _pos.npz)  [820 ticks, 120s, finite=True]
+  full_S_tau10_s1_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=10.0 mode=stress landauer=False xi_variant=XI_ANALYTIC commit=2c2dd17
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.4 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.3 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.056 xi_u=0.709 occ=0.092
+    t=  3.03 tick=   61 alive= 3848 sev=0.038 E/N=    -21.4 KE/|U|=    0.71 at_cap=0.004 dt=0.0384 perc=0.198 xi_u=0.690 occ=0.205
+    t=  4.00 tick=  104 alive= 2829 sev=0.293 E/N=      842 KE/|U|=   17.28 at_cap=0.001 dt=0.0162 perc=0.135 xi_u=0.712 occ=0.160
+    t=  5.01 tick=  165 alive= 2062 sev=0.484 E/N=      953 KE/|U|=   28.15 at_cap=0.003 dt=0.0171 perc=0.040 xi_u=0.594 occ=0.207
+    t=  6.01 tick=  223 alive= 2062 sev=0.484 E/N=      956 KE/|U|=   28.42 at_cap=0.007 dt=0.0174 perc=0.073 xi_u=0.575 occ=0.212
+    t=  7.01 tick=  280 alive= 2062 sev=0.484 E/N=      955 KE/|U|=   28.36 at_cap=0.008 dt=0.0174 perc=0.039 xi_u=0.591 occ=0.219
+    t=  8.00 tick=  337 alive= 2062 sev=0.484 E/N=      956 KE/|U|=   28.44 at_cap=0.008 dt=0.0175 perc=0.041 xi_u=0.589 occ=0.202
+    t=  9.01 tick=  395 alive= 2062 sev=0.484 E/N=      957 KE/|U|=   28.44 at_cap=0.009 dt=0.0175 perc=0.039 xi_u=0.581 occ=0.211
+    t= 10.01 tick=  452 alive= 2062 sev=0.484 E/N=      958 KE/|U|=   28.39 at_cap=0.008 dt=0.0175 perc=0.055 xi_u=0.627 occ=0.214
+    t= 11.00 tick=  509 alive= 2062 sev=0.484 E/N=      960 KE/|U|=   28.62 at_cap=0.009 dt=0.0175 perc=0.031 xi_u=0.578 occ=0.204
+    t= 12.00 tick=  566 alive= 2062 sev=0.484 E/N=      961 KE/|U|=   28.55 at_cap=0.010 dt=0.0175 perc=0.058 xi_u=0.589 occ=0.210
+    t= 13.02 tick=  624 alive= 2062 sev=0.484 E/N=      961 KE/|U|=   28.53 at_cap=0.010 dt=0.0175 perc=0.047 xi_u=0.586 occ=0.214
+    t= 14.01 tick=  681 alive= 2062 sev=0.484 E/N=      962 KE/|U|=   28.46 at_cap=0.004 dt=0.0175 perc=0.065 xi_u=0.589 occ=0.203
+    t= 15.01 tick=  738 alive= 2060 sev=0.485 E/N=      965 KE/|U|=   28.62 at_cap=0.008 dt=0.0175 perc=0.031 xi_u=0.599 occ=0.208
+  wrote results/exp_03_sink_arms_full_S_tau10_s1_md0.95_20260905_230752.json (+ _pos.npz)  [738 ticks, 142s, finite=True]
+  full_R_tau10_s1_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=10.0 mode=random landauer=False xi_variant=XI_ANALYTIC commit=befc79a
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.4 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.3 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.056 xi_u=0.709 occ=0.092
+    t=  3.00 tick=   61 alive= 3894 sev=0.026 E/N=    0.783 KE/|U|=    1.01 at_cap=0.006 dt=0.0332 perc=0.214 xi_u=0.673 occ=0.205
+    t=  4.01 tick=  110 alive= 2861 sev=0.285 E/N=      905 KE/|U|=   19.49 at_cap=0.004 dt=0.0163 perc=0.033 xi_u=0.643 occ=0.145
+    t=  5.01 tick=  170 alive= 2062 sev=0.484 E/N=      954 KE/|U|=   28.82 at_cap=0.002 dt=0.0171 perc=0.065 xi_u=0.594 occ=0.210
+    t=  6.02 tick=  228 alive= 2062 sev=0.484 E/N=      959 KE/|U|=   29.18 at_cap=0.005 dt=0.0175 perc=0.054 xi_u=0.598 occ=0.202
+    t=  7.01 tick=  285 alive= 2062 sev=0.484 E/N=      958 KE/|U|=   29.05 at_cap=0.008 dt=0.0175 perc=0.047 xi_u=0.587 occ=0.213
+    t=  8.01 tick=  342 alive= 2062 sev=0.484 E/N=      959 KE/|U|=   29.10 at_cap=0.005 dt=0.0175 perc=0.059 xi_u=0.576 occ=0.207
+    t=  9.01 tick=  399 alive= 2062 sev=0.484 E/N=      959 KE/|U|=   29.17 at_cap=0.010 dt=0.0176 perc=0.039 xi_u=0.587 occ=0.198
+    t= 10.01 tick=  456 alive= 2062 sev=0.484 E/N=      961 KE/|U|=   29.18 at_cap=0.006 dt=0.0176 perc=0.055 xi_u=0.574 occ=0.208
+    t= 11.01 tick=  513 alive= 2062 sev=0.484 E/N=      964 KE/|U|=   29.17 at_cap=0.007 dt=0.0176 perc=0.083 xi_u=0.584 occ=0.208
+    t= 12.02 tick=  570 alive= 2062 sev=0.484 E/N=      965 KE/|U|=   29.33 at_cap=0.010 dt=0.0176 perc=0.052 xi_u=0.572 occ=0.210
+    t= 13.00 tick=  626 alive= 2062 sev=0.484 E/N=      966 KE/|U|=   29.35 at_cap=0.008 dt=0.0176 perc=0.053 xi_u=0.567 occ=0.205
+    t= 14.00 tick=  683 alive= 2062 sev=0.484 E/N=      966 KE/|U|=   29.42 at_cap=0.009 dt=0.0176 perc=0.030 xi_u=0.587 occ=0.215
+    t= 15.01 tick=  740 alive= 2060 sev=0.485 E/N=      965 KE/|U|=   29.10 at_cap=0.006 dt=0.0176 perc=0.060 xi_u=0.602 occ=0.212
+  wrote results/exp_03_sink_arms_full_R_tau10_s1_md0.95_20260905_231004.json (+ _pos.npz)  [740 ticks, 131s, finite=True]
+  full_D_s1_md0.95: n=4000 box=60.0 damping=0.999656 sev_tau=None mode=stress landauer=False xi_variant=XI_ANALYTIC commit=befc79a rho_K=0.8133 target_KE/N=999.5
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.4 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.3 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.057 xi_u=0.713 occ=0.090
+    t=  3.01 tick=   61 alive= 4000 sev=0.000 E/N=    -1.51 KE/|U|=    0.98 at_cap=0.007 dt=0.0330 perc=0.192 xi_u=0.682 occ=0.193
+    t=  4.01 tick=  113 alive= 4000 sev=0.000 E/N= 1.08e+03 KE/|U|=   16.65 at_cap=0.001 dt=0.0144 perc=0.066 xi_u=0.669 occ=0.186
+    t=  5.01 tick=  182 alive= 4000 sev=0.000 E/N= 1.17e+03 KE/|U|=   18.52 at_cap=0.002 dt=0.0149 perc=0.035 xi_u=0.598 occ=0.184
+    t=  6.00 tick=  247 alive= 4000 sev=0.000 E/N= 1.16e+03 KE/|U|=   18.52 at_cap=0.007 dt=0.0155 perc=0.021 xi_u=0.596 occ=0.197
+    t=  7.00 tick=  311 alive= 4000 sev=0.000 E/N= 1.14e+03 KE/|U|=   18.20 at_cap=0.008 dt=0.0157 perc=0.054 xi_u=0.600 occ=0.191
+    t=  8.01 tick=  375 alive= 4000 sev=0.000 E/N= 1.13e+03 KE/|U|=   17.96 at_cap=0.009 dt=0.0159 perc=0.035 xi_u=0.590 occ=0.193
+    t=  9.00 tick=  437 alive= 4000 sev=0.000 E/N= 1.11e+03 KE/|U|=   17.76 at_cap=0.008 dt=0.0160 perc=0.029 xi_u=0.586 occ=0.185
+    t= 10.01 tick=  500 alive= 4000 sev=0.000 E/N= 1.09e+03 KE/|U|=   17.50 at_cap=0.007 dt=0.0161 perc=0.022 xi_u=0.594 occ=0.189
+    t= 11.01 tick=  562 alive= 4000 sev=0.000 E/N= 1.08e+03 KE/|U|=   17.27 at_cap=0.006 dt=0.0162 perc=0.029 xi_u=0.602 occ=0.187
+    t= 12.00 tick=  623 alive= 4000 sev=0.000 E/N= 1.06e+03 KE/|U|=   17.02 at_cap=0.008 dt=0.0163 perc=0.024 xi_u=0.583 occ=0.191
+    t= 13.00 tick=  684 alive= 4000 sev=0.000 E/N= 1.05e+03 KE/|U|=   16.79 at_cap=0.008 dt=0.0164 perc=0.027 xi_u=0.602 occ=0.189
+    t= 14.01 tick=  745 alive= 4000 sev=0.000 E/N= 1.03e+03 KE/|U|=   16.52 at_cap=0.008 dt=0.0166 perc=0.018 xi_u=0.598 occ=0.187
+    t= 15.01 tick=  805 alive= 4000 sev=0.000 E/N= 1.02e+03 KE/|U|=   16.28 at_cap=0.006 dt=0.0167 perc=0.032 xi_u=0.600 occ=0.190
+  wrote results/exp_03_sink_arms_full_D_s1_md0.95_20260905_231211.json (+ _pos.npz)  [805 ticks, 126s, finite=True]
+  full_B0_s2_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=None mode=stress landauer=False xi_variant=XI_ANALYTIC commit=befc79a
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.7 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.6 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.058 xi_u=0.694 occ=0.088
+    t=  3.02 tick=   61 alive= 4000 sev=0.000 E/N=      -19 KE/|U|=    0.76 at_cap=0.005 dt=0.0371 perc=0.110 xi_u=0.695 occ=0.193
+    t=  4.00 tick=  111 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   19.10 at_cap=0.002 dt=0.0142 perc=0.098 xi_u=0.668 occ=0.185
+    t=  5.01 tick=  184 alive= 4000 sev=0.000 E/N= 1.41e+03 KE/|U|=   22.00 at_cap=0.002 dt=0.0140 perc=0.049 xi_u=0.607 occ=0.196
+    t=  6.01 tick=  254 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.29 at_cap=0.004 dt=0.0144 perc=0.018 xi_u=0.592 occ=0.189
+    t=  7.01 tick=  323 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.23 at_cap=0.007 dt=0.0145 perc=0.039 xi_u=0.597 occ=0.186
+    t=  8.01 tick=  392 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.22 at_cap=0.009 dt=0.0145 perc=0.027 xi_u=0.610 occ=0.193
+    t=  9.01 tick=  461 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.21 at_cap=0.009 dt=0.0145 perc=0.032 xi_u=0.587 occ=0.192
+    t= 10.00 tick=  529 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.19 at_cap=0.006 dt=0.0145 perc=0.039 xi_u=0.591 occ=0.183
+    t= 11.01 tick=  598 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.22 at_cap=0.008 dt=0.0146 perc=0.049 xi_u=0.602 occ=0.190
+    t= 12.01 tick=  667 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.31 at_cap=0.009 dt=0.0146 perc=0.032 xi_u=0.592 occ=0.190
+    t= 13.00 tick=  735 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.28 at_cap=0.008 dt=0.0146 perc=0.036 xi_u=0.592 occ=0.192
+    t= 14.01 tick=  804 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.30 at_cap=0.009 dt=0.0146 perc=0.035 xi_u=0.578 occ=0.186
+    t= 15.00 tick=  872 alive= 4000 sev=0.000 E/N= 1.42e+03 KE/|U|=   22.30 at_cap=0.007 dt=0.0146 perc=0.025 xi_u=0.586 occ=0.186
+  wrote results/exp_03_sink_arms_full_B0_s2_md0.95_20260905_231424.json (+ _pos.npz)  [872 ticks, 132s, finite=True]
+  full_S_tau10_s2_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=10.0 mode=stress landauer=False xi_variant=XI_ANALYTIC commit=befc79a
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.7 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.6 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.058 xi_u=0.694 occ=0.088
+    t=  3.05 tick=   61 alive= 3886 sev=0.029 E/N=      -37 KE/|U|=    0.52 at_cap=0.008 dt=0.0484 perc=0.223 xi_u=0.699 occ=0.204
+    t=  4.01 tick=  100 alive= 2894 sev=0.277 E/N=      799 KE/|U|=   15.91 at_cap=0.000 dt=0.0171 perc=0.121 xi_u=0.685 occ=0.148
+    t=  5.01 tick=  159 alive= 1851 sev=0.537 E/N=      946 KE/|U|=   30.50 at_cap=0.001 dt=0.0176 perc=0.042 xi_u=0.583 occ=0.123
+    t=  6.02 tick=  215 alive= 1827 sev=0.543 E/N=      955 KE/|U|=   31.62 at_cap=0.006 dt=0.0183 perc=0.023 xi_u=0.571 occ=0.123
+    t=  7.00 tick=  269 alive= 1827 sev=0.543 E/N=      957 KE/|U|=   31.68 at_cap=0.007 dt=0.0184 perc=0.039 xi_u=0.583 occ=0.133
+    t=  8.01 tick=  324 alive= 1827 sev=0.543 E/N=      958 KE/|U|=   31.79 at_cap=0.005 dt=0.0184 perc=0.044 xi_u=0.574 occ=0.131
+    t=  9.01 tick=  378 alive= 1827 sev=0.543 E/N=      959 KE/|U|=   31.67 at_cap=0.010 dt=0.0184 perc=0.028 xi_u=0.598 occ=0.126
+    t= 10.02 tick=  433 alive= 1827 sev=0.543 E/N=      960 KE/|U|=   31.79 at_cap=0.005 dt=0.0184 perc=0.031 xi_u=0.559 occ=0.130
+    t= 11.01 tick=  487 alive= 1827 sev=0.543 E/N=      964 KE/|U|=   31.76 at_cap=0.005 dt=0.0184 perc=0.058 xi_u=0.572 occ=0.130
+    t= 12.00 tick=  541 alive= 1827 sev=0.543 E/N=      966 KE/|U|=   31.99 at_cap=0.001 dt=0.0184 perc=0.026 xi_u=0.585 occ=0.134
+    t= 13.00 tick=  595 alive= 1827 sev=0.543 E/N=      967 KE/|U|=   31.99 at_cap=0.008 dt=0.0185 perc=0.063 xi_u=0.585 occ=0.128
+    t= 14.02 tick=  650 alive= 1827 sev=0.543 E/N=      968 KE/|U|=   32.07 at_cap=0.008 dt=0.0185 perc=0.053 xi_u=0.574 occ=0.130
+    t= 15.01 tick=  704 alive= 1827 sev=0.543 E/N=      968 KE/|U|=   32.03 at_cap=0.008 dt=0.0185 perc=0.021 xi_u=0.590 occ=0.136
+  wrote results/exp_03_sink_arms_full_S_tau10_s2_md0.95_20260905_231642.json (+ _pos.npz)  [704 ticks, 137s, finite=True]
+  full_R_tau10_s2_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=10.0 mode=random landauer=False xi_variant=XI_ANALYTIC commit=befc79a
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.7 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.6 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.058 xi_u=0.694 occ=0.088
+    t=  3.02 tick=   61 alive= 3924 sev=0.019 E/N=    -19.4 KE/|U|=    0.75 at_cap=0.006 dt=0.0368 perc=0.114 xi_u=0.695 occ=0.201
+    t=  4.01 tick=  109 alive= 2931 sev=0.267 E/N= 1.09e+03 KE/|U|=   22.04 at_cap=0.002 dt=0.0153 perc=0.045 xi_u=0.657 occ=0.139
+    t=  5.01 tick=  174 alive= 1855 sev=0.536 E/N= 1.23e+03 KE/|U|=   40.47 at_cap=0.004 dt=0.0156 perc=0.028 xi_u=0.574 occ=0.124
+    t=  6.00 tick=  237 alive= 1827 sev=0.543 E/N= 1.23e+03 KE/|U|=   41.09 at_cap=0.005 dt=0.0159 perc=0.043 xi_u=0.585 occ=0.133
+    t=  7.01 tick=  300 alive= 1827 sev=0.543 E/N= 1.23e+03 KE/|U|=   41.33 at_cap=0.007 dt=0.0160 perc=0.034 xi_u=0.587 occ=0.137
+    t=  8.00 tick=  362 alive= 1827 sev=0.543 E/N= 1.23e+03 KE/|U|=   41.40 at_cap=0.010 dt=0.0160 perc=0.048 xi_u=0.566 occ=0.132
+    t=  9.01 tick=  425 alive= 1827 sev=0.543 E/N= 1.23e+03 KE/|U|=   41.40 at_cap=0.011 dt=0.0160 perc=0.055 xi_u=0.557 occ=0.137
+    t= 10.01 tick=  487 alive= 1827 sev=0.543 E/N= 1.23e+03 KE/|U|=   41.44 at_cap=0.010 dt=0.0160 perc=0.030 xi_u=0.586 occ=0.133
+    t= 11.00 tick=  549 alive= 1827 sev=0.543 E/N= 1.23e+03 KE/|U|=   41.24 at_cap=0.007 dt=0.0160 perc=0.048 xi_u=0.572 occ=0.133
+    t= 12.01 tick=  612 alive= 1827 sev=0.543 E/N= 1.24e+03 KE/|U|=   41.55 at_cap=0.009 dt=0.0161 perc=0.053 xi_u=0.593 occ=0.131
+    t= 13.01 tick=  674 alive= 1827 sev=0.543 E/N= 1.24e+03 KE/|U|=   41.53 at_cap=0.010 dt=0.0161 perc=0.053 xi_u=0.559 occ=0.130
+    t= 14.00 tick=  736 alive= 1827 sev=0.543 E/N= 1.24e+03 KE/|U|=   41.60 at_cap=0.011 dt=0.0161 perc=0.047 xi_u=0.577 occ=0.135
+    t= 15.01 tick=  799 alive= 1827 sev=0.543 E/N= 1.24e+03 KE/|U|=   41.66 at_cap=0.009 dt=0.0161 perc=0.050 xi_u=0.566 occ=0.126
+  wrote results/exp_03_sink_arms_full_R_tau10_s2_md0.95_20260905_231845.json (+ _pos.npz)  [799 ticks, 122s, finite=True]
+  full_D_s2_md0.95: n=4000 box=60.0 damping=0.999339 sev_tau=None mode=stress landauer=False xi_variant=XI_ANALYTIC commit=befc79a rho_K=0.6725 target_KE/N=999.4
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.7 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.6 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.042 xi_u=0.698 occ=0.088
+    t=  3.03 tick=   61 alive= 4000 sev=0.000 E/N=    -24.3 KE/|U|=    0.69 at_cap=0.005 dt=0.0377 perc=0.062 xi_u=0.697 occ=0.192
+    t=  4.01 tick=  110 alive= 4000 sev=0.000 E/N= 1.23e+03 KE/|U|=   18.64 at_cap=0.003 dt=0.0144 perc=0.144 xi_u=0.682 occ=0.183
+    t=  5.00 tick=  181 alive= 4000 sev=0.000 E/N= 1.36e+03 KE/|U|=   21.24 at_cap=0.004 dt=0.0145 perc=0.022 xi_u=0.600 occ=0.187
+    t=  6.01 tick=  249 alive= 4000 sev=0.000 E/N= 1.32e+03 KE/|U|=   20.69 at_cap=0.002 dt=0.0150 perc=0.050 xi_u=0.610 occ=0.190
+    t=  7.01 tick=  315 alive= 4000 sev=0.000 E/N= 1.28e+03 KE/|U|=   20.21 at_cap=0.005 dt=0.0153 perc=0.028 xi_u=0.594 occ=0.186
+    t=  8.01 tick=  380 alive= 4000 sev=0.000 E/N= 1.25e+03 KE/|U|=   19.69 at_cap=0.009 dt=0.0156 perc=0.026 xi_u=0.583 occ=0.187
+    t=  9.01 tick=  444 alive= 4000 sev=0.000 E/N= 1.21e+03 KE/|U|=   19.14 at_cap=0.008 dt=0.0158 perc=0.018 xi_u=0.610 occ=0.194
+    t= 10.01 tick=  507 alive= 4000 sev=0.000 E/N= 1.18e+03 KE/|U|=   18.64 at_cap=0.006 dt=0.0160 perc=0.025 xi_u=0.592 occ=0.187
+    t= 11.01 tick=  569 alive= 4000 sev=0.000 E/N= 1.15e+03 KE/|U|=   18.15 at_cap=0.005 dt=0.0162 perc=0.023 xi_u=0.608 occ=0.187
+    t= 12.00 tick=  630 alive= 4000 sev=0.000 E/N= 1.11e+03 KE/|U|=   17.68 at_cap=0.007 dt=0.0164 perc=0.027 xi_u=0.595 occ=0.188
+    t= 13.01 tick=  691 alive= 4000 sev=0.000 E/N= 1.08e+03 KE/|U|=   17.20 at_cap=0.006 dt=0.0166 perc=0.026 xi_u=0.592 occ=0.187
+    t= 14.00 tick=  750 alive= 4000 sev=0.000 E/N= 1.05e+03 KE/|U|=   16.77 at_cap=0.007 dt=0.0169 perc=0.031 xi_u=0.604 occ=0.184
+    t= 15.00 tick=  809 alive= 4000 sev=0.000 E/N= 1.02e+03 KE/|U|=   16.37 at_cap=0.007 dt=0.0171 perc=0.052 xi_u=0.592 occ=0.193
+  wrote results/exp_03_sink_arms_full_D_s2_md0.95_20260905_232044.json (+ _pos.npz)  [809 ticks, 118s, finite=True]
+  full_B0_s3_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=None mode=stress landauer=False xi_variant=XI_ANALYTIC commit=befc79a
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.9 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.8 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.043 xi_u=0.711 occ=0.085
+    t=  3.01 tick=   61 alive= 4000 sev=0.000 E/N=    -17.2 KE/|U|=    0.78 at_cap=0.005 dt=0.0339 perc=0.208 xi_u=0.680 occ=0.188
+    t=  4.00 tick=  111 alive= 4000 sev=0.000 E/N= 1.17e+03 KE/|U|=   17.75 at_cap=0.003 dt=0.0142 perc=0.048 xi_u=0.687 occ=0.183
+    t=  5.01 tick=  181 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   19.82 at_cap=0.002 dt=0.0146 perc=0.026 xi_u=0.612 occ=0.191
+    t=  6.01 tick=  249 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   20.05 at_cap=0.005 dt=0.0149 perc=0.023 xi_u=0.594 occ=0.190
+    t=  7.01 tick=  316 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   20.01 at_cap=0.008 dt=0.0150 perc=0.036 xi_u=0.610 occ=0.188
+    t=  8.01 tick=  382 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   19.98 at_cap=0.008 dt=0.0151 perc=0.039 xi_u=0.596 occ=0.189
+    t=  9.00 tick=  448 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   19.97 at_cap=0.009 dt=0.0151 perc=0.042 xi_u=0.604 occ=0.191
+    t= 10.01 tick=  515 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   19.96 at_cap=0.007 dt=0.0151 perc=0.023 xi_u=0.595 occ=0.195
+    t= 11.00 tick=  581 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   19.99 at_cap=0.006 dt=0.0151 perc=0.028 xi_u=0.596 occ=0.189
+    t= 12.01 tick=  648 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   20.02 at_cap=0.007 dt=0.0151 perc=0.022 xi_u=0.588 occ=0.189
+    t= 13.01 tick=  714 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   19.99 at_cap=0.008 dt=0.0151 perc=0.025 xi_u=0.599 occ=0.188
+    t= 14.01 tick=  780 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   19.99 at_cap=0.007 dt=0.0151 perc=0.040 xi_u=0.583 occ=0.194
+    t= 15.00 tick=  846 alive= 4000 sev=0.000 E/N= 1.27e+03 KE/|U|=   20.01 at_cap=0.008 dt=0.0151 perc=0.030 xi_u=0.599 occ=0.186
+  wrote results/exp_03_sink_arms_full_B0_s3_md0.95_20260905_232243.json (+ _pos.npz)  [846 ticks, 118s, finite=True]
+  full_S_tau10_s3_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=10.0 mode=stress landauer=False xi_variant=XI_ANALYTIC commit=befc79a
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.9 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.8 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.043 xi_u=0.711 occ=0.085
+    t=  3.05 tick=   61 alive= 3870 sev=0.033 E/N=    -42.7 KE/|U|=    0.44 at_cap=0.008 dt=0.0497 perc=0.235 xi_u=0.694 occ=0.203
+    t=  4.00 tick=   99 alive= 2972 sev=0.257 E/N=      624 KE/|U|=   12.03 at_cap=0.003 dt=0.0184 perc=0.076 xi_u=0.742 occ=0.144
+    t=  5.01 tick=  154 alive= 1991 sev=0.502 E/N=      773 KE/|U|=   23.44 at_cap=0.000 dt=0.0190 perc=0.059 xi_u=0.583 occ=0.224
+    t=  6.00 tick=  205 alive= 1966 sev=0.508 E/N=      779 KE/|U|=   24.20 at_cap=0.004 dt=0.0198 perc=0.052 xi_u=0.584 occ=0.218
+    t=  7.00 tick=  255 alive= 1966 sev=0.508 E/N=      777 KE/|U|=   24.10 at_cap=0.005 dt=0.0200 perc=0.039 xi_u=0.577 occ=0.210
+    t=  8.00 tick=  305 alive= 1966 sev=0.508 E/N=      779 KE/|U|=   24.25 at_cap=0.007 dt=0.0201 perc=0.070 xi_u=0.576 occ=0.221
+    t=  9.01 tick=  355 alive= 1966 sev=0.508 E/N=      779 KE/|U|=   24.19 at_cap=0.008 dt=0.0201 perc=0.038 xi_u=0.595 occ=0.218
+    t= 10.01 tick=  405 alive= 1966 sev=0.508 E/N=      780 KE/|U|=   24.27 at_cap=0.009 dt=0.0201 perc=0.078 xi_u=0.593 occ=0.210
+    t= 11.01 tick=  455 alive= 1966 sev=0.508 E/N=      781 KE/|U|=   24.27 at_cap=0.006 dt=0.0201 perc=0.060 xi_u=0.558 occ=0.213
+    t= 12.02 tick=  505 alive= 1966 sev=0.508 E/N=      782 KE/|U|=   24.41 at_cap=0.009 dt=0.0201 perc=0.038 xi_u=0.593 occ=0.206
+    t= 13.00 tick=  554 alive= 1966 sev=0.508 E/N=      783 KE/|U|=   24.33 at_cap=0.007 dt=0.0201 perc=0.042 xi_u=0.588 occ=0.218
+    t= 14.01 tick=  604 alive= 1965 sev=0.509 E/N=      784 KE/|U|=   24.47 at_cap=0.009 dt=0.0201 perc=0.040 xi_u=0.596 occ=0.218
+    t= 15.01 tick=  654 alive= 1965 sev=0.509 E/N=      787 KE/|U|=   24.44 at_cap=0.004 dt=0.0201 perc=0.088 xi_u=0.566 occ=0.228
+  wrote results/exp_03_sink_arms_full_S_tau10_s3_md0.95_20260905_232450.json (+ _pos.npz)  [654 ticks, 125s, finite=True]
+  full_R_tau10_s3_md0.95: n=4000 box=60.0 damping=1.000000 sev_tau=10.0 mode=random landauer=False xi_variant=XI_ANALYTIC commit=befc79a
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.9 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.8 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.043 xi_u=0.711 occ=0.085
+    t=  3.01 tick=   61 alive= 3908 sev=0.023 E/N=    -16.8 KE/|U|=    0.78 at_cap=0.005 dt=0.0344 perc=0.134 xi_u=0.680 occ=0.201
+    t=  4.01 tick=  109 alive= 3000 sev=0.250 E/N=      999 KE/|U|=   19.92 at_cap=0.002 dt=0.0153 perc=0.077 xi_u=0.686 occ=0.132
+    t=  5.00 tick=  172 alive= 1996 sev=0.501 E/N= 1.15e+03 KE/|U|=   35.50 at_cap=0.003 dt=0.0162 perc=0.044 xi_u=0.602 occ=0.207
+    t=  6.00 tick=  233 alive= 1966 sev=0.508 E/N= 1.13e+03 KE/|U|=   35.73 at_cap=0.009 dt=0.0165 perc=0.044 xi_u=0.590 occ=0.218
+    t=  7.01 tick=  294 alive= 1966 sev=0.508 E/N= 1.13e+03 KE/|U|=   35.60 at_cap=0.006 dt=0.0166 perc=0.062 xi_u=0.565 occ=0.213
+    t=  8.01 tick=  354 alive= 1966 sev=0.508 E/N= 1.13e+03 KE/|U|=   35.65 at_cap=0.010 dt=0.0166 perc=0.034 xi_u=0.578 occ=0.212
+    t=  9.00 tick=  414 alive= 1966 sev=0.508 E/N= 1.14e+03 KE/|U|=   35.77 at_cap=0.010 dt=0.0166 perc=0.050 xi_u=0.583 occ=0.211
+    t= 10.01 tick=  475 alive= 1966 sev=0.508 E/N= 1.14e+03 KE/|U|=   35.94 at_cap=0.009 dt=0.0166 perc=0.028 xi_u=0.574 occ=0.208
+    t= 11.01 tick=  535 alive= 1966 sev=0.508 E/N= 1.14e+03 KE/|U|=   35.93 at_cap=0.010 dt=0.0166 perc=0.050 xi_u=0.604 occ=0.220
+    t= 12.01 tick=  595 alive= 1966 sev=0.508 E/N= 1.14e+03 KE/|U|=   35.90 at_cap=0.003 dt=0.0166 perc=0.073 xi_u=0.588 occ=0.211
+    t= 13.01 tick=  655 alive= 1966 sev=0.508 E/N= 1.14e+03 KE/|U|=   35.93 at_cap=0.010 dt=0.0166 perc=0.069 xi_u=0.582 occ=0.211
+    t= 14.00 tick=  715 alive= 1965 sev=0.509 E/N= 1.14e+03 KE/|U|=   36.03 at_cap=0.007 dt=0.0166 perc=0.039 xi_u=0.584 occ=0.221
+    t= 15.00 tick=  775 alive= 1965 sev=0.509 E/N= 1.14e+03 KE/|U|=   36.15 at_cap=0.008 dt=0.0166 perc=0.052 xi_u=0.583 occ=0.221
+  wrote results/exp_03_sink_arms_full_R_tau10_s3_md0.95_20260905_232642.json (+ _pos.npz)  [775 ticks, 112s, finite=True]
+  full_D_s3_md0.95: n=4000 box=60.0 damping=0.999184 sev_tau=None mode=stress landauer=False xi_variant=XI_ANALYTIC commit=befc79a rho_K=0.6128 target_KE/N=820.5
+    t=  1.00 tick=   20 alive= 4000 sev=0.000 E/N=    -65.9 KE/|U|=    0.00 at_cap=0.000 dt=0.0500 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 alive= 4000 sev=0.000 E/N=    -65.8 KE/|U|=    0.04 at_cap=0.000 dt=0.0500 perc=0.032 xi_u=0.709 occ=0.084
+    t=  3.01 tick=   61 alive= 4000 sev=0.000 E/N=    -19.5 KE/|U|=    0.75 at_cap=0.006 dt=0.0346 perc=0.113 xi_u=0.679 occ=0.191
+    t=  4.01 tick=  110 alive= 4000 sev=0.000 E/N=  1.1e+03 KE/|U|=   16.77 at_cap=0.002 dt=0.0145 perc=0.050 xi_u=0.683 occ=0.182
+    t=  5.01 tick=  179 alive= 4000 sev=0.000 E/N= 1.19e+03 KE/|U|=   18.72 at_cap=0.003 dt=0.0149 perc=0.046 xi_u=0.618 occ=0.186
+    t=  6.00 tick=  244 alive= 4000 sev=0.000 E/N= 1.15e+03 KE/|U|=   18.22 at_cap=0.005 dt=0.0156 perc=0.025 xi_u=0.586 occ=0.183
+    t=  7.01 tick=  308 alive= 4000 sev=0.000 E/N= 1.11e+03 KE/|U|=   17.52 at_cap=0.008 dt=0.0160 perc=0.020 xi_u=0.613 occ=0.184
+    t=  8.01 tick=  370 alive= 4000 sev=0.000 E/N= 1.07e+03 KE/|U|=   17.00 at_cap=0.009 dt=0.0163 perc=0.022 xi_u=0.604 occ=0.190
+    t=  9.01 tick=  431 alive= 4000 sev=0.000 E/N= 1.03e+03 KE/|U|=   16.42 at_cap=0.006 dt=0.0165 perc=0.053 xi_u=0.620 occ=0.190
+    t= 10.01 tick=  491 alive= 4000 sev=0.000 E/N=    1e+03 KE/|U|=   15.94 at_cap=0.006 dt=0.0168 perc=0.036 xi_u=0.593 occ=0.197
+    t= 11.02 tick=  550 alive= 4000 sev=0.000 E/N=      966 KE/|U|=   15.40 at_cap=0.004 dt=0.0171 perc=0.023 xi_u=0.600 occ=0.188
+    t= 12.02 tick=  608 alive= 4000 sev=0.000 E/N=      933 KE/|U|=   14.92 at_cap=0.005 dt=0.0174 perc=0.022 xi_u=0.594 occ=0.191
+    t= 13.01 tick=  665 alive= 4000 sev=0.000 E/N=      906 KE/|U|=   14.51 at_cap=0.002 dt=0.0177 perc=0.040 xi_u=0.594 occ=0.190
+    t= 14.01 tick=  721 alive= 4000 sev=0.000 E/N=      875 KE/|U|=   14.02 at_cap=0.006 dt=0.0180 perc=0.027 xi_u=0.608 occ=0.187
+    t= 15.01 tick=  776 alive= 4000 sev=0.000 E/N=      845 KE/|U|=   13.60 at_cap=0.006 dt=0.0183 perc=0.030 xi_u=0.586 occ=0.187
+  wrote results/exp_03_sink_arms_full_D_s3_md0.95_20260905_232839.json (+ _pos.npz)  [776 ticks, 116s, finite=True]
+  12 runs, 9 frame comparisons -> results/exp_03_sink_arms_grid_full_20260905_232840.json
+   full B0 tau= None s=1 md=0.95 damp=1.00000 perc=0.035 xi_u=0.594 occ=0.190 sev=0.000 n@10=4000 KE/|U|end=18.5 at_cap=0.010 floor=0 closure=1.4e-07
+   full B0 tau= None s=2 md=0.95 damp=1.00000 perc=0.038 xi_u=0.591 occ=0.188 sev=0.000 n@10=4000 KE/|U|end=22.3 at_cap=0.010 floor=0 closure=1.2e-07
+   full B0 tau= None s=3 md=0.95 damp=1.00000 perc=0.028 xi_u=0.592 occ=0.191 sev=0.000 n@10=4000 KE/|U|end=20.0 at_cap=0.010 floor=0 closure=1.4e-07
+   full  D tau= None s=1 md=0.95 damp=0.99966 perc=0.024 xi_u=0.596 occ=0.189 sev=0.000 n@10=4000 KE/|U|end=16.3 at_cap=0.010 floor=0 closure=9.8e-08
+   full  D tau= None s=2 md=0.95 damp=0.99934 perc=0.026 xi_u=0.598 occ=0.187 sev=0.000 n@10=4000 KE/|U|end=16.4 at_cap=0.010 floor=0 closure=1.1e-07
+   full  D tau= None s=3 md=0.95 damp=0.99918 perc=0.030 xi_u=0.598 occ=0.191 sev=0.000 n@10=4000 KE/|U|end=13.6 at_cap=0.010 floor=0 closure=1.3e-07
+   full  R tau= 10.0 s=1 md=0.95 damp=1.00000 perc=0.055 xi_u=0.577 occ=0.209 sev=0.485 n@10=2062 KE/|U|end=29.1 at_cap=0.011 floor=0 closure=2.0e-07
+   full  R tau= 10.0 s=2 md=0.95 damp=1.00000 perc=0.046 xi_u=0.577 occ=0.133 sev=0.543 n@10=1827 KE/|U|end=41.7 at_cap=0.011 floor=0 closure=2.1e-07
+   full  R tau= 10.0 s=3 md=0.95 damp=1.00000 perc=0.052 xi_u=0.586 occ=0.214 sev=0.509 n@10=1966 KE/|U|end=36.1 at_cap=0.011 floor=0 closure=1.9e-07
+   full  S tau= 10.0 s=1 md=0.95 damp=1.00000 perc=0.051 xi_u=0.594 occ=0.209 sev=0.485 n@10=2062 KE/|U|end=28.6 at_cap=0.011 floor=0 closure=3.0e-07
+   full  S tau= 10.0 s=2 md=0.95 damp=1.00000 perc=0.046 xi_u=0.575 occ=0.130 sev=0.543 n@10=1827 KE/|U|end=32.0 at_cap=0.010 floor=0 closure=3.0e-07
+   full  S tau= 10.0 s=3 md=0.95 damp=1.00000 perc=0.051 xi_u=0.586 occ=0.213 sev=0.509 n@10=1966 KE/|U|end=24.4 at_cap=0.010 floor=0 closure=2.1e-07
+phase full done
