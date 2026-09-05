@@ -57,7 +57,7 @@ def main():
     ap.add_argument("--size", default="all")
     ap.add_argument("--results-dir", type=Path, default=Path(__file__).resolve().parents[1] / "results")
     a = ap.parse_args()
-    files = sorted(p for p in a.results_dir.glob("exp_03_sink_arms_*.json"))
+    files = sorted(p for p in a.results_dir.glob("exp_03_sink_arms_*.json") if "_grid_" not in p.name)   # never its own output
     runs = []
     for p in files:
         d = json.loads(p.read_text())
