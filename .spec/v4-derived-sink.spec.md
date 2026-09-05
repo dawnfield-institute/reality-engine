@@ -40,8 +40,8 @@ energy budget the substrate did not have.
   pressure and the SEC update; its entropy is frozen; it is not damped, not guarded, and not counted
   in the Integrator's step statistics; it drifts. Its mass, kinetic energy and momentum leave the
   interacting ledger at the tick of severance and are reported (`loss_severance_ke/energy/mass`);
-  `mass_int + mass_sev == mass_total` exactly and a severed particle's velocity is bit-identical
-  thereafter. `u_out`, the particle's whole interaction energy with the retained set, is charged to
+  `mass_int + mass_sev == mass_total` to float32 rounding (≤ 1e-6 relative; three reductions over
+  different index sets) and a severed particle's velocity is bit-identical thereafter. `u_out`, the particle's whole interaction energy with the retained set, is charged to
   `total_int` at that tick.
 - **R6 — a random mode exists for the selection control.** `sev_mode = "random"` severs a scheduled
   count of uniformly random alive particles per tick (schedule replayed by `sim_time`), through the
@@ -66,7 +66,7 @@ damping 0.99, sec 0: `Σ loss_drag = KE_0 − KE_T` to 1e-6 and the fitted decay
 particles, exactly · KA-iv momentum closure `Δp_int = Σ impulse_pressure − p_out` to 1e-5 (with the
 third-law pressure, `impulse_pressure ≡ 0`) · severance: the fired set equals an independent
 recomputation of the rule; no retained particle with a neighbour satisfies it; degree-0 never fires;
-`mass_int + mass_sev` exact; severed velocity bit-identical over 100 ticks; random mode reproduces its
+`mass_int + mass_sev` to 1e-6 relative; severed velocity bit-identical over 100 ticks; random mode reproduces its
 schedule; `ΔE_int` at a severance tick = −(ke_out + u_out) · Landauer: per-particle loss equals
 `min(KE, LN2|ΔS|)` on a constructed releasing state, zero on growth, total erased equal at dt and
 dt/2 within 1e-4 · anchors: `CANONICAL_SINK` (sinks off) ≡ `CANONICAL`; free drift unchanged.

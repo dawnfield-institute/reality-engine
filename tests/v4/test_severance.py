@@ -12,9 +12,6 @@ import torch
 
 from ._proxy import P, PROXY_1000
 
-SEV = pytest.mark.xfail(strict=True, reason="LedgerSeverance not yet implemented (spec R4–R6)")
-
-
 def _sp(cfg):
     return cfg.box / math.ceil(cfg.n ** (1.0 / cfg.dims))
 
@@ -23,7 +20,6 @@ def _cfg(**kw):
     return P.ParticleConfig(**{**PROXY_1000, **kw})
 
 
-@SEV
 def test_sink_pipeline_is_inert_by_default():
     """CANONICAL_SINK with sev_tau=None, landauer=False is bit-identical to CANONICAL."""
     a = P.ParticleEngine(_cfg(n=300, box=25.2), pipeline=P.CANONICAL, device=torch.device("cpu"))
@@ -34,7 +30,6 @@ def test_sink_pipeline_is_inert_by_default():
     assert b.state.severed is None or not bool(b.state.severed.any())
 
 
-@SEV
 def test_stress_trigger_matches_independent_recomputation():
     """Run the pipeline operator by operator; before LedgerSeverance acts, recompute the rule from
     the state and demand the fired set equals it — and that no retained particle with a neighbour
@@ -48,7 +43,7 @@ def test_stress_trigger_matches_independent_recomputation():
         for op in ops:
             if isinstance(op, P.LedgerSeverance):
                 r, _, _ = P.pairwise(s, 1.0)
-                alive = s.severed is None and torch.ones(s.n, dtype=torch.bool) or ~s.severed
+                alive = torch.ones(s.n, dtype=torch.bool) if s.severed is None else ~s.severed
                 near = (r < _sp(cfg)) & alive.unsqueeze(1) & alive.unsqueeze(0)
                 deg = near.sum(1)
                 dS = (s.entropy.unsqueeze(1) - s.entropy.unsqueeze(0)).abs()
@@ -57,7 +52,8 @@ def test_stress_trigger_matches_independent_recomputation():
                 before = s.severed.clone() if s.severed is not None else torch.zeros(s.n, dtype=torch.bool)
             s = op(s, eng.config)
             if isinstance(op, P.LedgerSeverance):
-                fired = s.severed & ~before
+                now = s.severed if s.severed is not None else torch.zeros(s.n, dtype=torch.bool)
+                fired = now & ~before
                 assert torch.equal(fired, expect), (int(fired.sum()), int(expect.sum()))
                 fired_total += int(fired.sum())
         eng.state = s
@@ -65,7 +61,6 @@ def test_stress_trigger_matches_independent_recomputation():
     assert fired_total > 0, "fixture must sever something for the test to mean anything"
 
 
-@SEV
 def test_severed_particles_interact_with_nothing():
     cfg = _cfg(sev_tau=1.0)
     eng = P.ParticleEngine(cfg, pipeline=P.CANONICAL_SINK, device=torch.device("cpu"))
@@ -81,12 +76,12 @@ def test_severed_particles_interact_with_nothing():
     assert torch.equal(s.vel[idx], v_then), "a severed particle's velocity must be bit-identical"
     assert torch.equal(s.entropy[idx], ent_then), "a severed particle's entropy is frozen"
     m = s.metrics
-    assert abs(m["mass_int"] + m["mass_sev"] - m["mass_total"]) == 0.0
+    # three float32 reductions over different index sets: equal to rounding, not bitwise
+    assert abs(m["mass_int"] + m["mass_sev"] - m["mass_total"]) <= 1e-6 * m["mass_total"]
     assert abs(m["kinetic_sev"] - sum(e["ke_out"] for e in eng.events)) <= 1e-6 * max(m["kinetic_sev"], 1)
     assert m["n_alive"] == cfg.n - int(s.severed.sum())
 
 
-@SEV
 def test_degree_zero_never_severs():
     cfg = P.ParticleConfig(n=2, box=60.0, r0=10.0, g=0.0, sec_balance=0.0, dims=3, damping=1.0,
                            sev_tau=0.01, sev_radius=2.0)
@@ -97,7 +92,6 @@ def test_degree_zero_never_severs():
     assert out.severed is None or not bool(out.severed.any())
 
 
-@SEV
 def test_random_mode_reproduces_its_schedule():
     sched = [(0.5, 3), (1.0, 5), (1.5, 2)]
     cfg = _cfg(n=300, box=25.2, sev_tau=1.0, sev_mode="random", sev_schedule=sched)
@@ -108,7 +102,6 @@ def test_random_mode_reproduces_its_schedule():
     assert int(s.severed.sum()) == sum(k for _, k in sched)
 
 
-@SEV
 def test_severance_energy_is_charged_to_the_interacting_total():
     cfg = _cfg(sev_tau=1.0)
     eng = P.ParticleEngine(cfg, pipeline=P.CANONICAL_SINK, device=torch.device("cpu"))
