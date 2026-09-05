@@ -62,6 +62,13 @@ class ParticleState:
     proper_time: Optional[torch.Tensor] = None    # (N,)
     prev_delta: Optional[torch.Tensor] = None     # (N,) last tick's overdensity, for "rate"
 
+    # --- the step ---------------------------------------------------------------------
+    # The global timestep the Integrator actually took on the previous tick. Operators that
+    # run BEFORE the Integrator (SECUpdate) apply their per-tick constants as rates against
+    # it, so an adaptive step cannot change the physics by changing how often it fires.
+    # None on the first tick and on the unrepaired path: callers fall back to config.dt.
+    dt_last: Optional[float] = None
+
     @property
     def n(self) -> int:
         return self.pos.shape[0]
@@ -114,6 +121,12 @@ class ParticleConfig:
     damping: float = 0.99
     max_speed: float = 2.0
     seed: int = 42
+    # The tick at which `damping`, `memory_decay` and the SEC growth coefficient are STATED.
+    # They are applied as rates -- x ** (dt_eff / dt_ref) -- which is bit-identical at
+    # dt_eff == dt_ref and the only way an adaptive step can leave the physics alone: applied
+    # per tick, a halved step would double the drag and the forgetting per unit time, a repair
+    # that "works" by adding dissipation. Never change this to retune a run; change dt.
+    dt_ref: float = 0.05
     entropy_init: float = 0.0       # exp_09 seeds 0; exp_11 seeds 0.1 * rand
     dims: int = 2                   # 2 or 3. exp_31 Part A: the cascade 1/r profile requires
                                     # d_spatial = 3, and the web topology exp_11 targets
@@ -307,10 +320,27 @@ class SECPressure:
 
 
 class SECUpdate:
-    """Local entropy from local density. Dense regions accumulate; sparse ones forget.
+    """Local entropy from local density. Dense regions accumulate; everyone forgets.
 
     This is the memory channel: entropy is a record of having been crowded, and it decays.
     Without the decay the pressure never releases and structure freezes.
+
+    **The decay applies to every particle every tick.** Until 2026-09-05 it applied only on
+    the NON-dense branch (`where(dense, entropy + growth, entropy * memory_decay)`), so a
+    particle flagged dense never forgot. Once `dense_fraction` reached ~0.97 (exp_11's 3D
+    config, tick ~200) 97% of particles were on the growth branch and the memory could not
+    release: entropy ran 100 -> 1728 -> 4419 monotonically, the pressure it drives followed,
+    and the speed cap locked. The docstring above described the intended physics; the code
+    did not implement it.
+
+    With unconditional release the entropy of any particle is bounded by
+        0.1 * (n - expected) / (1 - memory_decay)
+    -- growth at most 0.1 * (n - expected) per tick against geometric decay -- with no cap
+    and no new knob. A cap is deliberately not added: with release present it is inert
+    (dawn-field-theory/experiments/spikes/postsymbolic_selection).
+
+    Growth and decay are RATES against `dt_ref` (see ParticleConfig): at the base step the
+    non-dense branch is bit-identical to the old code.
     """
 
     name = "sec_update"
@@ -327,10 +357,13 @@ class SECUpdate:
         v_ball = (math.pi ** (d / 2) / math.gamma(d / 2 + 1)) * c.r0 ** d
         expected = float(s.n) * v_ball / ((s.box * a) ** d)
         dense = local > 1.5 * expected
-        ent = torch.where(dense, s.entropy + 0.1 * (local - expected),
-                          s.entropy * c.memory_decay)
+        s_dt = (s.dt_last if s.dt_last is not None else c.dt) / c.dt_ref
+        growth = 0.1 * (local - expected) * s_dt
+        ent = (s.entropy * (c.memory_decay ** s_dt)
+               + torch.where(dense, growth, torch.zeros_like(growth)))
         m = dict(s.metrics)
         m["entropy_mean"] = ent.mean().item()
+        m["entropy_max"] = ent.max().item()
         m["dense_fraction"] = dense.float().mean().item()
         return s.replace(entropy=ent, metrics=m)
 
@@ -363,7 +396,10 @@ class SECUpdateRelative:
         local = (r < c.r0).sum(dim=1).float()
         mean_count = local.mean()
         deviation = (local - mean_count) / (mean_count + 1.0)
-        ent = torch.clamp(s.entropy + c.sec_balance * deviation, min=0.0)
+        # Rate against dt_ref, so the literal exp_11 transcription is preserved at the base
+        # step and does not acquire a dt-dependence when the Integrator shrinks it.
+        s_dt = (s.dt_last if s.dt_last is not None else c.dt) / c.dt_ref
+        ent = torch.clamp(s.entropy + c.sec_balance * deviation * s_dt, min=0.0)
         m = dict(s.metrics)
         m["entropy_mean"] = ent.mean().item()
         m["local_count_mean"] = mean_count.item()

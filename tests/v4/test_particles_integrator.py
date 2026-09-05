@@ -84,8 +84,6 @@ def _all_dense_state(cfg: P.ParticleConfig, entropy: float = 100.0):
                            entropy=torch.full((n,), float(entropy)), box=cfg.box)
 
 
-@pytest.mark.xfail(strict=True, reason="defect: memory_decay applied only on the non-dense "
-                   "branch, so a dense particle never forgets (R2)")
 def test_sec_memory_releases_on_dense_branch(proxy_config):
     cfg = proxy_config
     s = _all_dense_state(cfg)
@@ -101,8 +99,6 @@ def test_sec_memory_releases_on_dense_branch(proxy_config):
         "a dense particle accumulated with no release at all"
 
 
-@pytest.mark.xfail(strict=True, reason="defect: entropy runs up monotonically and without bound "
-                   "once dense_fraction saturates (R2)")
 def test_entropy_bounded_and_not_monotone(proxy_run):
     _, marks = proxy_run
     series = [m["entropy_mean"] for _, _, m in marks]
