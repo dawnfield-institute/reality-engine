@@ -42,6 +42,16 @@ result: >
   the canonical pipeline it does not, because the velocity damping and speed cap are
   dissipative by construction - that is design, not defect.
 notes: >
+  CORRECTED 2026-09-05 (dynamics superseded): every number in `result` was produced with the
+  speed cap max_speed=2.0 binding on 100% of particles from tick ~100, so force magnitude was
+  discarded and only direction integrated; sec_balance was inert and SEC entropy never released
+  (journals/2026-08-28_the-clamp-is-the-equation-of-motion.md). The substrate now chooses its
+  step from the forces, derives and reports its guard, and releases memory every tick
+  (journals/2026-09-05_the-integrator-owns-dt.md; .spec/v4-particle-substrate.spec.md). The
+  transient-web reading below is a reading of the clamped system; exp_04 re-measures at matched
+  simulated time. With the clamp gone the substrate is a relaxation oscillator
+  (.spec/challenges.md C4.1) - a physics question, not repaired here.
+
   CORRECTED BY POC-09: the "sign error" below is a DEVIATION from the reference, not a fix.
   POC-09 transcribed exp_11 literally with the signs as written and reproduced its published
   numbers to three significant figures (void 0.888 vs 0.89, CV 2.948 vs 2.94). The repulsive

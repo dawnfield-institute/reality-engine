@@ -1,6 +1,7 @@
 # v4 Particle Substrate — integrator hygiene
 
-**Status:** in progress (2026-09-05) · **Scope of this revision:** integrator hygiene only. This
+**Status:** implemented 2026-09-05 (commits `996296d` → `0f2cd20`, branch `fix/v4-integrator-owns-dt`;
+R1–R9 in code and under test; exp_04 acceptance: controller lines 12/12, pressure lines partial — see Acceptance) · **Scope of this revision:** integrator hygiene only. This
 is not a full substrate specification; it specifies the one property the substrate lacked — that
 its dynamics are the force law it declares — and the instrumentation that makes that checkable.
 
@@ -86,6 +87,12 @@ seeds, and on the `tests/v4` proxy:
 
 **Falsification of this spec:** `at_cap_frac > 0.02` at any mark with `dt` above the floor means
 the controller is wrong, not the physics.
+
+**Measured (exp_04, 2026-09-05, thresholds as written):** the four controller lines hold on 12/12
+runs and the falsification did not fire. Entropy released 11/12 (one run ends mid-collapse).
+`press/grav ≤ 100` at every mark holds on 4/12 — the peak is the first detonation and is linear in
+`sec_balance` — and the [5,15] average ≤ 10 holds on 11/12. The pressure lines are the force law's
+(`.spec/challenges.md` C4.1), not the controller's; they are recorded as failed, not relaxed.
 
 ## What this spec does not claim
 
