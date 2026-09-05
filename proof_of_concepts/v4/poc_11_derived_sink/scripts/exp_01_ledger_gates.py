@@ -52,13 +52,22 @@ def main():
         gate("potential = E1 closed form (rel)", True, "scipy absent — skipped")
 
     # KA-i conservation to truncation, guard explicitly unbound
-    def drift(cfl):
-        cfg = ParticleConfig(**{**PROXY, "n": 400, "box": 27.9, "sec_balance": 0.0, "cfl": cfl, "max_speed": 1e9})
-        _, rw = run(cfg, 500)
+    def drift(dt_ref, t_end=3.0):
+        # halve THE STEP over a fixed smooth window (t <= 3, before close encounters). Halving cfl
+        # alone is not a test here: the Courant step exceeds dt_ref until t ~ 3, so both runs
+        # integrate at the same dt and the ratio is decided by the chaotic late phase (the first
+        # version of this gate passed at 7.6x for that wrong reason; CI gave 0.69x and 1.45x).
+        torch.set_num_threads(1)
+        cfg = ParticleConfig(**{**PROXY, "n": 400, "box": 27.9, "sec_balance": 0.0, "dt": dt_ref, "dt_ref": dt_ref, "max_speed": 1e9})
+        eng = ParticleEngine(cfg, pipeline=CANONICAL, device=torch.device("cpu")); rw = []
+        while True:
+            rw.append(dict(eng.tick().metrics))
+            if rw[-1]["sim_time"] >= t_end - 1e-9: break
+        assert max(x["at_cap_frac"] for x in rw) == 0.0
         return abs(rw[-1]["total_int"] - rw[0]["total_int"]), max(x["cfl_number"] for x in rw) * sum(abs(x["work_gravity"]) for x in rw)
-    dE, bound = drift(0.2); dE2, _ = drift(0.1)
+    dE, bound = drift(0.05); dE2, _ = drift(0.025)
     gate("KA-i |dE| <= cfl_max * sum|work| (damping 1, sec 0)", dE <= bound, f"|dE| {dE:.3g} vs bound {bound:.3g}")
-    gate("KA-i halving cfl shrinks |dE| >= 1.5x", dE / max(dE2, 1e-12) >= 1.5, f"ratio {dE / max(dE2, 1e-12):.2f}")
+    gate("KA-i halving the step over t<=3 shrinks |dE| >= 1.5x", dE / max(dE2, 1e-12) >= 1.5, f"ratio {dE / max(dE2, 1e-12):.2f}")
 
     # KA-ii drag rate
     cfg = ParticleConfig(n=200, box=60.0, r0=10.0, g=0.0, sec_balance=0.0, dims=3, seed=3, ic="zeldovich", ic_amplitude=0.5, damping=0.99)

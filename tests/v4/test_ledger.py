@@ -54,25 +54,31 @@ def test_closure_residual_every_tick(proxy_config):
 
 def test_energy_conserved_to_truncation_without_drag():
     """KA-i: damping 1, sec 0, guard unbound — |dE| bounded by the Courant truncation, and halving
-    cfl shrinks it by a first-order factor."""
-    def drift(cfl):
+    THE STEP over a fixed smooth window shrinks |dE| by a first-order factor.
+
+    The first version of this test halved `cfl` and compared 500-tick runs. That passed for the
+    wrong reason: until t ~ 3 the Courant step exceeds dt_ref, so both runs integrate at the same
+    dt (bit-identical for 60 ticks), and the "ratio" was decided by the chaotic late phase — 7.6x
+    here, 0.69x and 1.45x on CI, a different number per run. Halving dt_ref over t <= 3 (before the
+    first close encounters) gives 2.00x / 2.01x for two successive halvings, deterministically."""
+    torch.set_num_threads(1)              # summation order fixed: the ratio is a measurement, not a race
+    def run(dt_ref, t_end):
         # the derived guard binds on the p99 tail BY CONSTRUCTION; an explicit unreachable cap
         # makes "guard unbound" literally true for the conservation check
-        cfg = P.ParticleConfig(**{**PROXY_1000, "n": 400, "box": 27.9, "sec_balance": 0.0, "cfl": cfl,
-                                  "max_speed": 1e9})
-        eng, rows = _run(cfg, 500)
+        cfg = P.ParticleConfig(**{**PROXY_1000, "n": 400, "box": 27.9, "sec_balance": 0.0,
+                                  "dt": dt_ref, "dt_ref": dt_ref, "max_speed": 1e9})
+        eng = P.ParticleEngine(cfg, device=torch.device("cpu")); rows = []
+        while True:
+            rows.append(dict(eng.tick().metrics))
+            if rows[-1]["sim_time"] >= t_end - 1e-9: break
         assert max(r["at_cap_frac"] for r in rows) == 0.0
-        E0, E1 = rows[0]["total_int"], rows[-1]["total_int"]
-        cfl_max = max(r["cfl_number"] for r in rows)
-        W = sum(abs(r["work_gravity"]) for r in rows)
-        return abs(E1 - E0), cfl_max * W
-    dE, bound = drift(0.2)
-    assert dE <= bound, (dE, bound)
-    dE_half, _ = drift(0.1)
-    # The purpose: the error is TRUNCATION (shrinks with the step), not a bug (constant). Measured
-    # 2026-09-05: halving cfl shrank |dE| by 7.6x (kick-drift at damping 1 is better than first
-    # order here); the original window of 1.5-4x was my expectation, not a requirement.
-    assert dE / max(dE_half, 1e-12) >= 1.5, (dE, dE_half)
+        dE = abs(rows[-1]["total_int"] - rows[0]["total_int"])
+        bound = max(r["cfl_number"] for r in rows) * sum(abs(r["work_gravity"]) for r in rows)
+        return dE, bound
+    dE, bound = run(0.05, 3.0)
+    assert dE <= bound, (dE, bound)                    # conserved to the Courant truncation bound
+    dE_half, _ = run(0.025, 3.0)
+    assert dE / max(dE_half, 1e-12) >= 1.5, (dE, dE_half)   # first order: measured 2.00x
 
 
 def test_drag_loss_reproduces_the_exp04_rate():
