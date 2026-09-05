@@ -78,6 +78,12 @@ class ParticleState:
     # would kick with is not known until every force has been evaluated, and choosing it
     # from this tick's forces (rather than last tick's energy) is what makes the step honest.
     acc: Optional[torch.Tensor] = None            # (N, d)
+    acc_gravity: Optional[torch.Tensor] = None    # (N, d) this tick's gravity part of acc
+    acc_pressure: Optional[torch.Tensor] = None   # (N, d) this tick's pressure part of acc
+    # Per-particle gravitational interaction energy sum_j u_ij (each pair counted from both
+    # ends), from the SAME kernel the force uses -- see gravity_potential_table. Written by
+    # LocalGravity, read by PACLedger; None on a pipeline without gravity.
+    potential_i: Optional[torch.Tensor] = None    # (N,)
 
     @property
     def n(self) -> int:
@@ -286,6 +292,39 @@ def pairwise(s: ParticleState, a: float = 1.0):
     return r_com * a, d, r_com
 
 
+def gravity_potential_table(g: float, r0: float, n: int = 65536):
+    """U(r) for the gravity kernel, tabulated on [0, 3 r0]: U(r) = -int_r^{3 r0} g e^{-s/r0}/(s+0.1) ds.
+
+    The force is F(r) = g e^{-r/r0}/(r+0.1) toward the neighbour, cut at 3 r0. This is the pair
+    potential whose gradient it is, referenced to zero at the cutoff so u_ij is continuous there
+    (the force is what jumps at the cutoff, and that jump is already the substrate's). Closed
+    form for the test: U(r) = -g e^{0.1/r0} [E1((r+0.1)/r0) - E1((3 r0+0.1)/r0)]. No second
+    gravity is introduced -- one kernel, one reduction. Returns numpy (r_grid, U_grid).
+    n = 65536: the kernel is steepest at r = 0 (scale 0.1), and a 4096-point trapezoid misses the
+    closed form there by 1e-4; at 65536 the table matches E1 to < 1e-6 everywhere (tested).
+    """
+    import numpy as np
+    r = np.linspace(0.0, 3.0 * r0, n)
+    f = g * np.exp(-r / r0) / (r + 0.1)
+    # cumulative trapezoid from the cutoff inward: U(r) = -int_r^{R} f
+    seg = 0.5 * (f[1:] + f[:-1]) * np.diff(r)
+    tail = np.concatenate([np.cumsum(seg[::-1])[::-1], [0.0]])
+    return r, -tail
+
+
+def _interp_potential(r: torch.Tensor, within: torch.Tensor, table) -> torch.Tensor:
+    """Linear lookup of U(r) on the table for pairs `within`; 0 elsewhere (and on the diagonal)."""
+    r_grid, U_grid = table
+    n = len(r_grid); span = float(r_grid[-1])
+    Ug = torch.as_tensor(U_grid, dtype=r.dtype, device=r.device)
+    r_safe = torch.where(within, r, torch.zeros_like(r))
+    x = r_safe / span * (n - 1)
+    idx = x.floor().clamp(0, n - 2).long()
+    frac = (x - idx.to(r.dtype)).clamp(0.0, 1.0)
+    u = Ug[idx] * (1.0 - frac) + Ug[idx + 1] * frac
+    return torch.where(within, u, torch.zeros_like(u))
+
+
 # ======================================================================================
 # Operators
 # ======================================================================================
@@ -300,6 +339,17 @@ class LocalGravity:
 
     name = "local_gravity"
 
+    def __init__(self):
+        self._table = None
+        self._table_key = None
+
+    def _potential_table(self, c: ParticleConfig):
+        key = (float(c.g), float(c.r0))
+        if self._table_key != key:
+            self._table = gravity_potential_table(c.g, c.r0)
+            self._table_key = key
+        return self._table
+
     @torch.no_grad()
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
         a = c.cosmology.a if c.cosmology else 1.0
@@ -308,6 +358,9 @@ class LocalGravity:
         mm = s.mass.unsqueeze(1) * s.mass.unsqueeze(0)
         mag = torch.where(within, c.g * mm * torch.exp(-r / c.r0) / (r + 0.1),
                           torch.zeros_like(r))
+        # the same kernel, integrated: per-particle interaction energy (pairs counted from both ends)
+        u = mm * _interp_potential(r, within, self._potential_table(c))
+        potential_i = u.sum(dim=1)
         # d[i,j] = pos_i - pos_j points AWAY from j, so an attractive force needs -unit.
         # The first version used +unit and made gravity repulsive: the cloud expanded to
         # uniform, damping killed the motion, and every metric froze at t=100 — void 0.756
@@ -317,8 +370,10 @@ class LocalGravity:
         force = -(mag.unsqueeze(-1) * unit).sum(dim=1)         # toward neighbours
         m = dict(s.metrics)
         m["gravity_force_mean"] = force.norm(dim=-1).mean().item()
+        m["potential_int"] = 0.5 * potential_i.sum().item()
         acc = force / s.mass.unsqueeze(-1)
-        return s.replace(acc=acc if s.acc is None else s.acc + acc, metrics=m)
+        return s.replace(acc=acc if s.acc is None else s.acc + acc, acc_gravity=acc,
+                         potential_i=potential_i, metrics=m)
 
 
 class SECPressure:
@@ -355,7 +410,7 @@ class SECPressure:
         m = dict(s.metrics)
         m["sec_pressure_mean"] = press.norm(dim=-1).mean().item()
         acc = press / s.mass.unsqueeze(-1)
-        return s.replace(acc=acc if s.acc is None else s.acc + acc, metrics=m)
+        return s.replace(acc=acc if s.acc is None else s.acc + acc, acc_pressure=acc, metrics=m)
 
 
 class SECUpdate:
@@ -595,7 +650,21 @@ class Integrator:
         cap = c.max_speed if c.max_speed is not None else c.cfl * c.r0 / dt
 
         # --- kick, then damp as a rate ------------------------------------------------------
-        vel = (s.vel + acc * dt) * (c.damping ** (dt / c.dt_ref))
+        v0 = s.vel
+        v1 = v0 + acc * dt
+        vel = v1 * (c.damping ** (dt / c.dt_ref))
+        # Exact discrete partition of the kick's kinetic change by force: with a = sum_X a_X,
+        #   dKE_kick = sum_X [ m v0.a_X dt + 1/2 m a_X.a dt^2 ]   (identity, not an approximation)
+        mvec = s.mass.unsqueeze(-1)
+        a_g = s.acc_gravity if s.acc_gravity is not None else torch.zeros_like(acc)
+        a_p = s.acc_pressure if s.acc_pressure is not None else torch.zeros_like(acc)
+        def _work(a_x):
+            return ((mvec * v0 * a_x).sum() * dt + 0.5 * (mvec * a_x * acc).sum() * dt * dt).item()
+        work_g, work_p = _work(a_g), _work(a_p)
+        ke1 = (0.5 * s.mass * (v1 ** 2).sum(-1)).sum().item()
+        ke2 = (0.5 * s.mass * (vel ** 2).sum(-1)).sum().item()
+        loss_drag = ke1 - ke2
+        impulse_p = (mvec * a_p).sum(0) * dt
         if c.cosmology is not None:
             # Standard comoving form: peculiar velocities decay as dv/dt = -2 H v, and
             # comoving displacement is v/a. This is what "expansion holds the web open"
@@ -617,12 +686,22 @@ class Integrator:
         m["cfl_number"] = max(v99 * dt, a99 * dt * dt) / c.r0
         m["sim_time"] = float(s.metrics.get("sim_time", 0.0)) + dt
         vel = torch.where(speed > cap, vel * cap / speed, vel)
+        ke3 = (0.5 * s.mass * (vel ** 2).sum(-1)).sum().item()
+        loss_guard = ke2 - ke3
+        m["work_gravity"], m["work_pressure"] = work_g, work_p
+        m["loss_drag"], m["loss_guard"] = loss_drag, loss_guard
+        for k, ax in enumerate("xyz"[: s.pos.shape[1]]):
+            m[f"impulse_pressure_{ax}"] = impulse_p[k].item()
+        for key, val in (("work_gravity", work_g), ("work_pressure", work_p),
+                         ("loss_drag", loss_drag), ("loss_guard", loss_guard)):
+            m[key + "_cum"] = float(m.get(key + "_cum", 0.0)) + val
 
         # --- drift ------------------------------------------------------------------------
         a = c.cosmology.a if c.cosmology else 1.0
         dt_i = dt if tau is None else dt * tau
         pos = (s.pos + vel * dt_i / a) % s.box
-        return s.replace(pos=pos, vel=vel, acc=None, dt_last=dt, metrics=m)
+        return s.replace(pos=pos, vel=vel, acc=None, acc_gravity=None, acc_pressure=None,
+                         dt_last=dt, metrics=m)
 
 
 class PACLedger:
@@ -638,9 +717,26 @@ class PACLedger:
     @torch.no_grad()
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
         m = dict(s.metrics)
+        ke_prev = s.metrics.get("kinetic_int")
         m["mass_total"] = s.mass.sum().item()
         m["kinetic"] = (0.5 * s.mass * (s.vel ** 2).sum(-1)).sum().item()
         m["entropy_total"] = s.entropy.sum().item()
+        # --- the interacting set's energy budget (all particles until severance exists) -------
+        m["n_alive"] = int(s.n)
+        m["kinetic_int"] = m["kinetic"]
+        m["potential_int"] = (0.5 * s.potential_i.sum().item() if s.potential_i is not None
+                              else float(s.metrics.get("potential_int", 0.0)))
+        m["total_int"] = m["kinetic_int"] + m["potential_int"]
+        m["e_int"] = m["total_int"] / max(m["n_alive"], 1)
+        # closure: this tick's kinetic change must be exactly the work minus the losses.
+        # A sign or partition error anywhere upstream shows up here as O(1), not as drift.
+        if ke_prev is not None:
+            budget = (m.get("work_gravity", 0.0) + m.get("work_pressure", 0.0)
+                      - m.get("loss_drag", 0.0) - m.get("loss_guard", 0.0)
+                      - m.get("loss_landauer", 0.0) - m.get("loss_severance_ke", 0.0))
+            m["closure_residual"] = abs((m["kinetic_int"] - ke_prev) - budget) / max(abs(ke_prev), 1.0)
+        else:
+            m["closure_residual"] = 0.0
         # One key per spatial axis. This recorded x and y only, so on every 3D run the z
         # component was silently missing from the conservation ledger.
         p = (s.mass.unsqueeze(-1) * s.vel).sum(0)

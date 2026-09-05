@@ -60,7 +60,7 @@ energy budget the substrate did not have.
 ## Acceptance (known answers; POC-11 exp_01 and `tests/v4`)
 
 KA-0 closure residual ≤ 1e-5 every tick · KA-i energy conserved at damping 1 / sec 0 to the Courant
-truncation bound `|ΔE| ≤ cfl_max · Σ|work|`, and halving `cfl` reduces |ΔE| by ×1.5–4 · KA-ii at
+truncation bound `|ΔE| ≤ cfl_max · Σ|work|`, and halving `cfl` reduces |ΔE| by at least ×1.5 (measured ×7.6) · KA-ii at
 damping 0.99, sec 0: `Σ loss_drag = KE_0 − KE_T` to 1e-6 and the fitted decay rate equals
 `2 ln(0.99)/dt_ref = −0.4020` within 1% · KA-iii `loss_guard = Σ ½ m (v² − cap²)` over clamped
 particles, exactly · KA-iv momentum closure `Δp_int = Σ impulse_pressure − p_out` to 1e-5 (with the
