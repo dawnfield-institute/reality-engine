@@ -2,6 +2,19 @@
 
 **Status**: completed · **Pillar**: SEC
 
+> ## ⚠ SUPERSEDED DYNAMICS — 2026-09-05
+>
+> **Every number below was produced with the speed cap binding on every particle from tick
+> ~100** (`journals/2026-08-28_the-clamp-is-the-equation-of-motion.md`): force magnitude was
+> discarded, only direction survived, `sec_balance` was inert, and SEC entropy never released.
+> The substrate was integrating a direction field, not the force law this POC set out to test.
+>
+> Repaired 2026-09-05 (`journals/2026-09-05_the-integrator-owns-dt.md`): the Integrator now
+> chooses the step from the forces, the guard is derived and reports when it binds
+> (`at_cap_frac`, `engine.bounds`), and SEC memory releases every tick. The results below are
+> retained as the record of what was measured; they are not results about the force law.
+> Re-measurement is exp_04 (`scripts/exp_04_integrator_owns_dt.py`, matched simulated time).
+
 ## Why
 
 POC-05 established that the field engine cannot produce connectivity. Its overdense set breaks

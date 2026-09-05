@@ -491,3 +491,44 @@ This document tracks open problems, research questions, and design decisions tha
 - Research 💡: 10
 
 **Next Reviews**: After each phase completion
+
+---
+
+## Phase 4 Challenges (v4 particle substrate)
+
+### C4.1: The substrate without its clamp is a relaxation oscillator
+
+**Question**: Is the SEC pressure parametrisation physical, or an artifact of exp_09's per-tick calibration?
+
+**Context**: Until 2026-09-05 the v4 particle substrate's speed cap bound on every particle from tick ~100, and was therefore its only energy sink (poc_08 measured 242× kinetic energy growth when the cap was lifted 2 → 20). With the cap no longer binding and the timestep set by the forces (`.spec/v4-particle-substrate.spec.md`), the design pass observed on a 3D proxy: collapse → the first dense event dumps entropy → the entropy-gradient force is impulsive (p99 acceleration ≈ 120 against free-fall ≈ 5) → the clump detonates to speeds 250–330 → disperses to uniform → drag bleeds the energy over ~10 time units → re-collapse. The growth coefficient `0.1`, the kernel-summed gradient over ~100 neighbours within `2 r0`, and `memory_decay = 0.95` were all calibrated per tick under the clamp.
+
+**Options**:
+1. Treat it as the force law and measure it (≥3 seeds, `press/grav` and connectivity vs `sec_balance`) — the repair round does this and records the numbers as measurements, not results
+2. Re-derive the pressure term from the SEC energy functional so its scale is set by the physics rather than by exp_09's tick
+3. Accept a physical dissipation channel (which the clamp was standing in for) and derive it rather than tune it
+
+**Impact**: Decides whether the substrate can carry dawn-field-theory M17 Block B (critical point) and the M18 dynamics question (does anything drive the branch coupling to 1/φ).
+
+**Status**: 🔄 Open — owner: the M18 dynamics conversation (Peter-gated). Not fixed in the hygiene round by design.
+
+---
+
+### C4.2: Per-particle timesteps in the force kick (design B)
+
+**Question**: Should `tau` reach the force kick, making emergent local time a genuine stability control?
+
+**Context**: After the hygiene round the Integrator owns `dt` and applies the kick; `tau` still scales only the drift, and `LocalTime` normalises `tau` to mean 1 so it redistributes time rather than lowering the step. Routing `dt_i = dt_eff · tau_i` into the kick is one line; relaxing the mean-1 normalisation changes what `proper_time` means and every poc_10 number (all measured under the clamp).
+
+**Impact**: poc_10's emergent-time program. Requires a re-measurement campaign, not a code change alone.
+
+**Status**: 🔄 Open — follow-on to the hygiene round; Peter's physics program.
+
+---
+
+### C4.3: Two clocks
+
+**Question**: Which elapsed time do consumers read?
+
+**Context**: `proper_time` (`LocalTime`) accumulates `tau · c.dt` in units of base ticks; `sim_time` (Integrator, from the hygiene round) is the true elapsed global time under the adaptive step. Until C4.2 they are different objects and any experiment matching runs "at the same time" must say which.
+
+**Status**: 🔄 Open — documented; resolve with C4.2.
