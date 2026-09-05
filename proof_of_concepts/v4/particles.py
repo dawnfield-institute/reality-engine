@@ -68,6 +68,11 @@ class ParticleState:
     # it, so an adaptive step cannot change the physics by changing how often it fires.
     # None on the first tick and on the unrepaired path: callers fall back to config.dt.
     dt_last: Optional[float] = None
+    # Acceleration accumulated by the force operators THIS tick and consumed by the
+    # Integrator, which applies the kick. Force operators do not touch `vel`: the step they
+    # would kick with is not known until every force has been evaluated, and choosing it
+    # from this tick's forces (rather than last tick's energy) is what makes the step honest.
+    acc: Optional[torch.Tensor] = None            # (N, d)
 
     @property
     def n(self) -> int:
@@ -119,7 +124,22 @@ class ParticleConfig:
     sec_balance: float = 0.6        # entropy pressure strength
     memory_decay: float = 0.95      # entropy fade
     damping: float = 0.99
-    max_speed: float = 2.0
+    # --- the speed guard ---------------------------------------------------------------
+    # None (default): the guard is the Courant displacement limit cfl * r0 / dt_eff, derived
+    # every tick from the same rule that sets dt, so by construction it can bind only on the
+    # top 1% tail the rule ignores. A number is honoured as an explicit cap (earlier
+    # experiments swept it) and reported like any other bound.
+    #
+    # It used to be 2.0, unconditionally, and that number was the equation of motion. On
+    # exp_11's 3D config (2026-08-28) every particle sat at it from tick ~100; forces only get
+    # large once structure forms, so the cap saturated precisely when the engine started
+    # doing something. 2.0 is BELOW the physical speed scale of these forces -- free fall
+    # sqrt(2 a r0) ~ 5, drag-terminal a dt/(1-damping) ~ 6-40 -- so no fixed value near it can
+    # be a guard that never binds. Lifting it to 20 was measured (poc_08) to let kinetic
+    # energy grow 242x: it relocates the blowup. The step is what was wrong, not the cap.
+    max_speed: Optional[float] = None
+    cfl: float = 0.2                # Courant number: max displacement per step, in units of r0
+    dt_min: Optional[float] = None  # floor on the step; None -> dt / 20. Reported when it binds.
     seed: int = 42
     # The tick at which `damping`, `memory_decay` and the SEC growth coefficient are STATED.
     # They are applied as rates -- x ** (dt_eff / dt_ref) -- which is bit-identical at
@@ -292,7 +312,8 @@ class LocalGravity:
         force = -(mag.unsqueeze(-1) * unit).sum(dim=1)         # toward neighbours
         m = dict(s.metrics)
         m["gravity_force_mean"] = force.norm(dim=-1).mean().item()
-        return s.replace(vel=s.vel + force * c.dt / s.mass.unsqueeze(-1), metrics=m)
+        acc = force / s.mass.unsqueeze(-1)
+        return s.replace(acc=acc if s.acc is None else s.acc + acc, metrics=m)
 
 
 class SECPressure:
@@ -316,7 +337,8 @@ class SECPressure:
         press = (mag.unsqueeze(-1) * unit).sum(dim=1)
         m = dict(s.metrics)
         m["sec_pressure_mean"] = press.norm(dim=-1).mean().item()
-        return s.replace(vel=s.vel + press * c.dt / s.mass.unsqueeze(-1), metrics=m)
+        acc = press / s.mass.unsqueeze(-1)
+        return s.replace(acc=acc if s.acc is None else s.acc + acc, metrics=m)
 
 
 class SECUpdate:
@@ -493,53 +515,97 @@ class LocalTime:
 
 
 class Integrator:
-    """Damped drift with a speed cap, on a periodic box.
+    """Kick, damp, guard, drift -- on ONE global step chosen from this tick's forces.
 
-    When `state.tau` is present each particle advances by its OWN dt = dt_base * tau_i, so
-    the substrate integrates on local proper time rather than one global clock. Individual
-    per-particle timesteps are standard practice in N-body work; what is not standard is
-    letting the physics set them.
+    The force operators accumulate acceleration into `state.acc`; this operator applies it.
+    Owning the step here, rather than each force kicking with `config.dt`, is what lets the
+    step be set from the forces that are about to act instead of from a fixed number.
 
-    **The cap is a bound, and a bound that binds is not physics.** `at_cap_frac` is the
-    fraction of particles whose speed met `max_speed` THIS tick, measured before the
-    renormalisation (after it, every clamped entry reads exactly `max_speed` by
-    construction). Measured on exp_11's 3D config, 2026-08-28, with nothing reporting it:
+    **The step.** A Courant rule on a ROBUST statistic of this tick's accelerations and
+    velocities:
 
-        tick   at_cap   mean_sp   p99      press/grav   entropy
-          50   0.4330   1.5120   2.000        0.5         0.0
-         100   1.0000   2.0000   2.000      910.1       100.1
-         300   1.0000   2.0000   2.000    10123.5      4419.3
+        a99 = |acc|.quantile(0.99)         v99 = (|vel| tau_i).quantile(0.99)
+        dt  = min(c.dt, cfl sqrt(r0 / a99), cfl r0 / (v99 + a99 dt))
+        dt  = max(dt, dt_min)              cap = cfl r0 / dt
 
-    From tick ~100 the substrate was integrating a direction field, and every result taken
-    in that regime measured the clamp. Report `at_cap_frac` beside any dynamical quantity,
-    and treat a value above a few percent as "the force law is not being integrated here"
-    rather than as a physical reading. `speed_p99` and `speed_max` are the pre-clamp tail.
+    The first bound resolves the force's own length scale (a dt^2 <= cfl^2 r0); the second
+    bounds displacement per step. p99 rather than max, so the 1% most extreme particles never
+    set everyone's clock (the v3 field engine's TimeEmergence has that defect, documented in
+    its own docstring), and the guard then binds on at most that tail BY CONSTRUCTION. On
+    exp_11's quiescent phase (a99 ~ 8, v99 ~ 5) the rule leaves dt at c.dt: the step was never
+    the problem for gravity alone. When SEC pressure detonates a clump (a99 ~ 120, v99 ~ 300)
+    it drops to ~0.007 and the cap rises to ~300 with it, so the force law keeps being
+    integrated where before it was discarded.
+
+    **Rates, not per-tick constants.** `damping` is applied as damping ** (dt / dt_ref). At
+    dt == dt_ref this is bit-identical to multiplying by `damping` once; at any other step it
+    is the same drag per unit time. Without this an adaptive step would add dissipation
+    whenever it shrank -- a repair that works by turning the physics off.
+
+    **What is reported, every tick.** `dt_eff`, `dt_at_floor`, `cap_eff`, `at_cap_frac` (from
+    the pre-clamp speed, tolerance as in the diagnostic), `speed_p99`, `speed_max`,
+    `accel_p99`, `cfl_number` = max(v99 dt, a99 dt^2) / r0, and `sim_time`, the true elapsed
+    global time. Read `at_cap_frac` beside any dynamical quantity; above a few percent with
+    `dt` off its floor, the controller is wrong (spec R3/R5), not the physics.
+
+    When `state.tau` is present each particle DRIFTS by its own dt_i = dt tau_i, as before;
+    the kick is on the global dt (emergent local time in the kick is `.spec/challenges.md`
+    C4.2, a physics decision, not hygiene). With `time_mode="global"` the substrate at base
+    dt with no forces is bit-identical to the pre-2026-09-05 integrator.
     """
 
     name = "integrator"
 
     @torch.no_grad()
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
-        vel = s.vel * c.damping
-        dt = c.dt if s.tau is None else c.dt * s.tau.unsqueeze(-1)
+        acc = s.acc if s.acc is not None else torch.zeros_like(s.vel)
+        tau = None if s.tau is None else s.tau.unsqueeze(-1)
+
+        # --- the step, from this tick's forces -------------------------------------------
+        a_mag = acc.norm(dim=-1)
+        v_mag = s.vel.norm(dim=-1) if tau is None else (s.vel * tau).norm(dim=-1)
+        a99 = torch.quantile(a_mag, 0.99).item()
+        v99 = torch.quantile(v_mag, 0.99).item()
+        dt = c.dt
+        if a99 > 0.0:
+            dt = min(dt, c.cfl * math.sqrt(c.r0 / a99))
+        denom = v99 + a99 * dt
+        if denom > 0.0:
+            dt = min(dt, c.cfl * c.r0 / denom)
+        dt_min = c.dt_min if c.dt_min is not None else c.dt / 20.0
+        at_floor = dt <= dt_min
+        dt = max(dt, dt_min)
+        cap = c.max_speed if c.max_speed is not None else c.cfl * c.r0 / dt
+
+        # --- kick, then damp as a rate ------------------------------------------------------
+        vel = (s.vel + acc * dt) * (c.damping ** (dt / c.dt_ref))
         if c.cosmology is not None:
             # Standard comoving form: peculiar velocities decay as dv/dt = -2 H v, and
             # comoving displacement is v/a. This is what "expansion holds the web open"
-            # actually means mechanically — infall is fought by the drag and by the
+            # actually means mechanically -- infall is fought by the drag and by the
             # separation growing underneath it.
             H = c.cosmology.hubble()
             vel = vel * (1.0 - 2.0 * H * dt)
+
+        # --- guard: measured before it acts, then applied ----------------------------------
         speed = vel.norm(dim=-1, keepdim=True)
         m = dict(s.metrics)
-        # Same tolerance as scripts/diag_clamp_saturation.py, so the metric reproduces the
-        # numbers already on record rather than a new definition of the same thing.
-        m["at_cap_frac"] = (speed >= c.max_speed * 0.999).float().mean().item()
+        m["at_cap_frac"] = (speed >= cap * 0.999).float().mean().item()
         m["speed_p99"] = torch.quantile(speed.flatten(), 0.99).item()
         m["speed_max"] = speed.max().item()
-        vel = torch.where(speed > c.max_speed, vel * c.max_speed / speed, vel)
+        m["cap_eff"] = float(cap)
+        m["dt_eff"] = float(dt)
+        m["dt_at_floor"] = bool(at_floor)
+        m["accel_p99"] = a99
+        m["cfl_number"] = max(v99 * dt, a99 * dt * dt) / c.r0
+        m["sim_time"] = float(s.metrics.get("sim_time", 0.0)) + dt
+        vel = torch.where(speed > cap, vel * cap / speed, vel)
+
+        # --- drift ------------------------------------------------------------------------
         a = c.cosmology.a if c.cosmology else 1.0
-        pos = (s.pos + vel * dt / a) % s.box
-        return s.replace(pos=pos, vel=vel, metrics=m)
+        dt_i = dt if tau is None else dt * tau
+        pos = (s.pos + vel * dt_i / a) % s.box
+        return s.replace(pos=pos, vel=vel, acc=None, dt_last=dt, metrics=m)
 
 
 class PACLedger:
@@ -603,7 +669,8 @@ class ParticleEngine:
         # Running record of every numerical bound, so a run can be read for "did anything
         # bind" without re-running it. Written every tick from state.metrics.
         self.bounds = {"at_cap_frac_max": 0.0, "ticks_at_cap_gt_1pct": 0,
-                       "first_tick_at_cap_gt_1pct": None}
+                       "first_tick_at_cap_gt_1pct": None, "ticks_at_dt_floor": 0,
+                       "dt_eff_min": None}
         self._warned_cap = False
 
     def _init(self) -> ParticleState:
@@ -637,7 +704,7 @@ class ParticleEngine:
         for op in self.pipeline:
             s = op(s, self.config)
         if self.config.cosmology is not None:
-            self.config.cosmology.advance(self.config.dt)
+            self.config.cosmology.advance(s.dt_last if s.dt_last is not None else self.config.dt)
         self.state = s
         self.tick_count += 1
         self._record_bounds(s)
@@ -649,6 +716,11 @@ class ParticleEngine:
             return
         b = self.bounds
         b["at_cap_frac_max"] = max(b["at_cap_frac_max"], frac)
+        if s.metrics.get("dt_at_floor"):
+            b["ticks_at_dt_floor"] += 1
+        d = s.metrics.get("dt_eff")
+        if d is not None:
+            b["dt_eff_min"] = d if b["dt_eff_min"] is None else min(b["dt_eff_min"], d)
         if frac > 0.01:
             b["ticks_at_cap_gt_1pct"] += 1
             if b["first_tick_at_cap_gt_1pct"] is None:
@@ -656,8 +728,8 @@ class ParticleEngine:
         if frac > self.AT_CAP_WARN and not self._warned_cap:
             self._warned_cap = True
             warnings.warn(
-                f"speed guard binding: {100 * frac:.1f}% of particles at max_speed="
-                f"{self.config.max_speed} on tick {self.tick_count}; the force law is not "
+                f"speed guard binding: {100 * frac:.1f}% of particles at cap="
+                f"{s.metrics.get('cap_eff', self.config.max_speed)} on tick {self.tick_count}; the force law is not "
                 f"being integrated for them (see Integrator). Reported once per engine; "
                 f"engine.bounds keeps the running record.",
                 RuntimeWarning, stacklevel=2)

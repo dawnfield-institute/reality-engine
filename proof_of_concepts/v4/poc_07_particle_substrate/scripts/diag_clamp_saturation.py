@@ -33,9 +33,12 @@ def run(sec_balance, steps=300, marks=(50, 100, 200, 300)):
         if t in marks:
             sp = e.state.vel.norm(dim=-1)
             m = e.state.metrics
+            # The guard is derived by the Integrator since 2026-09-05 (cap_eff); before that
+            # it was the config constant. Same tolerance either way, so the columns compare.
+            cap = float(m.get("cap_eff", cfg.max_speed if cfg.max_speed is not None else float("inf")))
             rows.append(dict(
                 tick=t,
-                at_cap=float((sp >= cfg.max_speed * 0.999).float().mean()),
+                at_cap=float((sp >= cap * 0.999).float().mean()),
                 mean_speed=float(sp.mean()), p99=float(torch.quantile(sp, 0.99)),
                 grav=float(m.get("gravity_force_mean", 0.0)),
                 press=float(m.get("sec_pressure_mean", 0.0)),
@@ -50,7 +53,8 @@ def main():
     print("terminal speed with no clamp:  a*dt/(1-damping)")
     c = ParticleConfig(**BASE)
     print(f"   a~9.25 (gravity at t=100), dt={c.dt}, damping={c.damping}"
-          f"  ->  {9.25*c.dt/(1-c.damping):.1f}   vs max_speed = {c.max_speed}")
+          f"  ->  {9.25*c.dt/(1-c.damping):.1f}   vs max_speed = "
+          f"{c.max_speed if c.max_speed is not None else 'derived: cfl*r0/dt_eff (cap_eff in metrics)'}")
     print("   any force above ~0.4 saturates the cap.\n")
 
     for sec in (0.35, XI / PHI, XI):

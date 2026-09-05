@@ -34,11 +34,11 @@ def test_at_cap_frac_reported_from_pre_clamp_speed(proxy_config):
     s = eng.tick()
     assert "at_cap_frac" in s.metrics
     assert "speed_p99" in s.metrics and "speed_max" in s.metrics
-    cap = eng._cap_for_check() if hasattr(eng, "_cap_for_check") else proxy_config.max_speed
-    if cap is not None:
-        sp = s.vel.norm(dim=-1)
-        expected = (sp >= cap * 0.999).float().mean().item()
-        assert s.metrics["at_cap_frac"] == pytest.approx(expected, abs=1e-9)
+    cap = s.metrics["cap_eff"]
+    sp = s.vel.norm(dim=-1)
+    expected = (sp >= cap * 0.999).float().mean().item()
+    assert s.metrics["at_cap_frac"] == pytest.approx(expected, abs=1e-9)
+    assert s.metrics["dt_eff"] > 0 and s.metrics["sim_time"] == pytest.approx(s.metrics["dt_eff"])
 
 
 def test_guard_reports_when_forced_to_bind(proxy_config):
@@ -63,8 +63,6 @@ def test_guard_reports_when_forced_to_bind(proxy_config):
 # R3 / R5 — the guard never binds under the forces it was built for
 # ---------------------------------------------------------------------------------------
 
-@pytest.mark.xfail(strict=True, reason="defect: every particle pinned at max_speed from tick ~75 "
-                   "on exp_11's density; fixed when the Integrator owns dt (R3, R5)")
 def test_guard_never_binds_under_exp11_forces(proxy_run):
     _, marks = proxy_run
     worst = max(m["at_cap_frac"] for _, _, m in marks)
@@ -126,8 +124,6 @@ def _free(dt: float, ticks: int):
     return eng
 
 
-@pytest.mark.xfail(strict=True, reason="defect: damping is applied per tick, so halving dt "
-                   "doubles the drag per unit time (R4)")
 def test_drag_is_dt_invariant():
     a = _free(0.05, 40)
     b = _free(0.025, 80)
