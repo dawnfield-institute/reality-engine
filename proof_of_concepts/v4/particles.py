@@ -29,6 +29,7 @@ left to the operators, and the law detector is asked afterwards what exponent ac
 from __future__ import annotations
 
 import math
+import warnings
 from dataclasses import dataclass, field, replace
 from typing import Callable, Optional, Protocol
 
@@ -462,6 +463,21 @@ class Integrator:
     the substrate integrates on local proper time rather than one global clock. Individual
     per-particle timesteps are standard practice in N-body work; what is not standard is
     letting the physics set them.
+
+    **The cap is a bound, and a bound that binds is not physics.** `at_cap_frac` is the
+    fraction of particles whose speed met `max_speed` THIS tick, measured before the
+    renormalisation (after it, every clamped entry reads exactly `max_speed` by
+    construction). Measured on exp_11's 3D config, 2026-08-28, with nothing reporting it:
+
+        tick   at_cap   mean_sp   p99      press/grav   entropy
+          50   0.4330   1.5120   2.000        0.5         0.0
+         100   1.0000   2.0000   2.000      910.1       100.1
+         300   1.0000   2.0000   2.000    10123.5      4419.3
+
+    From tick ~100 the substrate was integrating a direction field, and every result taken
+    in that regime measured the clamp. Report `at_cap_frac` beside any dynamical quantity,
+    and treat a value above a few percent as "the force law is not being integrated here"
+    rather than as a physical reading. `speed_p99` and `speed_max` are the pre-clamp tail.
     """
 
     name = "integrator"
@@ -478,10 +494,16 @@ class Integrator:
             H = c.cosmology.hubble()
             vel = vel * (1.0 - 2.0 * H * dt)
         speed = vel.norm(dim=-1, keepdim=True)
+        m = dict(s.metrics)
+        # Same tolerance as scripts/diag_clamp_saturation.py, so the metric reproduces the
+        # numbers already on record rather than a new definition of the same thing.
+        m["at_cap_frac"] = (speed >= c.max_speed * 0.999).float().mean().item()
+        m["speed_p99"] = torch.quantile(speed.flatten(), 0.99).item()
+        m["speed_max"] = speed.max().item()
         vel = torch.where(speed > c.max_speed, vel * c.max_speed / speed, vel)
         a = c.cosmology.a if c.cosmology else 1.0
         pos = (s.pos + vel * dt / a) % s.box
-        return s.replace(pos=pos, vel=vel)
+        return s.replace(pos=pos, vel=vel, metrics=m)
 
 
 class PACLedger:
@@ -526,6 +548,12 @@ EXP11_TIME = [LocalGravity, SECPressure, LocalTime, Integrator, SECUpdateRelativ
 # ======================================================================================
 
 class ParticleEngine:
+    # Above this fraction of particles at the cap, the substrate is integrating a direction
+    # field rather than the force law (see Integrator). The engine annotates always and
+    # warns ONCE; it never asserts, because an assertion kills an exploratory run that may
+    # be the very run that shows where the bound binds. Tests assert; the engine reports.
+    AT_CAP_WARN = 0.02
+
     def __init__(self, config: ParticleConfig | None = None,
                  pipeline: Optional[list] = None, device=None):
         self.config = config or ParticleConfig()
@@ -533,6 +561,11 @@ class ParticleEngine:
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.state = self._init()
         self.tick_count = 0
+        # Running record of every numerical bound, so a run can be read for "did anything
+        # bind" without re-running it. Written every tick from state.metrics.
+        self.bounds = {"at_cap_frac_max": 0.0, "ticks_at_cap_gt_1pct": 0,
+                       "first_tick_at_cap_gt_1pct": None}
+        self._warned_cap = False
 
     def _init(self) -> ParticleState:
         c = self.config
@@ -568,7 +601,27 @@ class ParticleEngine:
             self.config.cosmology.advance(self.config.dt)
         self.state = s
         self.tick_count += 1
+        self._record_bounds(s)
         return s
+
+    def _record_bounds(self, s: ParticleState) -> None:
+        frac = s.metrics.get("at_cap_frac")
+        if frac is None:
+            return
+        b = self.bounds
+        b["at_cap_frac_max"] = max(b["at_cap_frac_max"], frac)
+        if frac > 0.01:
+            b["ticks_at_cap_gt_1pct"] += 1
+            if b["first_tick_at_cap_gt_1pct"] is None:
+                b["first_tick_at_cap_gt_1pct"] = self.tick_count
+        if frac > self.AT_CAP_WARN and not self._warned_cap:
+            self._warned_cap = True
+            warnings.warn(
+                f"speed guard binding: {100 * frac:.1f}% of particles at max_speed="
+                f"{self.config.max_speed} on tick {self.tick_count}; the force law is not "
+                f"being integrated for them (see Integrator). Reported once per engine; "
+                f"engine.bounds keeps the running record.",
+                RuntimeWarning, stacklevel=2)
 
     def field_of(self, values: torch.Tensor, res: int,
                  weight: Optional[torch.Tensor] = None):

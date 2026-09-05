@@ -114,13 +114,20 @@ def render_field(eng, res, dims, slab=0.25):
 
 
 def evolve(eng, steps, res, every, render_res=None, dims=2):
-    """Yield (tick, render_image, metrics). Metrics from the matched grid, image from its own."""
+    """Yield (tick, render_image, metrics). Metrics from the matched grid, image from its own.
+
+    `at_cap` rides along with the structure metrics: it is the fraction of particles pinned
+    at the speed guard on that tick (see `particles.Integrator`). A structure number taken
+    while it is high is a number about the clamp, so it is printed and traced beside them.
+    """
     for t in range(1, steps + 1):
         eng.tick()
         if t % every == 0 or t == steps:
             F = eng.density_field(res).cpu().numpy().astype(float)
             img = render_field(eng, render_res, dims) if render_res else slice_of(F)
-            yield t, img, web_metrics(F)
+            w = web_metrics(F)
+            w["at_cap"] = float(eng.state.metrics.get("at_cap_frac", float("nan")))
+            yield t, img, w
 
 
 def cmd_run(a):
@@ -131,7 +138,7 @@ def cmd_run(a):
           f"sec {a.sec_balance}, {a.convention} convention, {a.ic} IC, device {eng.device}")
     rres = a.render_res or (res * 4 if a.dims == 2 else res * 3)
     print(f"  metrics grid {res}^{a.dims} = {res**a.dims} cells, {a.n/res**a.dims:.2f} particles/cell   |   render grid {rres}^{a.dims}")
-    print(f"  {'tick':>7} {'void':>7} {'cv':>7} {'perc':>7} {'occ':>7} {'web':>6}")
+    print(f"  {'tick':>7} {'void':>7} {'cv':>7} {'perc':>7} {'occ':>7} {'web':>6} {'at_cap':>7}")
 
     frames, trace = [], []
     for t, F, w in evolve(eng, a.steps, res, a.every, rres, a.dims):
@@ -139,7 +146,7 @@ def cmd_run(a):
         trace.append({"tick": t, **{k: (bool(v) if isinstance(v, bool) else float(v))
                                     for k, v in w.items()}})
         print(f"  {t:>7} {w['void']:>7.3f} {w['cv']:>7.3f} {w['percolation']:>7.3f} "
-              f"{w['occupancy']:>7.3f} {str(w['is_web']):>6}")
+              f"{w['occupancy']:>7.3f} {str(w['is_web']):>6} {w['at_cap']:>7.3f}")
 
     OUT.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
@@ -196,7 +203,7 @@ def cmd_sweep(a):
     res = a.res or matched_res(a.n, a.dims)
     print(f"  sweeping {a.param} over {a.values}   ({a.dims}D, {a.n} particles, "
           f"{a.steps} steps, {a.convention})")
-    print(f"  {a.param:>12} {'void':>7} {'cv':>7} {'perc':>7} {'occ':>7} {'web':>6}")
+    print(f"  {a.param:>12} {'void':>7} {'cv':>7} {'perc':>7} {'occ':>7} {'web':>6} {'at_cap':>7}")
 
     panels, rows = [], []
     for v in a.values:
@@ -213,7 +220,7 @@ def cmd_sweep(a):
         rows.append({a.param: v, **{k: (bool(x) if isinstance(x, bool) else float(x))
                                     for k, x in w.items()}})
         print(f"  {v:>12.4g} {w['void']:>7.3f} {w['cv']:>7.3f} {w['percolation']:>7.3f} "
-              f"{w['occupancy']:>7.3f} {str(w['is_web']):>6}")
+              f"{w['occupancy']:>7.3f} {str(w['is_web']):>6} {w['at_cap']:>7.3f}")
 
     OUT.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
