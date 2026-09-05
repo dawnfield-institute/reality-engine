@@ -751,6 +751,38 @@ class Integrator:
                          dt_last=dt, metrics=m)
 
 
+class LandauerErasure:
+    """Landauer erasure as a dynamical step: released entropy costs LN2 of kinetic energy.
+
+    The engine has carried this rule as an accounting line since v1 (fracton/field/sec_evolution.py
+    computes entropy_reduced * ln 2 and adds it to a heat total) and never closed it: nothing was
+    ever taken from motion. Here, when a particle's SEC entropy is released this tick (dS < 0),
+    it loses min(KE_i, LN2 * |dS_i|) of kinetic energy -- LN2 imported named from fracton, k_B T = 1
+    in substrate units (a temperature would be a knob; there is none). dt-invariant by construction
+    because dS is rate-scaled. Its MAGNITUDE inherits memory_decay -- the one tuned rate this round
+    declares and does not touch -- so it is run as an exploratory arm, not a derived one.
+    Inert unless config.landauer is True.
+    """
+
+    name = "landauer_erasure"
+
+    @torch.no_grad()
+    def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
+        if not c.landauer or s.d_entropy is None:
+            return s
+        alive = s.alive()
+        release = torch.clamp(-s.d_entropy, min=0.0)
+        ke = 0.5 * s.mass * (s.vel ** 2).sum(-1)
+        loss = torch.where(alive, torch.minimum(ke, LN2 * release), torch.zeros_like(ke))
+        scale = torch.where(ke > 0, torch.sqrt(torch.clamp(ke - loss, min=0.0) / ke.clamp(min=1e-30)),
+                            torch.ones_like(ke))
+        vel = s.vel * scale.unsqueeze(-1)
+        m = dict(s.metrics)
+        m["loss_landauer"] = loss.sum().item()
+        m["loss_landauer_cum"] = float(m.get("loss_landauer_cum", 0.0)) + m["loss_landauer"]
+        return s.replace(vel=vel, metrics=m)
+
+
 class LedgerSeverance:
     """Radiation as ledger severance -- whole-particle decoupling on the stress trigger.
 
@@ -921,7 +953,7 @@ CANONICAL_TIME: list[Callable[[], ParticleOperator]] = [
 # Same forces with the ledger-severance sink in Milestone R's order (update, then check, then
 # forces). Inert -- bit-identical to CANONICAL -- unless sev_tau is set.
 CANONICAL_SINK: list[Callable[[], ParticleOperator]] = [
-    SECUpdate, LedgerSeverance, LocalGravity, SECPressure, Integrator, PACLedger,
+    SECUpdate, LandauerErasure, LedgerSeverance, LocalGravity, SECPressure, Integrator, PACLedger,
 ]
 
 # exp_11's 3D pipeline: same forces, different SEC rule. Its ordering also differs — exp_11

@@ -10,9 +10,6 @@ import torch
 
 from ._proxy import P, PROXY_1000
 
-LAN = pytest.mark.xfail(strict=True, reason="LandauerErasure not yet implemented (spec R7)")
-
-
 def _spread_state(n=200, box=60.0, entropy=20.0, speed=3.0, seed=0):
     """Nobody dense (uniform at low density), everyone moving, everyone carrying entropy."""
     torch.manual_seed(seed)
@@ -22,7 +19,6 @@ def _spread_state(n=200, box=60.0, entropy=20.0, speed=3.0, seed=0):
                            box=box)
 
 
-@LAN
 def test_landauer_loss_matches_the_rule():
     cfg = P.ParticleConfig(n=200, box=60.0, r0=5.0, g=0.0, sec_balance=0.0, dims=3, damping=1.0,
                            landauer=True)
@@ -36,7 +32,6 @@ def test_landauer_loss_matches_the_rule():
     assert abs(s2.metrics["loss_landauer"] - expected.sum().item()) <= 1e-5 * expected.sum().item()
 
 
-@LAN
 def test_landauer_zero_on_growth():
     """A tight cluster with zero entropy: dS > 0 everywhere, so nothing is erased."""
     cfg = P.ParticleConfig(n=64, box=60.0, r0=10.0, g=0.0, sec_balance=0.0, dims=3, damping=1.0,
@@ -52,7 +47,6 @@ def test_landauer_zero_on_growth():
     assert s2.metrics["loss_landauer"] == 0.0
 
 
-@LAN
 def test_landauer_is_dt_invariant():
     """Forces off: total erased over matched simulated time is LN2 x total entropy released,
     whatever the step."""
