@@ -1,0 +1,50 @@
+schema_version: '2.1'
+directory_name: poc_11_derived_sink
+title: 'POC-11 (v4): A derived sink, not a tuned one — radiation as ledger severance on the particle substrate'
+description: >
+  The particle substrate has no energy sink now that its speed cap is gone, and its tuned drag was
+  shown to be the equation of motion for most of a run. Milestone R licenses two derived pieces of
+  a sink and no amount: a stress trigger (a vertex severs when all its bonds are simultaneously
+  overstressed) and a form (severance is decoupling, not destruction). This POC builds the energy
+  ledger the substrate lacked, a LedgerSeverance operator that decouples whole particles on that
+  trigger, a Landauer-erasure operator as an exploratory second sink, and the matched-energy and
+  matched-count controls, and runs the arms that dawn-field-theory Milestone R exp_28 scores.
+status: completed
+era: era4-milestone-stack-2026q2
+pillar: SEC
+hypothesis: >
+  A dissipation channel derived from Milestone R's severance rules lets the substrate hold
+  structure, and does so beyond what a matched amount of generic drag or a matched count of
+  random removal achieves.
+falsification: >
+  Registered in dawn-field-theory milestone-r/journals (exp_28): K1 — severance holds structure no
+  better than energy-matched drag (the trigger is not doing work; any dissipation would do); K2 —
+  no better than count-matched random removal (removing particles, not overstress selection,
+  holds structure). Instrument falsification: a closure residual above 1e-5 with the guard unbound.
+validation_type: computational
+result: >
+  0/4 against the sealed thresholds (dawn-field-theory bf833113), 2026-09-05. The trigger
+  min_j |S_i - S_j| > tau fires only at an extremum of the entropy field; on this substrate the
+  extrema are the collapse cores, so severance removes the bound, connected part (u_out < 0 in
+  every run) and leaves the retained set hotter per particle (T1 fail) and LESS connected than a
+  random subset of the baseline at the same count (T2 fail with sign: 3/3 seeds, -2.6 pooled
+  sigma at the proxy's informative tau = 20; a null at n = 4000, tau* = 10, where half leaves and
+  S = R); random removal at the onset tau holds more; the matched drag holds as much or more. Neither kill fires (both conditional on T2). Landauer erasure is ~1% of
+  the pressure work. On the corrected force the baseline's detonation is ~100x weaker than on the
+  self-propelling rule and it still cannot hold. C4.1 option 3 closed; option 2 remains.
+notes: >
+  Prerequisites landed the same day: the pressure pair law was self-propulsion and was replaced
+  by a third-law pressure (mean-entropy repulsion); the energy ledger is new. Every pre-seal
+  number is computed on the corrected force. The design pass's "decided within ~30 ticks" and
+  KE/|U| ~ 960 were measured on the self-propelling force and are superseded (KE/|U| 11-18).
+  The drag control was first defined on a ratio of signed energies that crosses zero as the set
+  unbinds; caught by a pre-seal smoke test and replaced by the retained kinetic energy per
+  particle (positive-definite) with one pre-declared refinement. The trigger is live only at the
+  lattice-spacing neighbourhood (degree 1-13), not at r0 (degree ~80).
+tags:
+  - derived-sink
+  - ledger-severance
+  - landauer
+  - energy-ledger
+  - milestone-r
+  - v4

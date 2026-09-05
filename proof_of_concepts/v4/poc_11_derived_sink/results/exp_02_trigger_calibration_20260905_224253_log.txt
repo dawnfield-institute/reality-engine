@@ -1,0 +1,11 @@
+  proxy {'n': 1000, 'box': 37.8, 'r0': 10.0, 'g': 1.5, 'dims': 3, 'seed': 1, 'sec_balance': 0.6541441634232203, 'damping': 1.0} (xi_variant=XI_ANALYTIC), taus (0.5, 1.0, 2.0, 5.0, 10.0, 20.0, 50.0), to sim_time 15.0, commit 18fa2b9
+    tau  ticks  wall  first t KE/|U|@1st ke_ratio sev_frac  n@t10  n_end at_cap
+    0.5    300     5     2.80       0.05     0.53    0.949     85     51  0.002
+    1.0    300     5     2.80       0.05     0.53    0.919    131     81  0.003
+    2.0    300     5     2.80       0.05     0.53    0.835    266    165  0.006
+    5.0    305     5     2.85       0.06     0.46    0.744    292    256  0.009
+   10.0    480     8     2.90       0.06     0.50    0.416    584    584  0.010
+   20.0    544     9     3.15       0.12     0.46    0.061    939    939  0.010
+   50.0    555     8      nan        nan      nan    0.000   1000   1000  0.010
+
+  wrote proof_of_concepts/v4/poc_11_derived_sink/results/exp_02_trigger_calibration_20260905_224338.json

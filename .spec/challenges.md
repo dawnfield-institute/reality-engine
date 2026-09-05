@@ -511,6 +511,32 @@ This document tracks open problems, research questions, and design decisions tha
 
 **Status**: 🔄 Open — owner: the M18 dynamics conversation (Peter-gated). Not fixed in the hygiene round by design.
 
+**Update 2026-09-05 (evening):** option 3 is under test as POC-11 / Milestone R exp_28 — a
+derived sink (whole-particle severance on Milestone R's stress trigger; Landauer erasure as an
+exploratory arm) against matched-energy and matched-count controls, with the energy ledger of
+`.spec/v4-derived-sink.spec.md` as the instrument. The oscillator characterisation above was
+measured on a pressure that injected momentum (C4.4); the substrate is re-characterised on the
+corrected force before any seal.
+
+**Update 2026-09-05 (night) — option 3 CLOSED (exp_28, 0/4, sealed dawn-field-theory `bf833113`).**
+On the corrected force the detonation is ~100× weaker (KE/|U| 11–18 in the window, not 960; dt
+recovers; a proxy run is 6 s) and the baseline still cannot hold: percolation peaks 0.18–0.37 at the
+first collapse and dissolves to 0.06–0.10 by t = 10 (3 seeds; n = 4000 the same). The derived
+trigger `min_j |S_i − S_j| > τ` fires only at extrema of the entropy field, which here are the
+collapse cores: severance removed the bound, connected part (`u_out < 0` in every run) and left the
+rest hotter per particle and *less* connected than a random subset of the baseline at the same
+count (3/3 seeds, −2.6 pooled σ at the proxy's informative τ = 20, where only the first 6–10% to fire
+leave); at n = 4000, τ\* = 10, where half leaves, a null (−0.5 σ) and identical to random removal —
+never above a random subset at either size; random removal at the onset τ held more, and the tuned
+drag — calibrated to the same retained KE per particle — held as much or more. Landauer
+erasure is ~1% of the pressure work. Milestone R's graph results stand (their field was noise); what
+died is the entropy-gradient barrier as an amount-free *dynamical* sink. **Option 2 is what remains:
+the impulsive pressure that detonates the collapse (KE/|U| 0.07 → 10 between t = 3 and 5) is the term
+to derive from the SEC functional; a sink downstream of the detonation removes the wrong energy from
+the wrong particles.** The ledger, the severance bookkeeping and the third-law pressure stay as gated
+instruments (POC-11); drag stays a control. Journal:
+`proof_of_concepts/v4/poc_11_derived_sink/journals/2026-09-05_the-trigger-selects-the-cores.md`.
+
 ---
 
 ### C4.2: Per-particle timesteps in the force kick (design B)
@@ -532,3 +558,24 @@ This document tracks open problems, research questions, and design decisions tha
 **Context**: `proper_time` (`LocalTime`) accumulates `tau · c.dt` in units of base ticks; `sim_time` (Integrator, from the hygiene round) is the true elapsed global time under the adaptive step. Until C4.2 they are different objects and any experiment matching runs "at the same time" must say which.
 
 **Status**: 🔄 Open — documented; resolve with C4.2.
+
+---
+
+### C4.4: The SEC pressure pair law (found and replaced 2026-09-05)
+
+**Question**: What is the SEC pressure between two particles?
+
+**Context**: exp_09's rule `sec * (S_i − S_j) * exp(−r/r0)` along the unit vector from j to i gives
+the force on j from i as the same vector as the force on i from j — the antisymmetric part of the
+pair interaction is identically zero, so the term was self-propulsion and every pair injected net
+momentum 2F. There is no sign fix; a third-law pair force needs a magnitude symmetric in (i, j).
+Replaced by mean-entropy repulsion `sec * (S_i + S_j)/2 * exp(−r/r0)` (Peter's choice; a pressure
+whose strength is the local entropy density). Alternative recorded: contrast repulsion `|S_i − S_j|`.
+
+**Open**: whether the pressure should instead be derived as the gradient of the SEC energy
+functional (C4.1 option 2, `fracton/field/sec_evolution.py`), which would give it a scale from α/β
+rather than from `sec_balance`. Upstream: `gravity_from_maxwell_pac/exp_09` produced its web with
+the momentum-injecting rule — flagged as a correction candidate in dawn-field-theory.
+
+**Status**: 🔄 Open (the derivation); the defect itself is fixed and tested
+(`tests/v4/test_pressure_momentum.py`).

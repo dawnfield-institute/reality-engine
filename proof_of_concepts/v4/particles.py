@@ -35,7 +35,12 @@ from typing import Callable, Optional, Protocol
 
 import torch
 
-PHI = (1 + math.sqrt(5)) / 2
+try:  # named constants — never bare literals (CLAUDE.md: "say which Xi you mean")
+    from fracton.constants import LN2, PHI, XI_ANALYTIC
+except ImportError:  # pragma: no cover — mirrors of fracton.constants.mathematical
+    LN2 = math.log(2)
+    PHI = (1 + math.sqrt(5)) / 2
+    XI_ANALYTIC = 0.5772156649015329 + math.log((1 + math.sqrt(5)) / 2)
 
 
 # ======================================================================================
@@ -73,6 +78,20 @@ class ParticleState:
     # would kick with is not known until every force has been evaluated, and choosing it
     # from this tick's forces (rather than last tick's energy) is what makes the step honest.
     acc: Optional[torch.Tensor] = None            # (N, d)
+    acc_gravity: Optional[torch.Tensor] = None    # (N, d) this tick's gravity part of acc
+    acc_pressure: Optional[torch.Tensor] = None   # (N, d) this tick's pressure part of acc
+    # Per-particle gravitational interaction energy sum_j u_ij (each pair counted from both
+    # ends), from the SAME kernel the force uses -- see gravity_potential_table. Written by
+    # LocalGravity, read by PACLedger; None on a pipeline without gravity.
+    potential_i: Optional[torch.Tensor] = None    # (N,)
+
+    # --- ledger severance (Milestone R: radiation is decoupling, not destruction) ----------
+    # A severed particle has left the interacting ledger with its own value: it is excluded
+    # as source and target from every interaction, its entropy is frozen, it is neither damped
+    # nor guarded, and it drifts. None == nobody has severed (the old path, bit-identical).
+    severed: Optional[torch.Tensor] = None        # (N,) bool
+    sev_time: Optional[torch.Tensor] = None       # (N,) sim_time at severance, nan if retained
+    d_entropy: Optional[torch.Tensor] = None      # (N,) S_new - S_old this tick (0 for severed)
 
     @property
     def n(self) -> int:
@@ -84,6 +103,17 @@ class ParticleState:
 
     def replace(self, **kw) -> "ParticleState":
         return replace(self, **kw)
+
+    def alive(self) -> torch.Tensor:
+        """(N,) bool: retained particles. All True until something severs."""
+        if self.severed is None:
+            return torch.ones(self.n, dtype=torch.bool, device=self.device)
+        return ~self.severed
+
+    def pair_alive(self) -> torch.Tensor:
+        """(N, N) bool: both ends retained."""
+        a = self.alive()
+        return a.unsqueeze(1) & a.unsqueeze(0)
 
 
 @dataclass
@@ -140,6 +170,21 @@ class ParticleConfig:
     max_speed: Optional[float] = None
     cfl: float = 0.2                # Courant number: max displacement per step, in units of r0
     dt_min: Optional[float] = None  # floor on the step; None -> dt / 20. Reported when it binds.
+
+    # --- ledger severance (LedgerSeverance; inert unless sev_tau is set) --------------------
+    # Milestone R exp_15/16: a vertex severs when ALL its edges are simultaneously overstressed,
+    #     min over neighbours of |S_i - S_j| > sev_tau,
+    # the per-edge GRADIENT of the SEC entropy (exp_14 falsified entropy/relaxation triggers).
+    # sev_tau is a declared free scale parameter and is SWEPT in any registration. sev_radius
+    # sets the neighbourhood; None -> the lattice spacing box / ceil(n^(1/dims)), the degree
+    # regime (1-13 neighbours) in which the derived barrier is live -- within r0 a particle has
+    # ~80 neighbours and "all edges" fires only on outliers. Declared, not tuned.
+    sev_tau: Optional[float] = None
+    sev_radius: Optional[float] = None
+    sev_mode: str = "stress"        # "stress" | "random" (the selection control: same bookkeeping)
+    sev_schedule: Optional[list] = None   # random mode: [(sim_time, count), ...], replayed by time
+    # --- Landauer erasure (LandauerErasure; inert unless True) ------------------------------
+    landauer: bool = False
     seed: int = 42
     # The tick at which `damping`, `memory_decay` and the SEC growth coefficient are STATED.
     # They are applied as rates -- x ** (dt_eff / dt_ref) -- which is bit-identical at
@@ -281,6 +326,39 @@ def pairwise(s: ParticleState, a: float = 1.0):
     return r_com * a, d, r_com
 
 
+def gravity_potential_table(g: float, r0: float, n: int = 65536):
+    """U(r) for the gravity kernel, tabulated on [0, 3 r0]: U(r) = -int_r^{3 r0} g e^{-s/r0}/(s+0.1) ds.
+
+    The force is F(r) = g e^{-r/r0}/(r+0.1) toward the neighbour, cut at 3 r0. This is the pair
+    potential whose gradient it is, referenced to zero at the cutoff so u_ij is continuous there
+    (the force is what jumps at the cutoff, and that jump is already the substrate's). Closed
+    form for the test: U(r) = -g e^{0.1/r0} [E1((r+0.1)/r0) - E1((3 r0+0.1)/r0)]. No second
+    gravity is introduced -- one kernel, one reduction. Returns numpy (r_grid, U_grid).
+    n = 65536: the kernel is steepest at r = 0 (scale 0.1), and a 4096-point trapezoid misses the
+    closed form there by 1e-4; at 65536 the table matches E1 to < 1e-6 everywhere (tested).
+    """
+    import numpy as np
+    r = np.linspace(0.0, 3.0 * r0, n)
+    f = g * np.exp(-r / r0) / (r + 0.1)
+    # cumulative trapezoid from the cutoff inward: U(r) = -int_r^{R} f
+    seg = 0.5 * (f[1:] + f[:-1]) * np.diff(r)
+    tail = np.concatenate([np.cumsum(seg[::-1])[::-1], [0.0]])
+    return r, -tail
+
+
+def _interp_potential(r: torch.Tensor, within: torch.Tensor, table) -> torch.Tensor:
+    """Linear lookup of U(r) on the table for pairs `within`; 0 elsewhere (and on the diagonal)."""
+    r_grid, U_grid = table
+    n = len(r_grid); span = float(r_grid[-1])
+    Ug = torch.as_tensor(U_grid, dtype=r.dtype, device=r.device)
+    r_safe = torch.where(within, r, torch.zeros_like(r))
+    x = r_safe / span * (n - 1)
+    idx = x.floor().clamp(0, n - 2).long()
+    frac = (x - idx.to(r.dtype)).clamp(0.0, 1.0)
+    u = Ug[idx] * (1.0 - frac) + Ug[idx + 1] * frac
+    return torch.where(within, u, torch.zeros_like(u))
+
+
 # ======================================================================================
 # Operators
 # ======================================================================================
@@ -295,14 +373,28 @@ class LocalGravity:
 
     name = "local_gravity"
 
+    def __init__(self):
+        self._table = None
+        self._table_key = None
+
+    def _potential_table(self, c: ParticleConfig):
+        key = (float(c.g), float(c.r0))
+        if self._table_key != key:
+            self._table = gravity_potential_table(c.g, c.r0)
+            self._table_key = key
+        return self._table
+
     @torch.no_grad()
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
         a = c.cosmology.a if c.cosmology else 1.0
         r, d, r_com = pairwise(s, a)
-        within = r < 3.0 * c.r0
+        within = (r < 3.0 * c.r0) & s.pair_alive()
         mm = s.mass.unsqueeze(1) * s.mass.unsqueeze(0)
         mag = torch.where(within, c.g * mm * torch.exp(-r / c.r0) / (r + 0.1),
                           torch.zeros_like(r))
+        # the same kernel, integrated: per-particle interaction energy (pairs counted from both ends)
+        u = mm * _interp_potential(r, within, self._potential_table(c))
+        potential_i = u.sum(dim=1)
         # d[i,j] = pos_i - pos_j points AWAY from j, so an attractive force needs -unit.
         # The first version used +unit and made gravity repulsive: the cloud expanded to
         # uniform, damping killed the motion, and every metric froze at t=100 — void 0.756
@@ -312,15 +404,29 @@ class LocalGravity:
         force = -(mag.unsqueeze(-1) * unit).sum(dim=1)         # toward neighbours
         m = dict(s.metrics)
         m["gravity_force_mean"] = force.norm(dim=-1).mean().item()
+        m["potential_int"] = 0.5 * potential_i.sum().item()
         acc = force / s.mass.unsqueeze(-1)
-        return s.replace(acc=acc if s.acc is None else s.acc + acc, metrics=m)
+        return s.replace(acc=acc if s.acc is None else s.acc + acc, acc_gravity=acc,
+                         potential_i=potential_i, metrics=m)
 
 
 class SECPressure:
-    """Entropy-gradient repulsion — the counter-force that opens voids.
+    """Entropy pressure — the counter-force that opens voids.
 
     Range 2 r0 against gravity's 3 r0. Two competing interactions at *different* ranges is
     what selects a scale; a single monotone attraction only concentrates.
+
+    **Pair law (2026-09-05): repulsion with magnitude sec_balance * (S_i + S_j)/2 * exp(-r/r0),
+    always pushing the pair apart.** The rule inherited from exp_09 was sec * (S_i - S_j) along
+    the unit vector from j to i. Under i <-> j both the difference and the direction flip, so
+    the force on j from i was the SAME vector as the force on i from j: the antisymmetric part
+    of the pair interaction was identically zero and the whole term was self-propulsion --
+    every pair injected net momentum 2F (checked: F_i = F_j = -2.195 x for S = 5 and 1, six
+    apart). There is no sign fix for that; the choice of a third-law pair law is a physics
+    choice, and Peter chose the pressure form: strength set by the pair's mean entropy, so a
+    dense hot region pushes outward from its interior. Third law exact; momentum is conserved
+    by construction and tested (tests/v4/test_pressure_momentum.py). Every result before this
+    commit -- POC-07/08/09/10, exp_04 -- was measured on the momentum-injecting rule.
     """
 
     name = "sec_pressure"
@@ -329,16 +435,16 @@ class SECPressure:
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
         a = c.cosmology.a if c.cosmology else 1.0
         r, d, r_com = pairwise(s, a)
-        within = r < 2.0 * c.r0
-        de = s.entropy.unsqueeze(1) - s.entropy.unsqueeze(0)
-        mag = torch.where(within, c.sec_balance * de * torch.exp(-r / c.r0),
+        within = (r < 2.0 * c.r0) & s.pair_alive()
+        s_pair = 0.5 * (s.entropy.unsqueeze(1) + s.entropy.unsqueeze(0))   # symmetric in (i, j)
+        mag = torch.where(within, c.sec_balance * s_pair * torch.exp(-r / c.r0),
                           torch.zeros_like(r))
-        unit = d / (r_com.unsqueeze(-1) + 1e-6)                # away from neighbours
+        unit = d / (r_com.unsqueeze(-1) + 1e-6)                # from j to i: pushes i away
         press = (mag.unsqueeze(-1) * unit).sum(dim=1)
         m = dict(s.metrics)
         m["sec_pressure_mean"] = press.norm(dim=-1).mean().item()
         acc = press / s.mass.unsqueeze(-1)
-        return s.replace(acc=acc if s.acc is None else s.acc + acc, metrics=m)
+        return s.replace(acc=acc if s.acc is None else s.acc + acc, acc_pressure=acc, metrics=m)
 
 
 class SECUpdate:
@@ -371,23 +477,26 @@ class SECUpdate:
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
         a = c.cosmology.a if c.cosmology else 1.0
         r, _, _ = pairwise(s, a)
-        local = (r < c.r0).sum(dim=1).float()
+        alive = s.alive()
+        local = ((r < c.r0) & s.pair_alive()).sum(dim=1).float()
         # Volume of a d-ball, not a disc: pi r^2 in 2D but (4/3) pi r^3 in 3D. Using the 2D
         # form in 3D makes the density trigger wrong by a factor of order unity, so entropy
-        # would accumulate at the wrong places.
+        # would accumulate at the wrong places. The interacting set is the system: `expected`
+        # counts the retained particles.
         d = s.pos.shape[1]
         v_ball = (math.pi ** (d / 2) / math.gamma(d / 2 + 1)) * c.r0 ** d
-        expected = float(s.n) * v_ball / ((s.box * a) ** d)
-        dense = local > 1.5 * expected
+        expected = float(alive.sum().item()) * v_ball / ((s.box * a) ** d)
+        dense = (local > 1.5 * expected) & alive
         s_dt = (s.dt_last if s.dt_last is not None else c.dt) / c.dt_ref
         growth = 0.1 * (local - expected) * s_dt
         ent = (s.entropy * (c.memory_decay ** s_dt)
                + torch.where(dense, growth, torch.zeros_like(growth)))
+        ent = torch.where(alive, ent, s.entropy)                 # a severed particle's entropy is frozen
         m = dict(s.metrics)
-        m["entropy_mean"] = ent.mean().item()
-        m["entropy_max"] = ent.max().item()
-        m["dense_fraction"] = dense.float().mean().item()
-        return s.replace(entropy=ent, metrics=m)
+        m["entropy_mean"] = ent[alive].mean().item() if bool(alive.any()) else 0.0
+        m["entropy_max"] = ent[alive].max().item() if bool(alive.any()) else 0.0
+        m["dense_fraction"] = dense.float().sum().item() / max(int(alive.sum().item()), 1)
+        return s.replace(entropy=ent, d_entropy=ent - s.entropy, metrics=m)
 
 
 class SECUpdateRelative:
@@ -560,12 +669,18 @@ class Integrator:
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
         acc = s.acc if s.acc is not None else torch.zeros_like(s.vel)
         tau = None if s.tau is None else s.tau.unsqueeze(-1)
+        alive = s.alive()
+        alive_v = alive.unsqueeze(-1)
 
-        # --- the step, from this tick's forces -------------------------------------------
+        # --- the step, from this tick's forces (retained particles only: a free-streaming
+        #     severed tail must not set everyone's clock) -----------------------------------
         a_mag = acc.norm(dim=-1)
         v_mag = s.vel.norm(dim=-1) if tau is None else (s.vel * tau).norm(dim=-1)
-        a99 = torch.quantile(a_mag, 0.99).item()
-        v99 = torch.quantile(v_mag, 0.99).item()
+        if bool(alive.any()):
+            a99 = torch.quantile(a_mag[alive], 0.99).item()
+            v99 = torch.quantile(v_mag[alive], 0.99).item()
+        else:
+            a99, v99 = 0.0, 0.0
         dt = c.dt
         if a99 > 0.0:
             dt = min(dt, c.cfl * math.sqrt(c.r0 / a99))
@@ -578,7 +693,21 @@ class Integrator:
         cap = c.max_speed if c.max_speed is not None else c.cfl * c.r0 / dt
 
         # --- kick, then damp as a rate ------------------------------------------------------
-        vel = (s.vel + acc * dt) * (c.damping ** (dt / c.dt_ref))
+        v0 = s.vel
+        v1 = v0 + acc * dt                                       # acc is zero on severed rows
+        vel = torch.where(alive_v, v1 * (c.damping ** (dt / c.dt_ref)), v1)   # no drag on the severed
+        # Exact discrete partition of the kick's kinetic change by force: with a = sum_X a_X,
+        #   dKE_kick = sum_X [ m v0.a_X dt + 1/2 m a_X.a dt^2 ]   (identity, not an approximation)
+        mvec = s.mass.unsqueeze(-1)
+        a_g = s.acc_gravity if s.acc_gravity is not None else torch.zeros_like(acc)
+        a_p = s.acc_pressure if s.acc_pressure is not None else torch.zeros_like(acc)
+        def _work(a_x):
+            return ((mvec * v0 * a_x).sum() * dt + 0.5 * (mvec * a_x * acc).sum() * dt * dt).item()
+        work_g, work_p = _work(a_g), _work(a_p)
+        ke1 = (0.5 * s.mass * (v1 ** 2).sum(-1)).sum().item()
+        ke2 = (0.5 * s.mass * (vel ** 2).sum(-1)).sum().item()
+        loss_drag = ke1 - ke2
+        impulse_p = (mvec * a_p).sum(0) * dt
         if c.cosmology is not None:
             # Standard comoving form: peculiar velocities decay as dv/dt = -2 H v, and
             # comoving displacement is v/a. This is what "expansion holds the web open"
@@ -590,22 +719,175 @@ class Integrator:
         # --- guard: measured before it acts, then applied ----------------------------------
         speed = vel.norm(dim=-1, keepdim=True)
         m = dict(s.metrics)
-        m["at_cap_frac"] = (speed >= cap * 0.999).float().mean().item()
-        m["speed_p99"] = torch.quantile(speed.flatten(), 0.99).item()
-        m["speed_max"] = speed.max().item()
+        # over the retained set: a severed particle is not guarded
+        sp_alive = speed.flatten()[alive] if bool(alive.any()) else speed.flatten()
+        m["at_cap_frac"] = (sp_alive >= cap * 0.999).float().mean().item()
+        m["speed_p99"] = torch.quantile(sp_alive, 0.99).item()
+        m["speed_max"] = sp_alive.max().item()
+        if s.severed is not None and bool(s.severed.any()):
+            m["severed_speed_max"] = speed.flatten()[s.severed].max().item()
         m["cap_eff"] = float(cap)
         m["dt_eff"] = float(dt)
         m["dt_at_floor"] = bool(at_floor)
         m["accel_p99"] = a99
         m["cfl_number"] = max(v99 * dt, a99 * dt * dt) / c.r0
         m["sim_time"] = float(s.metrics.get("sim_time", 0.0)) + dt
-        vel = torch.where(speed > cap, vel * cap / speed, vel)
+        vel = torch.where(alive_v & (speed > cap), vel * cap / speed, vel)
+        ke3 = (0.5 * s.mass * (vel ** 2).sum(-1)).sum().item()
+        loss_guard = ke2 - ke3
+        m["work_gravity"], m["work_pressure"] = work_g, work_p
+        m["loss_drag"], m["loss_guard"] = loss_drag, loss_guard
+        for k, ax in enumerate("xyz"[: s.pos.shape[1]]):
+            m[f"impulse_pressure_{ax}"] = impulse_p[k].item()
+        for key, val in (("work_gravity", work_g), ("work_pressure", work_p),
+                         ("loss_drag", loss_drag), ("loss_guard", loss_guard)):
+            m[key + "_cum"] = float(m.get(key + "_cum", 0.0)) + val
 
         # --- drift ------------------------------------------------------------------------
         a = c.cosmology.a if c.cosmology else 1.0
         dt_i = dt if tau is None else dt * tau
         pos = (s.pos + vel * dt_i / a) % s.box
-        return s.replace(pos=pos, vel=vel, acc=None, dt_last=dt, metrics=m)
+        return s.replace(pos=pos, vel=vel, acc=None, acc_gravity=None, acc_pressure=None,
+                         dt_last=dt, metrics=m)
+
+
+class LandauerErasure:
+    """Landauer erasure as a dynamical step: released entropy costs LN2 of kinetic energy.
+
+    The engine has carried this rule as an accounting line since v1 (fracton/field/sec_evolution.py
+    computes entropy_reduced * ln 2 and adds it to a heat total) and never closed it: nothing was
+    ever taken from motion. Here, when a particle's SEC entropy is released this tick (dS < 0),
+    it loses min(KE_i, LN2 * |dS_i|) of kinetic energy -- LN2 imported named from fracton, k_B T = 1
+    in substrate units (a temperature would be a knob; there is none). dt-invariant by construction
+    because dS is rate-scaled. Its MAGNITUDE inherits memory_decay -- the one tuned rate this round
+    declares and does not touch -- so it is run as an exploratory arm, not a derived one.
+    Inert unless config.landauer is True.
+    """
+
+    name = "landauer_erasure"
+
+    @torch.no_grad()
+    def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
+        if not c.landauer or s.d_entropy is None:
+            return s
+        alive = s.alive()
+        release = torch.clamp(-s.d_entropy, min=0.0)
+        ke = 0.5 * s.mass * (s.vel ** 2).sum(-1)
+        loss = torch.where(alive, torch.minimum(ke, LN2 * release), torch.zeros_like(ke))
+        scale = torch.where(ke > 0, torch.sqrt(torch.clamp(ke - loss, min=0.0) / ke.clamp(min=1e-30)),
+                            torch.ones_like(ke))
+        vel = s.vel * scale.unsqueeze(-1)
+        m = dict(s.metrics)
+        m["loss_landauer"] = loss.sum().item()
+        m["loss_landauer_cum"] = float(m.get("loss_landauer_cum", 0.0)) + m["loss_landauer"]
+        return s.replace(vel=vel, metrics=m)
+
+
+class LedgerSeverance:
+    """Radiation as ledger severance -- whole-particle decoupling on the stress trigger.
+
+    Milestone R licenses exactly two derived pieces of a sink and no amount. The TRIGGER
+    (exp_15, 4/4; exp_16 universality): a vertex severs when ALL its edges are simultaneously
+    overstressed -- min over neighbours of the per-edge gradient |S_i - S_j| exceeds a threshold
+    (exp_14 falsified entropy/relaxation triggers, wrong sign). The FORM (exp_01 T1/T3):
+    severance is decoupling, not destruction -- the severed vertex leaves with its own value,
+    the two branches never exchange again, global conservation is exact. So here a particle
+    that fires is flagged `severed`, carries its mass, kinetic energy and momentum out of the
+    interacting ledger, and thereafter interacts with nothing (see ParticleState.severed). No
+    fraction, no energy law: the amount is the particle. Global totals are conserved by the
+    ledger to machine precision, which is the gate.
+
+    Runs after SECUpdate and before the forces (Milestone R's order: update, then check), so a
+    particle whose entropy just spiked is decoupled before it receives that tick's impulse.
+
+    `sev_mode="random"` fires a scheduled count of uniformly random retained particles per tick
+    through the same bookkeeping -- the SELECTION control: does it matter that the overstressed
+    ones are the ones that leave?
+    """
+
+    name = "ledger_severance"
+
+    def __init__(self):
+        self._table = None
+        self._table_key = None
+
+    def _potential_table(self, c: ParticleConfig):
+        key = (float(c.g), float(c.r0))
+        if self._table_key != key:
+            self._table = gravity_potential_table(c.g, c.r0)
+            self._table_key = key
+        return self._table
+
+    @torch.no_grad()
+    def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
+        if c.sev_tau is None:
+            return s
+        a = c.cosmology.a if c.cosmology else 1.0
+        alive = s.alive()
+        sim_time = float(s.metrics.get("sim_time", 0.0))
+        m = dict(s.metrics)
+
+        if c.sev_mode == "random":
+            sched = c.sev_schedule or []
+            ptr = int(m.get("_sev_sched_ptr", 0))
+            k = 0
+            while ptr < len(sched) and sched[ptr][0] <= sim_time:
+                k += int(sched[ptr][1]); ptr += 1
+            m["_sev_sched_ptr"] = float(ptr)
+            idx_alive = torch.nonzero(alive).flatten()
+            k = min(k, int(idx_alive.numel()))
+            fire = torch.zeros(s.n, dtype=torch.bool, device=s.device)
+            if k > 0:
+                gen = torch.Generator(device="cpu").manual_seed(int(c.seed * 1_000_003 + round(sim_time * 1e6)))
+                pick = torch.randperm(int(idx_alive.numel()), generator=gen)[:k]
+                fire[idx_alive[pick.to(idx_alive.device)]] = True
+            min_stress = None
+        else:
+            r, _, _ = pairwise(s, a)
+            r_sev = c.sev_radius if c.sev_radius is not None else s.box / math.ceil(s.n ** (1.0 / s.pos.shape[1]))
+            near = (r < r_sev) & s.pair_alive()
+            deg = near.sum(dim=1)
+            dS = (s.entropy.unsqueeze(1) - s.entropy.unsqueeze(0)).abs()
+            min_stress = torch.where(near, dS, torch.full_like(dS, float("inf"))).min(dim=1).values
+            fire = alive & (deg >= 1) & (min_stress > c.sev_tau)
+
+        n_fire = int(fire.sum().item())
+        m["sev_count"] = float(n_fire)
+        if n_fire == 0:
+            m["loss_severance_ke"] = 0.0; m["loss_severance_u"] = 0.0
+            m["loss_severance_energy"] = 0.0; m["loss_severance_mass"] = 0.0
+            m["sev_frac_cum"] = float((~alive).sum().item()) / s.n
+            return s.replace(metrics=m)
+
+        # what leaves the interacting ledger: the particles' own kinetic energy and mass, and
+        # their whole interaction energy with what remains (pairs among the fired counted once)
+        ke_i = 0.5 * s.mass * (s.vel ** 2).sum(-1)
+        ke_out = ke_i[fire].sum().item()
+        mass_out = s.mass[fire].sum().item()
+        r, _, _ = pairwise(s, a)
+        within = (r < 3.0 * c.r0) & s.pair_alive()
+        mm = s.mass.unsqueeze(1) * s.mass.unsqueeze(0)
+        u = mm * _interp_potential(r, within, self._potential_table(c))
+        u_out = u[fire].sum().item() - 0.5 * u[fire][:, fire].sum().item()
+        ke_ret = ke_i[alive & ~fire]
+        m["loss_severance_ke"] = ke_out
+        m["loss_severance_u"] = u_out
+        m["loss_severance_energy"] = ke_out + u_out
+        m["loss_severance_mass"] = mass_out
+        m["sev_ke_ratio"] = ((ke_i[fire].mean() / ke_ret.mean()).item() if ke_ret.numel() and ke_ret.mean() > 0
+                             else float("nan"))
+        m["sev_stress_min"] = (min_stress[fire].min().item() if min_stress is not None else float("nan"))
+        for key in ("loss_severance_ke", "loss_severance_u", "loss_severance_energy", "loss_severance_mass"):
+            m[key + "_cum"] = float(m.get(key + "_cum", 0.0)) + m[key]
+
+        severed = (s.severed.clone() if s.severed is not None
+                   else torch.zeros(s.n, dtype=torch.bool, device=s.device))
+        severed |= fire
+        sev_time = (s.sev_time.clone() if s.sev_time is not None
+                    else torch.full((s.n,), float("nan"), device=s.device))
+        sev_time[fire] = sim_time
+        m["sev_frac_cum"] = float(severed.sum().item()) / s.n
+        return s.replace(severed=severed, sev_time=sev_time, metrics=m)
 
 
 class PACLedger:
@@ -621,9 +903,35 @@ class PACLedger:
     @torch.no_grad()
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
         m = dict(s.metrics)
+        ke_prev = s.metrics.get("kinetic_int")
         m["mass_total"] = s.mass.sum().item()
         m["kinetic"] = (0.5 * s.mass * (s.vel ** 2).sum(-1)).sum().item()
         m["entropy_total"] = s.entropy.sum().item()
+        # --- the interacting / severed / global split ------------------------------------------
+        alive = s.alive(); sev = ~alive
+        ke_i = 0.5 * s.mass * (s.vel ** 2).sum(-1)
+        m["n_alive"] = int(alive.sum().item())
+        m["mass_int"] = s.mass[alive].sum().item()
+        m["mass_sev"] = s.mass[sev].sum().item()
+        m["kinetic_int"] = ke_i[alive].sum().item()
+        m["kinetic_sev"] = ke_i[sev].sum().item()
+        p_all = (s.mass.unsqueeze(-1) * s.vel)
+        for k, ax in enumerate("xyz"[: s.pos.shape[1]]):
+            m[f"momentum_int_{ax}"] = p_all[alive].sum(0)[k].item() if bool(alive.any()) else 0.0
+        m["entropy_total"] = s.entropy[alive].sum().item()
+        m["potential_int"] = (0.5 * s.potential_i[alive].sum().item() if s.potential_i is not None
+                              else float(s.metrics.get("potential_int", 0.0)))
+        m["total_int"] = m["kinetic_int"] + m["potential_int"]
+        m["e_int"] = m["total_int"] / max(m["n_alive"], 1)
+        # closure: this tick's kinetic change must be exactly the work minus the losses.
+        # A sign or partition error anywhere upstream shows up here as O(1), not as drift.
+        if ke_prev is not None:
+            budget = (m.get("work_gravity", 0.0) + m.get("work_pressure", 0.0)
+                      - m.get("loss_drag", 0.0) - m.get("loss_guard", 0.0)
+                      - m.get("loss_landauer", 0.0) - m.get("loss_severance_ke", 0.0))
+            m["closure_residual"] = abs((m["kinetic_int"] - ke_prev) - budget) / max(abs(ke_prev), 1.0)
+        else:
+            m["closure_residual"] = 0.0
         # One key per spatial axis. This recorded x and y only, so on every 3D run the z
         # component was silently missing from the conservation ledger.
         p = (s.mass.unsqueeze(-1) * s.vel).sum(0)
@@ -640,6 +948,12 @@ CANONICAL: list[Callable[[], ParticleOperator]] = [
 # from the CURRENT configuration before anything moves. Inert unless time_mode != "global".
 CANONICAL_TIME: list[Callable[[], ParticleOperator]] = [
     SECUpdate, LocalGravity, SECPressure, LocalTime, Integrator, PACLedger,
+]
+
+# Same forces with the ledger-severance sink in Milestone R's order (update, then check, then
+# forces). Inert -- bit-identical to CANONICAL -- unless sev_tau is set.
+CANONICAL_SINK: list[Callable[[], ParticleOperator]] = [
+    SECUpdate, LandauerErasure, LedgerSeverance, LocalGravity, SECPressure, Integrator, PACLedger,
 ]
 
 # exp_11's 3D pipeline: same forces, different SEC rule. Its ordering also differs — exp_11
@@ -672,6 +986,9 @@ class ParticleEngine:
                        "first_tick_at_cap_gt_1pct": None, "ticks_at_dt_floor": 0,
                        "dt_eff_min": None}
         self._warned_cap = False
+        # Severance event log: one entry per tick on which something left the ledger. The
+        # selection control replays it (sev_mode="random", sev_schedule=[(sim_time, count)]).
+        self.events: list[dict] = []
 
     def _init(self) -> ParticleState:
         c = self.config
@@ -708,6 +1025,11 @@ class ParticleEngine:
         self.state = s
         self.tick_count += 1
         self._record_bounds(s)
+        if s.metrics.get("sev_count", 0.0) > 0:
+            self.events.append(dict(tick=self.tick_count, sim_time=float(s.metrics.get("sim_time", 0.0)),
+                                    count=int(s.metrics["sev_count"]),
+                                    ke_out=float(s.metrics["loss_severance_ke"]),
+                                    u_out=float(s.metrics["loss_severance_u"])))
         return s
 
     def _record_bounds(self, s: ParticleState) -> None:

@@ -27,6 +27,10 @@ PROXY = dict(n=500, box=30.0, r0=10.0, g=1.5, dims=3, seed=1, sec_balance=0.6541
 # and well into the entropy runaway (300 = the diagnostic's own horizon at n=4000).
 MARKS = (25, 50, 100, 150, 200, 300)
 
+# The POC-11 proxy: exp_11's density at n = 1000 (box = 60 * (1000/4000)^(1/3) = 37.8), no drag,
+# so the derived arms have nothing tuned dissipating. ~26 s to sim_time 15 on CPU.
+PROXY_1000 = dict(n=1000, box=37.8, r0=10.0, g=1.5, dims=3, seed=1, sec_balance=0.6541, damping=1.0)
+
 
 def run_marks(cfg: "P.ParticleConfig", pipeline=None, marks=MARKS, min_sim_time: float = 15.0):
     """Run an engine; return (engine, [(tick, sim_time, metrics-copy), ...]).
