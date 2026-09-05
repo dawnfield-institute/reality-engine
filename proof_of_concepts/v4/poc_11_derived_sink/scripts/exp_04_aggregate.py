@@ -89,7 +89,7 @@ def main():
         for arm in ("B0", "D"):
             for other in by_arm.get(arm, []):
                 if key(other) != k: continue
-                if arm == "D" and other.get("_matched_tau") not in (None, S["tau"]): continue
+                if arm == "D" and other.get("matched_tau") != S["tau"]: continue   # D is matched to ONE S run
                 side = np.load(a.results_dir / other["pos_sidecar"])
                 times = side["sim_times"]; vals = []
                 for i, m in enumerate(S["marks"]):
@@ -104,7 +104,7 @@ def main():
                                             S_xi_u=S["_summary"]["xi_u"], other_xi_u_matched=float(np.mean([v["xi_u"] for v in vals])),
                                             S_occ=S["_summary"]["occ"], other_occ_matched=float(np.mean([v["occupancy"] for v in vals]))))
         for other in by_arm.get("R", []):
-            if key(other) == k and other.get("tau") in (None, S["tau"]):
+            if key(other) == k and other.get("matched_tau") == S["tau"]:          # R replays ONE S run
                 comparisons.append(dict(S_file=S["_file"], other_file=other["_file"], other_arm="R", size=S["size"],
                                         seed=S["seed"], tau=S["tau"], md=S["md"],
                                         S_perc=S["_summary"]["perc"], other_perc_matched=other["_summary"]["perc"],
