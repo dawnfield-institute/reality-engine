@@ -35,7 +35,12 @@ from typing import Callable, Optional, Protocol
 
 import torch
 
-PHI = (1 + math.sqrt(5)) / 2
+try:  # named constants — never bare literals (CLAUDE.md: "say which Xi you mean")
+    from fracton.constants import LN2, PHI, XI_ANALYTIC
+except ImportError:  # pragma: no cover — mirrors of fracton.constants.mathematical
+    LN2 = math.log(2)
+    PHI = (1 + math.sqrt(5)) / 2
+    XI_ANALYTIC = 0.5772156649015329 + math.log((1 + math.sqrt(5)) / 2)
 
 
 # ======================================================================================
@@ -317,10 +322,22 @@ class LocalGravity:
 
 
 class SECPressure:
-    """Entropy-gradient repulsion — the counter-force that opens voids.
+    """Entropy pressure — the counter-force that opens voids.
 
     Range 2 r0 against gravity's 3 r0. Two competing interactions at *different* ranges is
     what selects a scale; a single monotone attraction only concentrates.
+
+    **Pair law (2026-09-05): repulsion with magnitude sec_balance * (S_i + S_j)/2 * exp(-r/r0),
+    always pushing the pair apart.** The rule inherited from exp_09 was sec * (S_i - S_j) along
+    the unit vector from j to i. Under i <-> j both the difference and the direction flip, so
+    the force on j from i was the SAME vector as the force on i from j: the antisymmetric part
+    of the pair interaction was identically zero and the whole term was self-propulsion --
+    every pair injected net momentum 2F (checked: F_i = F_j = -2.195 x for S = 5 and 1, six
+    apart). There is no sign fix for that; the choice of a third-law pair law is a physics
+    choice, and Peter chose the pressure form: strength set by the pair's mean entropy, so a
+    dense hot region pushes outward from its interior. Third law exact; momentum is conserved
+    by construction and tested (tests/v4/test_pressure_momentum.py). Every result before this
+    commit -- POC-07/08/09/10, exp_04 -- was measured on the momentum-injecting rule.
     """
 
     name = "sec_pressure"
@@ -330,10 +347,10 @@ class SECPressure:
         a = c.cosmology.a if c.cosmology else 1.0
         r, d, r_com = pairwise(s, a)
         within = r < 2.0 * c.r0
-        de = s.entropy.unsqueeze(1) - s.entropy.unsqueeze(0)
-        mag = torch.where(within, c.sec_balance * de * torch.exp(-r / c.r0),
+        s_pair = 0.5 * (s.entropy.unsqueeze(1) + s.entropy.unsqueeze(0))   # symmetric in (i, j)
+        mag = torch.where(within, c.sec_balance * s_pair * torch.exp(-r / c.r0),
                           torch.zeros_like(r))
-        unit = d / (r_com.unsqueeze(-1) + 1e-6)                # away from neighbours
+        unit = d / (r_com.unsqueeze(-1) + 1e-6)                # from j to i: pushes i away
         press = (mag.unsqueeze(-1) * unit).sum(dim=1)
         m = dict(s.metrics)
         m["sec_pressure_mean"] = press.norm(dim=-1).mean().item()

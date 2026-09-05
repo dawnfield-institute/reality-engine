@@ -14,6 +14,14 @@
 > (`at_cap_frac`, `engine.bounds`), and SEC memory releases every tick. The results below are
 > retained as the record of what was measured; they are not results about the force law.
 > Re-measurement is exp_04 (`scripts/exp_04_integrator_owns_dt.py`, matched simulated time).
+>
+> **Second forward note — 2026-09-05, later the same day.** exp_04 itself, and the "relaxation
+> oscillator" characterisation in `.spec/challenges.md` C4.1, were measured on an `SECPressure`
+> whose pair forces were **parallel, not opposite**: the antisymmetric part of exp_09's
+> `sec * (S_i - S_j)` rule is identically zero, so every pair injected net momentum. Replaced by a
+> third-law pair law, mean-entropy repulsion `sec * (S_i + S_j)/2 * exp(-r/r0)` (Peter's choice;
+> `journals/2026-09-05_the-pressure-was-self-propulsion.md`). exp_04's numbers stand as the record
+> of the old rule. The substrate's behaviour under the corrected force is characterised in POC-11.
 
 ## Why
 
