@@ -1,0 +1,39 @@
+schema_version: '2.1'
+directory_name: poc_11_derived_sink
+title: 'POC-11 (v4): A derived sink, not a tuned one — radiation as ledger severance on the particle substrate'
+description: >
+  The particle substrate has no energy sink now that its speed cap is gone, and its tuned drag was
+  shown to be the equation of motion for most of a run. Milestone R licenses two derived pieces of
+  a sink and no amount: a stress trigger (a vertex severs when all its bonds are simultaneously
+  overstressed) and a form (severance is decoupling, not destruction). This POC builds the energy
+  ledger the substrate lacked, a LedgerSeverance operator that decouples whole particles on that
+  trigger, a Landauer-erasure operator as an exploratory second sink, and the matched-energy and
+  matched-count controls, and runs the arms that dawn-field-theory Milestone R exp_28 scores.
+status: active
+era: era4-milestone-stack-2026q2
+pillar: SEC
+hypothesis: >
+  A dissipation channel derived from Milestone R's severance rules lets the substrate hold
+  structure, and does so beyond what a matched amount of generic drag or a matched count of
+  random removal achieves.
+falsification: >
+  Registered in dawn-field-theory milestone-r/journals (exp_28): K1 — severance holds structure no
+  better than energy-matched drag (the trigger is not doing work; any dissipation would do); K2 —
+  no better than count-matched random removal (removing particles, not overstress selection,
+  holds structure). Instrument falsification: a closure residual above 1e-5 with the guard unbound.
+validation_type: computational
+result: >
+  PENDING — registered, not run.
+notes: >
+  Prerequisites landed the same day: the pressure pair law was self-propulsion and was replaced
+  by a third-law pressure (mean-entropy repulsion); the energy ledger is new. Every pre-seal
+  number is computed on the corrected force. Design pass findings disclosed in the registration:
+  the trigger is live only at the lattice-spacing neighbourhood (degree 1-13), not at r0
+  (degree ~80); the KE/|U| budget decides the question within ~30 ticks of the first detonation.
+tags:
+  - derived-sink
+  - ledger-severance
+  - landauer
+  - energy-ledger
+  - milestone-r
+  - v4

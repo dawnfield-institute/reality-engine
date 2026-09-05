@@ -29,7 +29,7 @@ reality-engine/
 │   ├── big_bang/              # Big bang evolution
 │   └── ...
 ├── tests/v3/                  # 142 tests (pytest) — the field engine
-├── tests/v4/                  # 9 tests — the particle substrate under proof_of_concepts/v4
+├── tests/v4/                  # 27 tests — the particle substrate under proof_of_concepts/v4
 ├── docs/                      # Theory and guides
 └── archive/                   # earlier generations, preserved not deleted
     ├── v1/                    # Jan 2026 layer packages: core/, dynamics/,
@@ -117,7 +117,7 @@ and theory_integration spikes are **not** affected — they use the canonical 16
 - Physics must EMERGE, never be programmed — no hardcoded F=ma, E=mc^2, etc.
 - PAC conservation enforced at machine precision (< 1e-12)
 - Mobius manifold substrate with anti-periodic boundaries: f(x+pi) = -f(x)
-- Tests: `pytest` from repo root — `pytest.ini` targets `tests/v3` (142) and `tests/v4` (9)
+- Tests: `pytest` from repo root — `pytest.ini` targets `tests/v3` (142) and `tests/v4` (27)
 - Installation: `pip install -r requirements.txt`
 - Run the engine: `python -m src.v3 --help`
 - Scorecard: `python scripts/physics_scorecard.py`
@@ -187,7 +187,7 @@ Implemented into engine: info fraction metric, eta=0.025, entropy/info init fact
 - Do NOT hardcode physics laws — all physics must emerge from field dynamics
 - Do NOT break PAC conservation invariants (< 1e-12 error)
 - Do NOT modify substrate geometry without understanding Mobius topology
-- Always run `pytest` after changes (151 tests must stay green)
+- Always run `pytest` after changes (169 tests must stay green)
 - spikes/ are research experiments — treat as exploratory, not production code
 - `archive/v1/` and `archive/v2/` are lineage — **read, never modify, never import from**.
   Archived work keeps its original shape; that shape is evidence of when it was done.
