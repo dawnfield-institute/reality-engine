@@ -537,6 +537,33 @@ the wrong particles.** The ledger, the severance bookkeeping and the third-law p
 instruments (POC-11); drag stays a control. Journal:
 `proof_of_concepts/v4/poc_11_derived_sink/journals/2026-09-05_the-trigger-selects-the-cores.md`.
 
+**Update 2026-09-06 — option 2 in progress as POC-12 / Milestone R exp_29, in the house's own terms.**
+The design pass found the pressure is *already* a gradient at fixed entropy (its magnitude is
+−dV/dr for `V = sec·(S_i+S_j)/2·r0·e^{−r/r0}`; only the 2 r0 cutoff breaks it) and that the whole
+non-conservation is the entropy ratchet: the pair energy created by entropy growth, booked tick by
+tick, is 689,700 against 667,300 of pressure work (ratio 1.03). SEC is local and free to inject;
+what the substrate lacked is the **ledger**. `.spec/v4-pac-ledger.spec.md`: a per-particle potential
+budget `P_i(0) = κ|U_grav(0)| m_i/Σm` pays for entropy growth at the price the pair energy sets, is
+repaid on decay, and `KE + U + E_SEC + ΣP` is conserved. κ = 0 is gravity-only, κ = ∞ is this
+substrate; the sweep {0.5, 1, 2} brackets the virial threshold (bound below ~½ by arithmetic).
+
+**Update 2026-09-06 (night) — the ledger lands (exp_29, 3/4 at both sizes, sealed `43e4ebc9`).**
+With the budget on, the substrate is bound (KE/|U_grav| 0.49–0.54 at κ = 0.5 vs 10.7–22.3
+unbounded), the total is conserved to truncation, the transfer is exact, and the web survives
+(percolation 0.51–0.76 proxy, 0.44–0.78 at n = 4000, vs 0.03–0.10; 4.8–5.7 σ) — the relaxation
+oscillator is gone. Against gravity alone the registered arm fails the 2 σ bar at both sizes and
+the kill fires: the mapping is retired as *the object that holds structure beyond gravity at
+κ = 0.5 with the proxy deciding*. **What the seal does not score:** the two sizes disagree about
+the pressure. On the proxy (box 37.8, range 2r0 = 20 — more than half the box) the bounded engine
+never adds to gravity's web; at n = 4000 (box 60) it adds — κ = 1 holds 0.70–0.80, above gravity in
+every seed by 2.8 σ (post hoc), and κ = 2 collapses. A bounded density-sourced repulsion is not
+structurally inert on a box large compared with its range. **Option 2's status:** the pressure's
+*form* (the SEC functional's `β∇²A` as a gradient-penalising pair force) stays a candidate, behind
+**R1b** — κ = 1 at n = 4000 on fresh seeds, the box-to-range ratio declared, the proxy retired as a
+decider for pressure-range questions. The ledger itself (`pac_kappa`, `sec_pair_energy`, the
+transfer, the conserved total) stays as a gated instrument, bit-identical to the old path when
+off. Journal: `proof_of_concepts/v4/poc_12_pac_ledger/journals/2026-09-06_the-ledger-holds-the-web.md`.
+
 ---
 
 ### C4.2: Per-particle timesteps in the force kick (design B)

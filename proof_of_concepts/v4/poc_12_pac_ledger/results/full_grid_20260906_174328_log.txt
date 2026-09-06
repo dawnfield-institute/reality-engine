@@ -1,0 +1,272 @@
+  full_k0_s1: n=4000 box=60.0 pac_kappa=0.0 P0=0.0 xi_variant=XI_ANALYTIC commit=78d59b3
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-2.62e+05 P/P0=nan bound=0.000 clos=3.1e-05 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=-2.61e+05 P/P0=nan bound=0.000 clos=1.9e-04 perc=0.056 xi_u=0.709 occ=0.092
+    t=  3.05 tick=   61 KE/|U|=   0.24 E_tot=-2.59e+05 P/P0=nan bound=1.000 clos=6.9e-04 perc=0.598 xi_u=0.779 occ=0.195
+    t=  4.05 tick=   81 KE/|U|=   0.48 E_tot= -2.6e+05 P/P0=nan bound=1.000 clos=5.9e-04 perc=0.472 xi_u=1.116 occ=0.149
+    t=  5.05 tick=  101 KE/|U|=   0.56 E_tot=-2.56e+05 P/P0=nan bound=1.000 clos=2.3e-04 perc=0.255 xi_u=1.064 occ=0.126
+    t=  6.05 tick=  121 KE/|U|=   0.74 E_tot=-2.38e+05 P/P0=nan bound=1.000 clos=3.1e-03 perc=0.395 xi_u=1.351 occ=0.106
+    t=  7.01 tick=  144 KE/|U|=   0.84 E_tot=-2.54e+05 P/P0=nan bound=1.000 clos=3.1e-05 perc=0.488 xi_u=1.480 occ=0.082
+    t=  8.01 tick=  175 KE/|U|=   0.86 E_tot=-3.06e+05 P/P0=nan bound=1.000 clos=2.9e-04 perc=0.426 xi_u=1.483 occ=0.076
+    t=  9.02 tick=  205 KE/|U|=   0.83 E_tot=-2.85e+05 P/P0=nan bound=1.000 clos=2.6e-04 perc=0.333 xi_u=1.464 occ=0.097
+    t= 10.03 tick=  235 KE/|U|=   0.83 E_tot=-2.83e+05 P/P0=nan bound=1.000 clos=1.7e-05 perc=0.353 xi_u=1.412 occ=0.091
+    t= 11.01 tick=  265 KE/|U|=   0.84 E_tot=-2.91e+05 P/P0=nan bound=1.000 clos=9.4e-04 perc=0.448 xi_u=1.353 occ=0.086
+    t= 12.01 tick=  296 KE/|U|=   0.83 E_tot=-2.97e+05 P/P0=nan bound=1.000 clos=4.0e-04 perc=0.383 xi_u=1.414 occ=0.092
+    t= 13.03 tick=  327 KE/|U|=   0.83 E_tot=-2.99e+05 P/P0=nan bound=1.000 clos=1.1e-03 perc=0.399 xi_u=1.429 occ=0.088
+    t= 14.00 tick=  357 KE/|U|=   0.82 E_tot=-3.08e+05 P/P0=nan bound=1.000 clos=4.4e-04 perc=0.393 xi_u=1.384 occ=0.089
+    t= 15.02 tick=  388 KE/|U|=   0.83 E_tot= -3.1e+05 P/P0=nan bound=1.000 clos=7.0e-04 perc=0.390 xi_u=1.434 occ=0.080
+  wrote results/exp_03_ledger_arms_full_k0_s1_20260906_174534.json (+ _pos.npz)  [388 ticks, 124s, finite=True]
+  full_k0.5_s1: n=4000 box=60.0 pac_kappa=0.5 P0=130932.0 xi_variant=XI_ANALYTIC commit=78d59b3
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-1.31e+05 P/P0=1.000 bound=0.000 clos=3.1e-05 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot= -1.3e+05 P/P0=1.000 bound=0.000 clos=1.9e-04 perc=0.056 xi_u=0.709 occ=0.092
+    t=  3.05 tick=   61 KE/|U|=   0.21 E_tot=-1.29e+05 P/P0=0.567 bound=1.000 clos=3.6e-05 perc=0.533 xi_u=0.767 occ=0.196
+    t=  4.05 tick=   81 KE/|U|=   0.34 E_tot=-1.31e+05 P/P0=0.127 bound=1.000 clos=6.3e-04 perc=0.768 xi_u=0.898 occ=0.154
+    t=  5.05 tick=  101 KE/|U|=   0.36 E_tot=-1.32e+05 P/P0=0.089 bound=1.000 clos=1.4e-05 perc=0.315 xi_u=1.034 occ=0.148
+    t=  6.05 tick=  121 KE/|U|=   0.38 E_tot= -1.3e+05 P/P0=0.117 bound=1.000 clos=4.9e-04 perc=0.269 xi_u=1.134 occ=0.135
+    t=  7.05 tick=  141 KE/|U|=   0.45 E_tot=-1.28e+05 P/P0=0.130 bound=1.000 clos=1.9e-04 perc=0.434 xi_u=1.375 occ=0.120
+    t=  8.05 tick=  161 KE/|U|=   0.50 E_tot= -1.2e+05 P/P0=0.088 bound=1.000 clos=7.8e-04 perc=0.558 xi_u=1.654 occ=0.103
+    t=  9.02 tick=  183 KE/|U|=   0.53 E_tot=-1.35e+05 P/P0=0.067 bound=1.000 clos=3.5e-04 perc=0.526 xi_u=1.691 occ=0.085
+    t= 10.02 tick=  207 KE/|U|=   0.52 E_tot= -1.4e+05 P/P0=0.054 bound=1.000 clos=9.9e-04 perc=0.637 xi_u=1.646 occ=0.093
+    t= 11.02 tick=  232 KE/|U|=   0.52 E_tot=-1.57e+05 P/P0=0.061 bound=1.000 clos=2.3e-04 perc=0.666 xi_u=1.669 occ=0.090
+    t= 12.01 tick=  256 KE/|U|=   0.52 E_tot=-1.64e+05 P/P0=0.062 bound=1.000 clos=4.0e-04 perc=0.578 xi_u=1.556 occ=0.101
+    t= 13.03 tick=  280 KE/|U|=   0.52 E_tot=-1.69e+05 P/P0=0.058 bound=1.000 clos=2.5e-04 perc=0.612 xi_u=1.598 occ=0.091
+    t= 14.01 tick=  304 KE/|U|=   0.53 E_tot=-1.75e+05 P/P0=0.050 bound=1.000 clos=2.3e-04 perc=0.619 xi_u=1.547 occ=0.088
+    t= 15.04 tick=  330 KE/|U|=   0.53 E_tot=-1.81e+05 P/P0=0.036 bound=1.000 clos=2.0e-04 perc=0.601 xi_u=1.652 occ=0.091
+  wrote results/exp_03_ledger_arms_full_k0.5_s1_20260906_174713.json (+ _pos.npz)  [330 ticks, 98s, finite=True]
+  full_k1_s1: n=4000 box=60.0 pac_kappa=1.0 P0=261864.0 xi_variant=XI_ANALYTIC commit=78d59b3
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=     82.7 P/P0=1.000 bound=0.000 clos=3.1e-05 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=      563 P/P0=1.000 bound=0.000 clos=1.9e-04 perc=0.056 xi_u=0.709 occ=0.092
+    t=  3.05 tick=   61 KE/|U|=   0.19 E_tot=      746 P/P0=0.578 bound=1.000 clos=4.7e-04 perc=0.467 xi_u=0.766 occ=0.195
+    t=  4.05 tick=   81 KE/|U|=   0.25 E_tot=-1.59e+03 P/P0=0.090 bound=1.000 clos=1.3e-04 perc=0.771 xi_u=0.922 occ=0.167
+    t=  5.05 tick=  101 KE/|U|=   0.26 E_tot= -2.8e+03 P/P0=0.087 bound=1.000 clos=3.2e-05 perc=0.690 xi_u=1.050 occ=0.154
+    t=  6.05 tick=  121 KE/|U|=   0.26 E_tot=-2.97e+03 P/P0=0.140 bound=1.000 clos=5.1e-06 perc=0.684 xi_u=1.125 occ=0.143
+    t=  7.05 tick=  141 KE/|U|=   0.26 E_tot=-3.35e+03 P/P0=0.163 bound=1.000 clos=1.7e-06 perc=0.557 xi_u=1.161 occ=0.140
+    t=  8.05 tick=  161 KE/|U|=   0.27 E_tot=-3.59e+03 P/P0=0.175 bound=1.000 clos=1.9e-05 perc=0.675 xi_u=0.997 occ=0.149
+    t=  9.05 tick=  181 KE/|U|=   0.28 E_tot=-3.58e+03 P/P0=0.182 bound=1.000 clos=1.8e-05 perc=0.675 xi_u=0.965 occ=0.153
+    t= 10.00 tick=  200 KE/|U|=   0.29 E_tot=-3.84e+03 P/P0=0.181 bound=1.000 clos=1.5e-06 perc=0.699 xi_u=0.982 occ=0.160
+    t= 11.00 tick=  220 KE/|U|=   0.31 E_tot=   -4e+03 P/P0=0.155 bound=1.000 clos=2.5e-05 perc=0.673 xi_u=1.093 occ=0.160
+    t= 12.00 tick=  240 KE/|U|=   0.32 E_tot= -4.3e+03 P/P0=0.140 bound=1.000 clos=8.3e-05 perc=0.769 xi_u=1.180 occ=0.159
+    t= 13.00 tick=  260 KE/|U|=   0.33 E_tot=-4.41e+03 P/P0=0.122 bound=1.000 clos=9.2e-06 perc=0.763 xi_u=1.251 occ=0.155
+    t= 14.00 tick=  280 KE/|U|=   0.33 E_tot=-5.27e+03 P/P0=0.101 bound=1.000 clos=2.4e-05 perc=0.866 xi_u=1.313 occ=0.154
+    t= 15.00 tick=  300 KE/|U|=   0.33 E_tot=-5.74e+03 P/P0=0.101 bound=1.000 clos=7.7e-06 perc=0.817 xi_u=1.370 occ=0.156
+  wrote results/exp_03_ledger_arms_full_k1_s1_20260906_174838.json (+ _pos.npz)  [300 ticks, 84s, finite=True]
+  full_k2_s1: n=4000 box=60.0 pac_kappa=2.0 P0=523728.0 xi_variant=XI_ANALYTIC commit=78d59b3
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot= 2.62e+05 P/P0=1.000 bound=0.000 clos=3.1e-05 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot= 2.62e+05 P/P0=1.000 bound=0.000 clos=1.9e-04 perc=0.056 xi_u=0.709 occ=0.092
+    t=  3.05 tick=   61 KE/|U|=   0.17 E_tot= 2.61e+05 P/P0=0.604 bound=1.000 clos=7.1e-04 perc=0.491 xi_u=0.749 occ=0.195
+    t=  4.05 tick=   81 KE/|U|=   0.19 E_tot= 2.57e+05 P/P0=0.106 bound=1.000 clos=4.1e-04 perc=0.607 xi_u=0.900 occ=0.183
+    t=  5.05 tick=  101 KE/|U|=   0.24 E_tot= 2.57e+05 P/P0=0.283 bound=1.000 clos=5.9e-05 perc=0.564 xi_u=0.887 occ=0.174
+    t=  6.05 tick=  121 KE/|U|=   0.39 E_tot= 2.56e+05 P/P0=0.453 bound=1.000 clos=4.0e-04 perc=0.086 xi_u=0.807 occ=0.173
+    t=  7.05 tick=  141 KE/|U|=   0.40 E_tot= 2.54e+05 P/P0=0.412 bound=1.000 clos=1.5e-04 perc=0.080 xi_u=0.777 occ=0.177
+    t=  8.05 tick=  161 KE/|U|=   0.42 E_tot= 2.54e+05 P/P0=0.343 bound=1.000 clos=1.0e-04 perc=0.148 xi_u=0.739 occ=0.186
+    t=  9.05 tick=  181 KE/|U|=   0.50 E_tot= 2.53e+05 P/P0=0.444 bound=1.000 clos=1.8e-04 perc=0.103 xi_u=0.716 occ=0.183
+    t= 10.00 tick=  200 KE/|U|=   0.53 E_tot= 2.52e+05 P/P0=0.515 bound=1.000 clos=8.6e-05 perc=0.092 xi_u=0.704 occ=0.184
+    t= 11.00 tick=  220 KE/|U|=   0.55 E_tot= 2.52e+05 P/P0=0.534 bound=1.000 clos=1.3e-04 perc=0.102 xi_u=0.705 occ=0.184
+    t= 12.00 tick=  240 KE/|U|=   0.57 E_tot= 2.52e+05 P/P0=0.538 bound=1.000 clos=3.8e-05 perc=0.058 xi_u=0.701 occ=0.190
+    t= 13.00 tick=  260 KE/|U|=   0.59 E_tot= 2.51e+05 P/P0=0.560 bound=1.000 clos=4.8e-05 perc=0.106 xi_u=0.684 occ=0.193
+    t= 14.00 tick=  280 KE/|U|=   0.60 E_tot= 2.51e+05 P/P0=0.477 bound=1.000 clos=3.6e-05 perc=0.096 xi_u=0.687 occ=0.190
+    t= 15.00 tick=  300 KE/|U|=   0.62 E_tot=  2.5e+05 P/P0=0.417 bound=1.000 clos=1.5e-04 perc=0.070 xi_u=0.678 occ=0.192
+  wrote results/exp_03_ledger_arms_full_k2_s1_20260906_174958.json (+ _pos.npz)  [300 ticks, 79s, finite=True]
+  full_kinf_s1: n=4000 box=60.0 pac_kappa=None P0=None xi_variant=XI_ANALYTIC commit=78d59b3
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-2.62e+05 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.200 xi_u=0.594 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=-2.61e+05 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.056 xi_u=0.709 occ=0.092
+    t=  3.00 tick=   61 KE/|U|=   1.01 E_tot= 2.58e+03 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.171 xi_u=0.679 occ=0.194
+    t=  4.01 tick=  114 KE/|U|=  16.48 E_tot= 4.28e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.055 xi_u=0.682 occ=0.183
+    t=  5.00 tick=  181 KE/|U|=  18.36 E_tot= 4.64e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.035 xi_u=0.599 occ=0.188
+    t=  6.00 tick=  246 KE/|U|=  18.49 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.022 xi_u=0.600 occ=0.185
+    t=  7.00 tick=  310 KE/|U|=  18.48 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.042 xi_u=0.593 occ=0.185
+    t=  8.00 tick=  374 KE/|U|=  18.42 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.027 xi_u=0.595 occ=0.189
+    t=  9.01 tick=  438 KE/|U|=  18.51 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.023 xi_u=0.581 occ=0.189
+    t= 10.01 tick=  502 KE/|U|=  18.47 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.031 xi_u=0.595 occ=0.189
+    t= 11.01 tick=  566 KE/|U|=  18.48 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.049 xi_u=0.591 occ=0.191
+    t= 12.00 tick=  629 KE/|U|=  18.51 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.038 xi_u=0.590 occ=0.193
+    t= 13.01 tick=  693 KE/|U|=  18.43 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.036 xi_u=0.600 occ=0.186
+    t= 14.00 tick=  756 KE/|U|=  18.48 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.024 xi_u=0.591 occ=0.193
+    t= 15.01 tick=  820 KE/|U|=  18.50 E_tot= 4.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.025 xi_u=0.599 occ=0.189
+  wrote results/exp_03_ledger_arms_full_kinf_s1_20260906_175213.json (+ _pos.npz)  [820 ticks, 134s, finite=True]
+  full_k0_s2: n=4000 box=60.0 pac_kappa=0.0 P0=0.0 xi_variant=XI_ANALYTIC commit=78d59b3
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-2.63e+05 P/P0=nan bound=0.000 clos=2.8e-05 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=-2.62e+05 P/P0=nan bound=0.000 clos=1.7e-04 perc=0.058 xi_u=0.694 occ=0.088
+    t=  3.05 tick=   61 KE/|U|=   0.22 E_tot= -2.6e+05 P/P0=nan bound=1.000 clos=6.7e-04 perc=0.391 xi_u=0.752 occ=0.192
+    t=  4.05 tick=   81 KE/|U|=   0.50 E_tot= -2.6e+05 P/P0=nan bound=1.000 clos=1.2e-03 perc=0.651 xi_u=0.941 occ=0.146
+    t=  5.05 tick=  101 KE/|U|=   0.57 E_tot=-2.58e+05 P/P0=nan bound=1.000 clos=6.7e-04 perc=0.413 xi_u=1.144 occ=0.129
+    t=  6.04 tick=  121 KE/|U|=   0.81 E_tot=-2.42e+05 P/P0=nan bound=1.000 clos=2.0e-03 perc=0.360 xi_u=1.420 occ=0.090
+    t=  7.02 tick=  146 KE/|U|=   0.78 E_tot=-2.83e+05 P/P0=nan bound=1.000 clos=2.9e-04 perc=0.376 xi_u=1.434 occ=0.106
+    t=  8.03 tick=  170 KE/|U|=   0.88 E_tot=-2.33e+05 P/P0=nan bound=1.000 clos=1.1e-03 perc=0.287 xi_u=1.397 occ=0.085
+    t=  9.01 tick=  202 KE/|U|=   0.83 E_tot=-3.02e+05 P/P0=nan bound=1.000 clos=5.2e-04 perc=0.346 xi_u=1.392 occ=0.099
+    t= 10.01 tick=  232 KE/|U|=   0.81 E_tot=-3.02e+05 P/P0=nan bound=1.000 clos=7.7e-04 perc=0.306 xi_u=1.400 occ=0.093
+    t= 11.03 tick=  262 KE/|U|=   0.81 E_tot=-3.04e+05 P/P0=nan bound=1.000 clos=3.4e-04 perc=0.346 xi_u=1.407 occ=0.089
+    t= 12.01 tick=  292 KE/|U|=   0.82 E_tot=-3.12e+05 P/P0=nan bound=1.000 clos=7.7e-04 perc=0.288 xi_u=1.355 occ=0.093
+    t= 13.01 tick=  322 KE/|U|=   0.82 E_tot=-3.13e+05 P/P0=nan bound=1.000 clos=3.1e-05 perc=0.323 xi_u=1.426 occ=0.089
+    t= 14.03 tick=  353 KE/|U|=   0.81 E_tot=-3.13e+05 P/P0=nan bound=1.000 clos=4.0e-04 perc=0.314 xi_u=1.446 occ=0.095
+    t= 15.02 tick=  383 KE/|U|=   0.82 E_tot=-3.17e+05 P/P0=nan bound=1.000 clos=4.9e-04 perc=0.299 xi_u=1.408 occ=0.088
+  wrote results/exp_03_ledger_arms_full_k0_s2_20260906_175354.json (+ _pos.npz)  [383 ticks, 100s, finite=True]
+  full_k0.5_s2: n=4000 box=60.0 pac_kappa=0.5 P0=131442.71875 xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-1.31e+05 P/P0=1.000 bound=0.000 clos=2.8e-05 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=-1.31e+05 P/P0=1.000 bound=0.000 clos=1.7e-04 perc=0.058 xi_u=0.694 occ=0.088
+    t=  3.05 tick=   61 KE/|U|=   0.20 E_tot= -1.3e+05 P/P0=0.634 bound=1.000 clos=7.7e-05 perc=0.405 xi_u=0.756 occ=0.192
+    t=  4.05 tick=   81 KE/|U|=   0.35 E_tot=-1.31e+05 P/P0=0.132 bound=1.000 clos=4.8e-04 perc=0.460 xi_u=0.965 occ=0.151
+    t=  5.05 tick=  101 KE/|U|=   0.38 E_tot=-1.32e+05 P/P0=0.085 bound=1.000 clos=2.5e-04 perc=0.389 xi_u=1.077 occ=0.144
+    t=  6.05 tick=  121 KE/|U|=   0.42 E_tot=-1.28e+05 P/P0=0.100 bound=1.000 clos=6.2e-04 perc=0.623 xi_u=1.272 occ=0.135
+    t=  7.05 tick=  141 KE/|U|=   0.52 E_tot=-1.12e+05 P/P0=0.073 bound=1.000 clos=1.5e-03 perc=0.775 xi_u=1.527 occ=0.102
+    t=  8.00 tick=  163 KE/|U|=   0.52 E_tot=-1.41e+05 P/P0=0.044 bound=1.000 clos=3.3e-04 perc=0.492 xi_u=1.684 occ=0.090
+    t=  9.01 tick=  188 KE/|U|=   0.54 E_tot= -1.6e+05 P/P0=0.060 bound=1.000 clos=1.4e-03 perc=0.488 xi_u=1.463 occ=0.080
+    t= 10.02 tick=  213 KE/|U|=   0.52 E_tot=-1.63e+05 P/P0=0.060 bound=1.000 clos=6.4e-06 perc=0.412 xi_u=1.414 occ=0.107
+    t= 11.02 tick=  237 KE/|U|=   0.52 E_tot=-1.71e+05 P/P0=0.093 bound=1.000 clos=2.4e-04 perc=0.411 xi_u=1.427 occ=0.099
+    t= 12.01 tick=  261 KE/|U|=   0.53 E_tot=-1.78e+05 P/P0=0.082 bound=1.000 clos=3.1e-04 perc=0.444 xi_u=1.483 occ=0.089
+    t= 13.03 tick=  288 KE/|U|=   0.54 E_tot=-1.88e+05 P/P0=0.057 bound=1.000 clos=4.5e-05 perc=0.467 xi_u=1.471 occ=0.093
+    t= 14.02 tick=  314 KE/|U|=   0.54 E_tot=-1.96e+05 P/P0=0.046 bound=1.000 clos=2.1e-04 perc=0.469 xi_u=1.460 occ=0.094
+    t= 15.01 tick=  340 KE/|U|=   0.54 E_tot=-2.01e+05 P/P0=0.044 bound=1.000 clos=1.8e-04 perc=0.437 xi_u=1.481 occ=0.095
+  wrote results/exp_03_ledger_arms_full_k0.5_s2_20260906_175525.json (+ _pos.npz)  [340 ticks, 89s, finite=True]
+  full_k1_s2: n=4000 box=60.0 pac_kappa=1.0 P0=262885.4375 xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=     76.4 P/P0=1.000 bound=0.000 clos=2.8e-05 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=      522 P/P0=1.000 bound=0.000 clos=1.7e-04 perc=0.058 xi_u=0.694 occ=0.088
+    t=  3.05 tick=   61 KE/|U|=   0.19 E_tot=      938 P/P0=0.638 bound=1.000 clos=4.1e-04 perc=0.577 xi_u=0.753 occ=0.194
+    t=  4.05 tick=   81 KE/|U|=   0.25 E_tot=-1.58e+03 P/P0=0.122 bound=1.000 clos=2.4e-04 perc=0.810 xi_u=0.902 occ=0.162
+    t=  5.05 tick=  101 KE/|U|=   0.26 E_tot=-2.74e+03 P/P0=0.090 bound=1.000 clos=6.9e-05 perc=0.739 xi_u=0.997 occ=0.156
+    t=  6.05 tick=  121 KE/|U|=   0.27 E_tot=-3.25e+03 P/P0=0.114 bound=1.000 clos=1.2e-04 perc=0.690 xi_u=0.959 occ=0.151
+    t=  7.05 tick=  141 KE/|U|=   0.26 E_tot=-3.46e+03 P/P0=0.150 bound=1.000 clos=3.3e-05 perc=0.623 xi_u=0.963 occ=0.144
+    t=  8.05 tick=  161 KE/|U|=   0.28 E_tot=-3.57e+03 P/P0=0.201 bound=1.000 clos=1.9e-05 perc=0.632 xi_u=1.141 occ=0.145
+    t=  9.05 tick=  181 KE/|U|=   0.30 E_tot=-3.75e+03 P/P0=0.201 bound=1.000 clos=1.8e-05 perc=0.466 xi_u=1.192 occ=0.145
+    t= 10.00 tick=  200 KE/|U|=   0.32 E_tot=-4.12e+03 P/P0=0.188 bound=1.000 clos=4.3e-06 perc=0.753 xi_u=1.136 occ=0.148
+    t= 11.00 tick=  220 KE/|U|=   0.34 E_tot=-3.93e+03 P/P0=0.144 bound=1.000 clos=1.9e-04 perc=0.660 xi_u=1.221 occ=0.154
+    t= 12.00 tick=  240 KE/|U|=   0.34 E_tot=-4.55e+03 P/P0=0.111 bound=1.000 clos=1.9e-04 perc=0.686 xi_u=1.406 occ=0.146
+    t= 13.00 tick=  260 KE/|U|=   0.33 E_tot=-5.07e+03 P/P0=0.078 bound=1.000 clos=9.7e-05 perc=0.721 xi_u=1.518 occ=0.142
+    t= 14.00 tick=  280 KE/|U|=   0.33 E_tot=-6.66e+03 P/P0=0.069 bound=1.000 clos=1.0e-05 perc=0.688 xi_u=1.523 occ=0.138
+    t= 15.00 tick=  300 KE/|U|=   0.33 E_tot=-6.23e+03 P/P0=0.075 bound=1.000 clos=1.4e-04 perc=0.696 xi_u=1.572 occ=0.144
+  wrote results/exp_03_ledger_arms_full_k1_s2_20260906_175653.json (+ _pos.npz)  [300 ticks, 87s, finite=True]
+  full_k2_s2: n=4000 box=60.0 pac_kappa=2.0 P0=525770.875 xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot= 2.63e+05 P/P0=1.000 bound=0.000 clos=2.8e-05 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot= 2.63e+05 P/P0=1.000 bound=0.000 clos=1.7e-04 perc=0.058 xi_u=0.694 occ=0.088
+    t=  3.05 tick=   61 KE/|U|=   0.17 E_tot= 2.63e+05 P/P0=0.658 bound=1.000 clos=9.3e-04 perc=0.537 xi_u=0.748 occ=0.195
+    t=  4.05 tick=   81 KE/|U|=   0.18 E_tot= 2.58e+05 P/P0=0.126 bound=1.000 clos=6.2e-04 perc=0.890 xi_u=0.869 occ=0.184
+    t=  5.05 tick=  101 KE/|U|=   0.23 E_tot= 2.58e+05 P/P0=0.277 bound=1.000 clos=7.7e-05 perc=0.604 xi_u=0.834 occ=0.177
+    t=  6.05 tick=  121 KE/|U|=   0.39 E_tot= 2.56e+05 P/P0=0.416 bound=1.000 clos=4.0e-04 perc=0.179 xi_u=0.811 occ=0.177
+    t=  7.05 tick=  141 KE/|U|=   0.42 E_tot= 2.55e+05 P/P0=0.432 bound=1.000 clos=2.4e-05 perc=0.066 xi_u=0.792 occ=0.175
+    t=  8.05 tick=  161 KE/|U|=   0.44 E_tot= 2.54e+05 P/P0=0.394 bound=1.000 clos=2.3e-05 perc=0.119 xi_u=0.743 occ=0.176
+    t=  9.05 tick=  181 KE/|U|=   0.48 E_tot= 2.53e+05 P/P0=0.416 bound=1.000 clos=8.6e-05 perc=0.138 xi_u=0.714 occ=0.182
+    t= 10.00 tick=  200 KE/|U|=   0.54 E_tot= 2.53e+05 P/P0=0.471 bound=1.000 clos=2.0e-04 perc=0.206 xi_u=0.725 occ=0.184
+    t= 11.00 tick=  220 KE/|U|=   0.56 E_tot= 2.52e+05 P/P0=0.503 bound=1.000 clos=5.0e-05 perc=0.146 xi_u=0.685 occ=0.193
+    t= 12.00 tick=  240 KE/|U|=   0.58 E_tot= 2.52e+05 P/P0=0.513 bound=1.000 clos=2.7e-05 perc=0.091 xi_u=0.677 occ=0.189
+    t= 13.00 tick=  260 KE/|U|=   0.60 E_tot= 2.52e+05 P/P0=0.531 bound=1.000 clos=1.5e-04 perc=0.134 xi_u=0.702 occ=0.186
+    t= 14.00 tick=  280 KE/|U|=   0.62 E_tot= 2.51e+05 P/P0=0.537 bound=1.000 clos=3.3e-06 perc=0.125 xi_u=0.674 occ=0.191
+    t= 15.00 tick=  300 KE/|U|=   0.64 E_tot= 2.51e+05 P/P0=0.523 bound=1.000 clos=4.6e-06 perc=0.129 xi_u=0.669 occ=0.191
+  wrote results/exp_03_ledger_arms_full_k2_s2_20260906_175821.json (+ _pos.npz)  [300 ticks, 87s, finite=True]
+  full_kinf_s2: n=4000 box=60.0 pac_kappa=None P0=None xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-2.63e+05 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.500 xi_u=0.603 occ=0.000
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=-2.62e+05 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.058 xi_u=0.694 occ=0.088
+    t=  3.02 tick=   61 KE/|U|=   0.76 E_tot= -7.6e+04 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.110 xi_u=0.695 occ=0.193
+    t=  4.00 tick=  111 KE/|U|=  19.10 E_tot= 5.07e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.098 xi_u=0.668 occ=0.185
+    t=  5.01 tick=  184 KE/|U|=  22.00 E_tot= 5.65e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.049 xi_u=0.607 occ=0.196
+    t=  6.01 tick=  254 KE/|U|=  22.29 E_tot= 5.68e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.018 xi_u=0.592 occ=0.189
+    t=  7.01 tick=  323 KE/|U|=  22.23 E_tot= 5.67e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.039 xi_u=0.597 occ=0.186
+    t=  8.01 tick=  392 KE/|U|=  22.22 E_tot= 5.67e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.027 xi_u=0.610 occ=0.193
+    t=  9.01 tick=  461 KE/|U|=  22.21 E_tot= 5.67e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.032 xi_u=0.587 occ=0.192
+    t= 10.00 tick=  529 KE/|U|=  22.19 E_tot= 5.67e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.039 xi_u=0.591 occ=0.183
+    t= 11.01 tick=  598 KE/|U|=  22.22 E_tot= 5.67e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.049 xi_u=0.602 occ=0.190
+    t= 12.01 tick=  667 KE/|U|=  22.31 E_tot= 5.68e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.032 xi_u=0.592 occ=0.190
+    t= 13.00 tick=  735 KE/|U|=  22.28 E_tot= 5.68e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.036 xi_u=0.592 occ=0.192
+    t= 14.01 tick=  804 KE/|U|=  22.30 E_tot= 5.68e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.035 xi_u=0.578 occ=0.186
+    t= 15.00 tick=  872 KE/|U|=  22.30 E_tot= 5.68e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.025 xi_u=0.586 occ=0.186
+  wrote results/exp_03_ledger_arms_full_kinf_s2_20260906_180052.json (+ _pos.npz)  [872 ticks, 150s, finite=True]
+  full_k0_s3: n=4000 box=60.0 pac_kappa=0.0 P0=0.0 xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-2.63e+05 P/P0=nan bound=0.000 clos=2.8e-05 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=-2.63e+05 P/P0=nan bound=0.000 clos=1.8e-04 perc=0.043 xi_u=0.711 occ=0.085
+    t=  3.05 tick=   61 KE/|U|=   0.22 E_tot= -2.6e+05 P/P0=nan bound=1.000 clos=6.2e-04 perc=0.529 xi_u=0.769 occ=0.187
+    t=  4.05 tick=   81 KE/|U|=   0.47 E_tot=-2.61e+05 P/P0=nan bound=1.000 clos=8.2e-04 perc=0.651 xi_u=1.007 occ=0.148
+    t=  5.05 tick=  101 KE/|U|=   0.55 E_tot=-2.59e+05 P/P0=nan bound=1.000 clos=6.6e-04 perc=0.400 xi_u=1.096 occ=0.122
+    t=  6.05 tick=  121 KE/|U|=   0.72 E_tot=-2.47e+05 P/P0=nan bound=1.000 clos=2.4e-03 perc=0.469 xi_u=1.431 occ=0.111
+    t=  7.01 tick=  144 KE/|U|=   0.79 E_tot=-2.75e+05 P/P0=nan bound=1.000 clos=7.6e-04 perc=0.529 xi_u=1.410 occ=0.095
+    t=  8.03 tick=  168 KE/|U|=   0.78 E_tot=-2.64e+05 P/P0=nan bound=1.000 clos=3.5e-04 perc=0.561 xi_u=1.413 occ=0.114
+    t=  9.03 tick=  195 KE/|U|=   0.85 E_tot=-2.57e+05 P/P0=nan bound=1.000 clos=9.3e-04 perc=0.696 xi_u=1.467 occ=0.092
+    t= 10.01 tick=  226 KE/|U|=   0.84 E_tot=-2.87e+05 P/P0=nan bound=1.000 clos=5.8e-04 perc=0.715 xi_u=1.431 occ=0.091
+    t= 11.02 tick=  256 KE/|U|=   0.82 E_tot=-2.82e+05 P/P0=nan bound=1.000 clos=4.8e-04 perc=0.550 xi_u=1.367 occ=0.098
+    t= 12.00 tick=  285 KE/|U|=   0.83 E_tot=-2.81e+05 P/P0=nan bound=1.000 clos=2.0e-04 perc=0.572 xi_u=1.306 occ=0.095
+    t= 13.03 tick=  316 KE/|U|=   0.84 E_tot=-2.84e+05 P/P0=nan bound=1.000 clos=4.7e-04 perc=0.599 xi_u=1.344 occ=0.095
+    t= 14.01 tick=  346 KE/|U|=   0.83 E_tot= -2.9e+05 P/P0=nan bound=1.000 clos=6.6e-04 perc=0.606 xi_u=1.350 occ=0.094
+    t= 15.02 tick=  376 KE/|U|=   0.82 E_tot=-2.91e+05 P/P0=nan bound=1.000 clos=5.3e-04 perc=0.593 xi_u=1.426 occ=0.092
+  wrote results/exp_03_ledger_arms_full_k0_s3_20260906_180226.json (+ _pos.npz)  [376 ticks, 92s, finite=True]
+  full_k0.5_s3: n=4000 box=60.0 pac_kappa=0.5 P0=131768.515625 xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-1.32e+05 P/P0=1.000 bound=0.000 clos=2.8e-05 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=-1.31e+05 P/P0=1.000 bound=0.000 clos=1.8e-04 perc=0.043 xi_u=0.711 occ=0.085
+    t=  3.05 tick=   61 KE/|U|=   0.21 E_tot= -1.3e+05 P/P0=0.597 bound=1.000 clos=3.9e-05 perc=0.523 xi_u=0.760 occ=0.188
+    t=  4.05 tick=   81 KE/|U|=   0.34 E_tot=-1.32e+05 P/P0=0.108 bound=1.000 clos=6.6e-04 perc=0.928 xi_u=0.921 occ=0.163
+    t=  5.05 tick=  101 KE/|U|=   0.36 E_tot=-1.32e+05 P/P0=0.099 bound=1.000 clos=1.5e-04 perc=0.629 xi_u=0.970 occ=0.148
+    t=  6.05 tick=  121 KE/|U|=   0.40 E_tot= -1.3e+05 P/P0=0.116 bound=1.000 clos=6.5e-04 perc=0.601 xi_u=1.083 occ=0.131
+    t=  7.05 tick=  141 KE/|U|=   0.50 E_tot=-1.21e+05 P/P0=0.099 bound=1.000 clos=7.5e-04 perc=0.570 xi_u=1.709 occ=0.099
+    t=  8.04 tick=  163 KE/|U|=   0.51 E_tot=-1.39e+05 P/P0=0.066 bound=1.000 clos=7.4e-05 perc=0.683 xi_u=1.748 occ=0.096
+    t=  9.02 tick=  185 KE/|U|=   0.52 E_tot=-1.49e+05 P/P0=0.064 bound=1.000 clos=1.6e-03 perc=0.713 xi_u=1.540 occ=0.100
+    t= 10.03 tick=  207 KE/|U|=   0.51 E_tot=-1.49e+05 P/P0=0.052 bound=1.000 clos=4.8e-04 perc=0.726 xi_u=1.689 occ=0.107
+    t= 11.04 tick=  230 KE/|U|=   0.52 E_tot=-1.59e+05 P/P0=0.062 bound=1.000 clos=5.7e-05 perc=0.808 xi_u=1.603 occ=0.094
+    t= 12.02 tick=  254 KE/|U|=   0.53 E_tot=-1.71e+05 P/P0=0.056 bound=1.000 clos=2.3e-04 perc=0.828 xi_u=1.633 occ=0.081
+    t= 13.01 tick=  279 KE/|U|=   0.53 E_tot=-1.79e+05 P/P0=0.047 bound=1.000 clos=8.5e-04 perc=0.740 xi_u=1.557 occ=0.099
+    t= 14.04 tick=  304 KE/|U|=   0.52 E_tot= -1.8e+05 P/P0=0.057 bound=1.000 clos=6.6e-05 perc=0.790 xi_u=1.529 occ=0.102
+    t= 15.01 tick=  328 KE/|U|=   0.53 E_tot=-1.88e+05 P/P0=0.051 bound=1.000 clos=2.2e-04 perc=0.832 xi_u=1.583 occ=0.094
+  wrote results/exp_03_ledger_arms_full_k0.5_s3_20260906_180340.json (+ _pos.npz)  [328 ticks, 73s, finite=True]
+  full_k1_s3: n=4000 box=60.0 pac_kappa=1.0 P0=263537.03125 xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=     77.7 P/P0=1.000 bound=0.000 clos=2.8e-05 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=      532 P/P0=1.000 bound=0.000 clos=1.8e-04 perc=0.043 xi_u=0.711 occ=0.085
+    t=  3.05 tick=   61 KE/|U|=   0.19 E_tot=      883 P/P0=0.606 bound=1.000 clos=4.0e-04 perc=0.449 xi_u=0.756 occ=0.190
+    t=  4.05 tick=   81 KE/|U|=   0.25 E_tot=-1.55e+03 P/P0=0.086 bound=1.000 clos=2.3e-04 perc=0.836 xi_u=0.856 occ=0.168
+    t=  5.05 tick=  101 KE/|U|=   0.26 E_tot=-2.87e+03 P/P0=0.089 bound=1.000 clos=1.5e-05 perc=0.774 xi_u=0.982 occ=0.156
+    t=  6.05 tick=  121 KE/|U|=   0.26 E_tot=-3.35e+03 P/P0=0.118 bound=1.000 clos=1.8e-05 perc=0.672 xi_u=1.005 occ=0.151
+    t=  7.05 tick=  141 KE/|U|=   0.26 E_tot=-3.66e+03 P/P0=0.153 bound=1.000 clos=3.3e-05 perc=0.596 xi_u=1.066 occ=0.146
+    t=  8.05 tick=  161 KE/|U|=   0.27 E_tot=-3.67e+03 P/P0=0.179 bound=1.000 clos=6.8e-05 perc=0.670 xi_u=1.150 occ=0.153
+    t=  9.05 tick=  181 KE/|U|=   0.29 E_tot=-3.86e+03 P/P0=0.187 bound=1.000 clos=4.0e-06 perc=0.706 xi_u=1.171 occ=0.154
+    t= 10.00 tick=  200 KE/|U|=   0.30 E_tot=-4.06e+03 P/P0=0.170 bound=1.000 clos=3.4e-05 perc=0.675 xi_u=1.105 occ=0.161
+    t= 11.00 tick=  220 KE/|U|=   0.32 E_tot= -4.2e+03 P/P0=0.144 bound=1.000 clos=5.9e-05 perc=0.829 xi_u=0.991 occ=0.155
+    t= 12.00 tick=  240 KE/|U|=   0.33 E_tot=-4.52e+03 P/P0=0.130 bound=1.000 clos=1.7e-04 perc=0.803 xi_u=0.944 occ=0.155
+    t= 13.00 tick=  260 KE/|U|=   0.34 E_tot=-6.09e+03 P/P0=0.126 bound=1.000 clos=6.8e-05 perc=0.809 xi_u=1.291 occ=0.157
+    t= 14.00 tick=  280 KE/|U|=   0.35 E_tot=-6.11e+03 P/P0=0.118 bound=1.000 clos=5.8e-05 perc=0.848 xi_u=1.306 occ=0.154
+    t= 15.00 tick=  300 KE/|U|=   0.36 E_tot=-6.51e+03 P/P0=0.106 bound=1.000 clos=1.9e-05 perc=0.836 xi_u=1.249 occ=0.150
+  wrote results/exp_03_ledger_arms_full_k1_s3_20260906_180450.json (+ _pos.npz)  [300 ticks, 69s, finite=True]
+  full_k2_s3: n=4000 box=60.0 pac_kappa=2.0 P0=527074.0625 xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot= 2.64e+05 P/P0=1.000 bound=0.000 clos=2.8e-05 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot= 2.64e+05 P/P0=1.000 bound=0.000 clos=1.8e-04 perc=0.043 xi_u=0.711 occ=0.085
+    t=  3.05 tick=   61 KE/|U|=   0.17 E_tot= 2.63e+05 P/P0=0.628 bound=1.000 clos=6.4e-04 perc=0.541 xi_u=0.756 occ=0.192
+    t=  4.05 tick=   81 KE/|U|=   0.18 E_tot= 2.59e+05 P/P0=0.112 bound=1.000 clos=2.4e-04 perc=0.785 xi_u=0.878 occ=0.184
+    t=  5.05 tick=  101 KE/|U|=   0.23 E_tot= 2.59e+05 P/P0=0.262 bound=1.000 clos=1.1e-04 perc=0.609 xi_u=0.895 occ=0.181
+    t=  6.05 tick=  121 KE/|U|=   0.40 E_tot= 2.57e+05 P/P0=0.435 bound=1.000 clos=3.8e-04 perc=0.083 xi_u=0.775 occ=0.180
+    t=  7.05 tick=  141 KE/|U|=   0.42 E_tot= 2.55e+05 P/P0=0.429 bound=1.000 clos=3.1e-04 perc=0.085 xi_u=0.835 occ=0.177
+    t=  8.05 tick=  161 KE/|U|=   0.43 E_tot= 2.55e+05 P/P0=0.361 bound=1.000 clos=1.4e-04 perc=0.195 xi_u=0.779 occ=0.184
+    t=  9.05 tick=  181 KE/|U|=   0.51 E_tot= 2.54e+05 P/P0=0.420 bound=1.000 clos=1.9e-04 perc=0.088 xi_u=0.727 occ=0.184
+    t= 10.00 tick=  200 KE/|U|=   0.54 E_tot= 2.53e+05 P/P0=0.511 bound=1.000 clos=6.1e-05 perc=0.102 xi_u=0.709 occ=0.192
+    t= 11.00 tick=  220 KE/|U|=   0.55 E_tot= 2.53e+05 P/P0=0.532 bound=1.000 clos=1.0e-04 perc=0.042 xi_u=0.693 occ=0.186
+    t= 12.00 tick=  240 KE/|U|=   0.57 E_tot= 2.53e+05 P/P0=0.513 bound=1.000 clos=7.4e-05 perc=0.069 xi_u=0.670 occ=0.188
+    t= 13.00 tick=  260 KE/|U|=   0.59 E_tot= 2.52e+05 P/P0=0.500 bound=1.000 clos=1.2e-04 perc=0.090 xi_u=0.693 occ=0.189
+    t= 14.00 tick=  280 KE/|U|=   0.61 E_tot= 2.52e+05 P/P0=0.458 bound=1.000 clos=9.5e-05 perc=0.232 xi_u=0.710 occ=0.193
+    t= 15.00 tick=  300 KE/|U|=   0.64 E_tot= 2.52e+05 P/P0=0.426 bound=1.000 clos=6.5e-05 perc=0.094 xi_u=0.689 occ=0.200
+  wrote results/exp_03_ledger_arms_full_k2_s3_20260906_180555.json (+ _pos.npz)  [300 ticks, 64s, finite=True]
+  full_kinf_s3: n=4000 box=60.0 pac_kappa=None P0=None xi_variant=XI_ANALYTIC commit=68f324c
+    t=  1.00 tick=   20 KE/|U|=   0.00 E_tot=-2.63e+05 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.333 xi_u=0.599 occ=0.001
+    t=  2.00 tick=   40 KE/|U|=   0.04 E_tot=-2.63e+05 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.043 xi_u=0.711 occ=0.085
+    t=  3.01 tick=   61 KE/|U|=   0.78 E_tot=-6.87e+04 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.208 xi_u=0.680 occ=0.188
+    t=  4.00 tick=  111 KE/|U|=  17.75 E_tot= 4.66e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.048 xi_u=0.687 occ=0.183
+    t=  5.01 tick=  181 KE/|U|=  19.82 E_tot= 5.07e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.026 xi_u=0.612 occ=0.191
+    t=  6.01 tick=  249 KE/|U|=  20.05 E_tot= 5.09e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.023 xi_u=0.594 occ=0.190
+    t=  7.01 tick=  316 KE/|U|=  20.01 E_tot= 5.08e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.036 xi_u=0.610 occ=0.188
+    t=  8.01 tick=  382 KE/|U|=  19.98 E_tot= 5.08e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.039 xi_u=0.596 occ=0.189
+    t=  9.00 tick=  448 KE/|U|=  19.97 E_tot= 5.08e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.042 xi_u=0.604 occ=0.191
+    t= 10.01 tick=  515 KE/|U|=  19.96 E_tot= 5.08e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.023 xi_u=0.595 occ=0.195
+    t= 11.00 tick=  581 KE/|U|=  19.99 E_tot= 5.08e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.028 xi_u=0.596 occ=0.189
+    t= 12.01 tick=  648 KE/|U|=  20.02 E_tot= 5.09e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.022 xi_u=0.588 occ=0.189
+    t= 13.01 tick=  714 KE/|U|=  19.99 E_tot= 5.09e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.025 xi_u=0.599 occ=0.188
+    t= 14.01 tick=  780 KE/|U|=  19.99 E_tot= 5.09e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.040 xi_u=0.583 occ=0.194
+    t= 15.00 tick=  846 KE/|U|=  20.01 E_tot= 5.09e+06 P/P0=nan bound=0.000 clos=0.0e+00 perc=0.030 xi_u=0.599 occ=0.186
+  wrote results/exp_03_ledger_arms_full_kinf_s3_20260906_180750.json (+ _pos.npz)  [846 ticks, 113s, finite=True]
+  15 runs -> results/exp_03_ledger_arms_grid_full_20260906_180751.json; floors: full: perc 0.047±0.013
+   full k= inf s=1 perc=0.035 (peak 0.200) xi_u=0.594 occ=0.190 KE/|U|= 18.47 E_tot= 4.65e+06 P/P0_end=nan exh_t=None Wp/P0=nan clos=0.0e+00 at_cap=0.010
+   full k=   0 s=1 perc=0.395 (peak 0.598) xi_u=1.399 occ=0.089 KE/|U|=  0.83 E_tot=-2.96e+05 P/P0_end=nan exh_t=None Wp/P0=nan clos=3.1e-03 at_cap=0.002
+   full k= 0.5 s=1 perc=0.622 (peak 0.768) xi_u=1.603 occ=0.093 KE/|U|=  0.52 E_tot=-1.61e+05 P/P0_end=0.036 exh_t=None Wp/P0=-4.268 clos=9.9e-04 at_cap=0.004
+   full k=   1 s=1 perc=0.764 (peak 0.866) xi_u=1.198 occ=0.157 KE/|U|=  0.32 E_tot=-4.59e+03 P/P0_end=0.101 exh_t=None Wp/P0=-0.585 clos=4.7e-04 at_cap=0.000
+   full k=   2 s=1 perc=0.087 (peak 0.607) xi_u=0.693 occ=0.189 KE/|U|=  0.58 E_tot= 2.51e+05 P/P0_end=0.417 exh_t=None Wp/P0=0.282 clos=7.1e-04 at_cap=0.000
+   full k= inf s=2 perc=0.038 (peak 0.500) xi_u=0.591 occ=0.188 KE/|U|= 22.26 E_tot= 5.68e+06 P/P0_end=nan exh_t=None Wp/P0=nan clos=0.0e+00 at_cap=0.010
+   full k=   0 s=2 perc=0.315 (peak 0.651) xi_u=1.407 occ=0.092 KE/|U|=  0.81 E_tot=-3.09e+05 P/P0_end=nan exh_t=None Wp/P0=nan clos=2.0e-03 at_cap=0.003
+   full k= 0.5 s=2 perc=0.441 (peak 0.775) xi_u=1.451 occ=0.096 KE/|U|=  0.53 E_tot=-1.79e+05 P/P0_end=0.044 exh_t=None Wp/P0=-4.265 clos=1.5e-03 at_cap=0.003
+   full k=   1 s=2 perc=0.701 (peak 0.810) xi_u=1.396 occ=0.145 KE/|U|=  0.33 E_tot=-5.09e+03 P/P0_end=0.075 exh_t=None Wp/P0=-1.449 clos=4.1e-04 at_cap=0.000
+   full k=   2 s=2 perc=0.139 (peak 0.890) xi_u=0.689 occ=0.189 KE/|U|=  0.59 E_tot= 2.52e+05 P/P0_end=0.523 exh_t=None Wp/P0=0.297 clos=9.3e-04 at_cap=0.000
+   full k= inf s=3 perc=0.028 (peak 0.333) xi_u=0.592 occ=0.191 KE/|U|= 19.99 E_tot= 5.09e+06 P/P0_end=nan exh_t=None Wp/P0=nan clos=0.0e+00 at_cap=0.010
+   full k=   0 s=3 perc=0.608 (peak 0.715) xi_u=1.360 occ=0.094 KE/|U|=  0.83 E_tot=-2.85e+05 P/P0_end=nan exh_t=None Wp/P0=nan clos=2.4e-03 at_cap=0.002
+   full k= 0.5 s=3 perc=0.778 (peak 0.928) xi_u=1.602 occ=0.097 KE/|U|=  0.52 E_tot=-1.68e+05 P/P0_end=0.051 exh_t=None Wp/P0=-4.174 clos=1.6e-03 at_cap=0.004
+   full k=   1 s=3 perc=0.800 (peak 0.848) xi_u=1.148 occ=0.155 KE/|U|=  0.33 E_tot=-5.25e+03 P/P0_end=0.106 exh_t=None Wp/P0=-0.757 clos=4.0e-04 at_cap=0.000
+   full k=   2 s=3 perc=0.105 (peak 0.785) xi_u=0.694 occ=0.191 KE/|U|=  0.58 E_tot= 2.53e+05 P/P0_end=0.426 exh_t=None Wp/P0=0.291 clos=6.4e-04 at_cap=0.000
+phase full done

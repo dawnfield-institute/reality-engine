@@ -1,0 +1,50 @@
+schema_version: '2.1'
+directory_name: poc_12_pac_ledger
+title: 'POC-12 (v4): The ledger on particles — a PAC potential budget for the SEC pressure'
+description: >
+  POC-11 showed the particle substrate cannot hold structure because its SEC pressure is a
+  source: entropy grows where pairs are close and the pair energy is large, decays after
+  dispersal where it is small, and the energy created in between is never paid for. This POC
+  makes the pair energy exact (a shifted kernel with the same force), gives every particle a
+  potential budget that pays for entropy growth at the price the pair energy sets and is repaid
+  on decay, and reports the conserved total KE + U + E_SEC + sum P every tick. It runs the arms
+  that dawn-field-theory Milestone R exp_29 scores: kappa in {0, 0.5, 1, 2, inf}, three seeds,
+  proxy and n = 4000.
+status: completed
+era: era4-milestone-stack-2026q2
+pillar: PAC
+hypothesis: >
+  With the entropy engine bounded by a potential budget of half the initial binding energy, the
+  substrate holds structure (whole-set percolation above both the unbounded engine and gravity
+  alone), settles bound (KE/|U| < 1), and the ordering in kappa is the one virial arithmetic
+  predicts.
+falsification: >
+  Registered in dawn-field-theory milestone-r/journals (exp_29): if the substrate cannot hold
+  at kappa = 0.5, PAC-on-particles as mapped here is the wrong object and the mapping dies (the
+  theory does not). Instrument falsification: a transfer residual above 1e-6 or a total-ledger
+  closure exceeding the Courant bound with the guard unbound.
+validation_type: computational
+result: >
+  3/4 at both sizes against the sealed thresholds (dawn-field-theory 43e4ebc9), 2026-09-06, and
+  the registered kill fires by the letter. The ledger works: with a budget of half the binding
+  energy the substrate settles bound (KE/|U_grav| 0.49-0.54 vs 10.7-22.3 unbounded), the total is
+  conserved, the transfer exact, the budget binds, and the web survives (percolation 0.51-0.76
+  proxy / 0.44-0.78 at n = 4000 vs 0.03-0.10 unbounded, 4.8-5.7 sigma). Against gravity alone the
+  registered arm (kappa = 0.5) wins 2/3 on the proxy (0.2 sigma) and 3/3 at n = 4000 by 1.1 sigma
+  against a 2-sigma bar: T1 FAIL, the mapping retired as the object that holds structure beyond
+  gravity at kappa = 0.5 with the proxy deciding. Unscored, post hoc: at n = 4000 kappa = 1 holds
+  0.70-0.80, above gravity in every seed by 2.8 sigma, and kappa = 2 collapses; on the proxy,
+  whose pressure range exceeds half its box, the engine never adds. The virial prediction held in
+  all six seeds. Next: R1b, kappa = 1 at n = 4000 on fresh seeds with the box-to-range ratio
+  declared; the pressure's form stays a candidate behind it.
+notes: >
+  Design pass 2026-09-06 (proxy seed 1, read-only): at fixed entropy the pressure is already a
+  gradient; the pair energy created by entropy change (689,700) accounts for the pressure work
+  (667,300); E_SEC peaks at 1.46e6 at t ~ 4.5 and converts to kinetic energy as the clump
+  expands. Built on POC-11's ledger and severance (branch stacked on feat/v4-derived-sink).
+tags:
+  - pac-ledger
+  - potential-budget
+  - energy-ledger
+  - milestone-r
+  - v4

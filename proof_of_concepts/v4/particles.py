@@ -93,6 +93,14 @@ class ParticleState:
     sev_time: Optional[torch.Tensor] = None       # (N,) sim_time at severance, nan if retained
     d_entropy: Optional[torch.Tensor] = None      # (N,) S_new - S_old this tick (0 for severed)
 
+    # --- the PAC ledger (spec v4-pac-ledger): a potential budget that pays for entropy ------------
+    # P_i is what particle i may still spend creating SEC pair energy. Entropy growth debits it at
+    # the price the pair energy sets (dE_SEC/dS_i); decay repays it. None == no ledger (the old
+    # path, bit-identical). budget0 is sum P at t = 0, a declared fraction kappa of |U_grav(0)|.
+    budget: Optional[torch.Tensor] = None         # (N,)
+    budget0: Optional[float] = None
+    sec_dEdS: Optional[torch.Tensor] = None       # (N,) dE_SEC/dS_i at this tick's positions
+
     @property
     def n(self) -> int:
         return self.pos.shape[0]
@@ -185,6 +193,10 @@ class ParticleConfig:
     sev_schedule: Optional[list] = None   # random mode: [(sim_time, count), ...], replayed by time
     # --- Landauer erasure (LandauerErasure; inert unless True) ------------------------------
     landauer: bool = False
+    # The PAC ledger (spec v4-pac-ledger R4): sum P(0) = pac_kappa * |U_grav(0)|, spread per unit
+    # mass. A declared RATIO of the initial binding energy, never a coordinate; swept, not fitted.
+    # None = no ledger (inert, bit-identical); 0 = entropy cannot grow (gravity only).
+    pac_kappa: Optional[float] = None
     seed: int = 42
     # The tick at which `damping`, `memory_decay` and the SEC growth coefficient are STATED.
     # They are applied as rates -- x ** (dt_eff / dt_ref) -- which is bit-identical at
@@ -410,6 +422,29 @@ class LocalGravity:
                          potential_i=potential_i, metrics=m)
 
 
+def sec_pair_energy(s: ParticleState, c: ParticleConfig, a: float = 1.0):
+    """The SEC pair energy whose gradient IS the pressure, and its derivative in each entropy.
+
+        K_ij = sec_balance * r0 * (exp(-r/r0) - exp(-2))   on r < 2 r0 (retained pairs), else 0
+        E_SEC = 1/2 sum_{i != j} (S_i + S_j)/2 * K_ij        dE_SEC/dS_i = 1/2 sum_j K_ij
+
+    -dK/dr = sec_balance * exp(-r/r0) is exactly SECPressure's magnitude, so the force is the
+    gradient of this energy at fixed entropy (spec v4-pac-ledger R1, tested by finite difference).
+    The shift by exp(-2) makes K vanish at the cutoff, which the force never sees but the energy
+    ledger does. The design pass of 2026-09-06 measured that the pair energy CREATED by entropy
+    change over a baseline run (689,700) accounts for the pressure work (667,300): the entropy
+    ratchet is the whole engine, and dE_SEC/dS_i is the price the budget pays for growth.
+    """
+    r, _, _ = pairwise(s, a)
+    n = r.shape[0]
+    within = (r < 2.0 * c.r0) & s.pair_alive() & ~torch.eye(n, dtype=torch.bool, device=r.device)
+    K = torch.where(within, c.sec_balance * c.r0 * (torch.exp(-r / c.r0) - math.exp(-2.0)), torch.zeros_like(r))
+    dEdS = 0.5 * K.sum(dim=1)
+    s_pair = 0.5 * (s.entropy.unsqueeze(1) + s.entropy.unsqueeze(0))
+    E = 0.5 * (s_pair * K).double().sum().item()
+    return E, dEdS
+
+
 class SECPressure:
     """Entropy pressure — the counter-force that opens voids.
 
@@ -443,6 +478,8 @@ class SECPressure:
         press = (mag.unsqueeze(-1) * unit).sum(dim=1)
         m = dict(s.metrics)
         m["sec_pressure_mean"] = press.norm(dim=-1).mean().item()
+        if c.pac_kappa is not None:          # the ledger reads the energy this force is the gradient of
+            m["sec_energy_int"], _ = sec_pair_energy(s, c, a)
         acc = press / s.mass.unsqueeze(-1)
         return s.replace(acc=acc if s.acc is None else s.acc + acc, acc_pressure=acc, metrics=m)
 
@@ -493,10 +530,36 @@ class SECUpdate:
                + torch.where(dense, growth, torch.zeros_like(growth)))
         ent = torch.where(alive, ent, s.entropy)                 # a severed particle's entropy is frozen
         m = dict(s.metrics)
+        budget, dEdS = s.budget, None
+        if c.pac_kappa is not None:
+            # --- the PAC ledger (spec v4-pac-ledger R2): growth is paid for at the price the pair
+            #     energy sets, decay is repaid, and a particle that cannot pay does not grow. ------
+            if budget is None:
+                raise ValueError("pac_kappa is set but state.budget is None: build the state through ParticleEngine")
+            _, dEdS = sec_pair_energy(s, c, a)                   # at THIS tick's positions, before the kick
+            dS = ent - s.entropy                                 # the net proposed change
+            cost = dEdS * dS                                     # > 0: growth to pay for; < 0: decay to repay
+            would = alive & (cost > 0)
+            clipped = would & (cost > budget)
+            dS_ok = torch.where(clipped, budget / dEdS.clamp(min=1e-30), dS)
+            dS_ok = torch.where(alive, dS_ok, torch.zeros_like(dS_ok))
+            ent = s.entropy + dS_ok
+            paid = dEdS * dS_ok
+            new_budget = torch.where(alive, budget - paid, budget)
+            transfer = paid[alive].double().sum().item()
+            b_prev = budget[alive].double().sum().item(); b_int = new_budget[alive].double().sum().item()
+            p0 = s.budget0 if s.budget0 else 0.0
+            m["budget_int"] = b_int
+            m["budget_frac"] = (b_int / p0) if p0 > 0 else float("nan")
+            m["budget_bound_frac"] = clipped.double().sum().item() / max(would.double().sum().item(), 1.0)
+            m["sec_transfer"] = transfer
+            m["sec_transfer_cum"] = float(s.metrics.get("sec_transfer_cum", 0.0)) + transfer
+            m["transfer_residual"] = abs(transfer + (b_int - b_prev)) / max(p0, 1.0)
+            budget = new_budget
         m["entropy_mean"] = ent[alive].mean().item() if bool(alive.any()) else 0.0
         m["entropy_max"] = ent[alive].max().item() if bool(alive.any()) else 0.0
         m["dense_fraction"] = dense.float().sum().item() / max(int(alive.sum().item()), 1)
-        return s.replace(entropy=ent, d_entropy=ent - s.entropy, metrics=m)
+        return s.replace(entropy=ent, d_entropy=ent - s.entropy, budget=budget, sec_dEdS=dEdS, metrics=m)
 
 
 class SECUpdateRelative:
@@ -923,6 +986,15 @@ class PACLedger:
                               else float(s.metrics.get("potential_int", 0.0)))
         m["total_int"] = m["kinetic_int"] + m["potential_int"]
         m["e_int"] = m["total_int"] / max(m["n_alive"], 1)
+        if s.budget is not None:
+            # the PAC ledger's conserved total (spec v4-pac-ledger R3): kinetic + gravitational +
+            # SEC pair energy + what is still in the budget. Conserved to the integrator's
+            # truncation; the transfer part is exact and audited in SECUpdate.
+            m["budget_int"] = s.budget[alive].double().sum().item()
+            m["total_pac"] = m["kinetic_int"] + m["potential_int"] + float(m.get("sec_energy_int", 0.0)) + m["budget_int"]
+            prev_tp = s.metrics.get("total_pac")
+            m["closure_pac"] = (abs(m["total_pac"] - prev_tp) / max(abs(m["potential_int"]), 1.0)
+                                if prev_tp is not None else 0.0)
         # closure: this tick's kinetic change must be exactly the work minus the losses.
         # A sign or partition error anywhere upstream shows up here as O(1), not as drift.
         if ke_prev is not None:
@@ -978,13 +1050,15 @@ class ParticleEngine:
         self.config = config or ParticleConfig()
         self.pipeline = [op() for op in (pipeline or CANONICAL)]
         self.device = device or torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.budget0: Optional[float] = None      # sum P(0) when the PAC ledger is on; None otherwise
         self.state = self._init()
         self.tick_count = 0
         # Running record of every numerical bound, so a run can be read for "did anything
         # bind" without re-running it. Written every tick from state.metrics.
         self.bounds = {"at_cap_frac_max": 0.0, "ticks_at_cap_gt_1pct": 0,
                        "first_tick_at_cap_gt_1pct": None, "ticks_at_dt_floor": 0,
-                       "dt_eff_min": None}
+                       "dt_eff_min": None,
+                       "budget_bound_frac_max": 0.0, "budget_exhausted_tick": None}
         self._warned_cap = False
         # Severance event log: one entry per tick on which something left the ledger. The
         # selection control replays it (sev_mode="random", sev_schedule=[(sim_time, count)]).
@@ -1007,7 +1081,7 @@ class ParticleEngine:
         else:
             pos = (pos + torch.randn_like(pos) * sp * 0.1) % c.box
             vel = torch.zeros_like(pos)
-        return ParticleState(
+        st = ParticleState(
             pos=pos,
             vel=vel,
             mass=1.0 + 0.1 * torch.randn(c.n, device=self.device),
@@ -1015,6 +1089,14 @@ class ParticleEngine:
                      if c.entropy_init else torch.zeros(c.n, device=self.device)),
             box=c.box,
         )
+        if c.pac_kappa is not None:
+            # spec v4-pac-ledger R4: sum P(0) = kappa * |U_grav(0)| from the SAME kernel and table
+            # the force uses, spread per unit mass. A ratio of the initial binding energy.
+            u0 = float(LocalGravity()(st, c).metrics["potential_int"])
+            p0 = float(c.pac_kappa) * abs(u0)
+            self.budget0 = p0
+            st = st.replace(budget=p0 * st.mass / st.mass.sum(), budget0=p0)
+        return st
 
     def tick(self) -> ParticleState:
         s = self.state
@@ -1033,10 +1115,16 @@ class ParticleEngine:
         return s
 
     def _record_bounds(self, s: ParticleState) -> None:
+        b = self.bounds
+        bb = s.metrics.get("budget_bound_frac")
+        if bb is not None:                        # the ledger's bound, reported the tick it binds
+            b["budget_bound_frac_max"] = max(b["budget_bound_frac_max"], bb)
+            bf = s.metrics.get("budget_frac")
+            if bf is not None and bf == bf and bf < 0.01 and b["budget_exhausted_tick"] is None:
+                b["budget_exhausted_tick"] = self.tick_count
         frac = s.metrics.get("at_cap_frac")
         if frac is None:
             return
-        b = self.bounds
         b["at_cap_frac_max"] = max(b["at_cap_frac_max"], frac)
         if s.metrics.get("dt_at_floor"):
             b["ticks_at_dt_floor"] += 1
