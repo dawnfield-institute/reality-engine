@@ -547,6 +547,22 @@ budget `P_i(0) = κ|U_grav(0)| m_i/Σm` pays for entropy growth at the price the
 repaid on decay, and `KE + U + E_SEC + ΣP` is conserved. κ = 0 is gravity-only, κ = ∞ is this
 substrate; the sweep {0.5, 1, 2} brackets the virial threshold (bound below ~½ by arithmetic).
 
+**Update 2026-09-06 (night) — the ledger lands; the pressure's form is next (exp_29, 3/4, sealed
+`43e4ebc9`).** With the budget on, the substrate is bound (KE/|U_grav| 0.49–0.53 at κ = 0.5 vs
+10.7–18.3 unbounded), the total is conserved to truncation, the transfer is exact, and the web
+survives (percolation 0.51–0.76 vs 0.06–0.10, 5.7 σ) — the relaxation oscillator is gone. But the
+web is gravity's: gravity alone holds 0.43–0.82 on the same seeds, and percolation falls
+monotonically with κ (0.51–0.76 → 0.40–0.53 → 0.15–0.28 → 0.06–0.10). The registered kill fires: the
+mapping "budget priced by exp_09's pair energy" is retired as *the object that holds structure*.
+**What this says about option 2:** a repulsion proportional to entropy, with entropy sourced by
+density, fires where matter has gathered and pushes it apart; no budget makes it add structure.
+The derived form to try is the SEC functional's smoothing term `β∇²A` (`fracton/field/
+sec_evolution.py`) as a pair force that penalises entropy *gradients* rather than entropy
+*magnitude* — a force that holds filaments — priced by the same ledger. The ledger itself
+(`pac_kappa`, `sec_pair_energy`, the transfer, the conserved total) stays as a gated instrument,
+bit-identical to the old path when off. Journal:
+`proof_of_concepts/v4/poc_12_pac_ledger/journals/2026-09-06_the-ledger-holds-the-web-and-the-web-is-gravitys.md`.
+
 ---
 
 ### C4.2: Per-particle timesteps in the force kick (design B)

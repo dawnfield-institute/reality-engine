@@ -1,6 +1,24 @@
 # POC-12 (v4): The ledger on particles
 
-**Status**: active · **Pillar**: PAC / SEC · **Registered in**: dawn-field-theory Milestone R exp_29 · **Spec**: `.spec/v4-pac-ledger.spec.md`
+**Status**: completed 2026-09-06 · **Pillar**: PAC / SEC · **Registered in**: dawn-field-theory Milestone R exp_29 (sealed `43e4ebc9`) · **Spec**: `.spec/v4-pac-ledger.spec.md` · **Result**: 3/4 — the ledger holds the web, and the web is gravity's
+
+## Result
+
+The ledger works and the pressure builds nothing. With a budget of half the binding energy the
+substrate settles **bound** (KE/|U_grav| 0.49–0.53, against 10.7–18.3 unbounded), the total
+`KE + U + E_SEC + ΣP` is conserved, the transfer is exact, the budget binds on every particle that
+would grow, and the web survives: whole-set percolation 0.51–0.76 over t ∈ [10, 15] where the
+unbounded engine holds 0.06–0.10 (5.7 σ). But gravity alone holds 0.43–0.82 on the same seeds; the
+ledgered arm beats it in two seeds of three by a margin a fifth of the spread. T1 fails against
+that control and the registered kill fires: the mapping "budget priced by exp_09's pair energy"
+is retired as the object that holds structure. Percolation falls monotonically with κ
+(0.5 → 1 → 2 → ∞: 0.51–0.76 → 0.40–0.53 → 0.15–0.28 → 0.06–0.10): an entropy-driven repulsion
+sourced by density can only take structure away, bounded or not. The virial arithmetic stated
+before the run held in all three seeds. What survives is the ledger discipline as a gated
+instrument; what is next is the pressure's **form** (the SEC functional's gradient-penalising
+term), C4.1 option 2 proper. Journal:
+`journals/2026-09-06_the-ledger-holds-the-web-and-the-web-is-gravitys.md`; scoring and outcomes in
+dawn-field-theory `milestone-r/journals/2026-09-06_exp29_outcomes.md`.
 
 ## Why
 

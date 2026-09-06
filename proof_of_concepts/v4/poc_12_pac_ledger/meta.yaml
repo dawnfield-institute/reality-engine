@@ -10,7 +10,7 @@ description: >
   on decay, and reports the conserved total KE + U + E_SEC + sum P every tick. It runs the arms
   that dawn-field-theory Milestone R exp_29 scores: kappa in {0, 0.5, 1, 2, inf}, three seeds,
   proxy and n = 4000.
-status: active
+status: completed
 era: era4-milestone-stack-2026q2
 pillar: PAC
 hypothesis: >
@@ -25,7 +25,17 @@ falsification: >
   closure exceeding the Courant bound with the guard unbound.
 validation_type: computational
 result: >
-  PENDING — registered, not run.
+  3/4 against the sealed thresholds (dawn-field-theory 43e4ebc9), 2026-09-06, and the registered
+  kill fires by the letter. The ledger works: with a budget of half the binding energy the
+  substrate settles bound (KE/|U_grav| 0.49-0.53 vs 10.7-18.3 unbounded), the total is conserved,
+  the transfer exact, the budget binds, and the web survives (percolation 0.51-0.76 vs 0.06-0.10
+  unbounded, 5.7 sigma). But gravity alone holds 0.43-0.82 on the same seeds and the ledgered arm
+  beats it in only 2/3 (margin 0.03 vs spread 0.17): T1 FAIL, so the mapping 'budget priced by
+  exp_09's pair energy' is retired as the object that holds structure. Percolation falls
+  monotonically with kappa: the entropy-driven repulsion can only take structure away. The
+  virial prediction (bound through kappa = 1, ordered above, U-shaped with minimum at 1) held in
+  all three seeds. The ledger discipline survives as a gated instrument; the next object is the
+  pressure's form (the SEC functional's gradient-penalising term).
 notes: >
   Design pass 2026-09-06 (proxy seed 1, read-only): at fixed entropy the pressure is already a
   gradient; the pair energy created by entropy change (689,700) accounts for the pressure work
