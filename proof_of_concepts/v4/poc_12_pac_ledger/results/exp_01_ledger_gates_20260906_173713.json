@@ -1,0 +1,51 @@
+{
+ "commit": "c5e961e",
+ "all_pass": false,
+ "gates": {
+  "KA-0 force = -grad(E_SEC) (finite difference, rel)": {
+   "ok": true,
+   "detail": "worst 1.55e-07"
+  },
+  "KA-i transfer identity sum(dE/dS dS) + d(sum P) = 0 (1e-6 of P0)": {
+   "ok": true,
+   "detail": "worst 9.15e-10, residual 9.15e-10"
+  },
+  "KA-ii net creation sum(dE/dS dS) <= P(0) (exact)": {
+   "ok": true,
+   "detail": "1.644e+04 vs P0 1.845e+04"
+  },
+  "KA-ii the budget binds (budget_bound_frac_max > 0)": {
+   "ok": true,
+   "detail": "max 1.000, exhausted tick 44"
+  },
+  "KA-ii pressure work <= P(0) within 10% truncation": {
+   "ok": true,
+   "detail": "-3557 / P0 = -0.193"
+  },
+  "KA-iii |d total_pac| <= cfl_max * gross work (t<=3.5)": {
+   "ok": true,
+   "detail": "235 vs bound 1.42e+03; max closure_pac 1.47e-03"
+  },
+  "KA-iii halving the step shrinks the drift >= 1.5x": {
+   "ok": true,
+   "detail": "ratio 1.92"
+  },
+  "anchor: kappa=None structurally inert + CANONICAL_SINK == CANONICAL": {
+   "ok": true,
+   "detail": "50 ticks, n=300"
+  },
+  "anchor: kappa=0 == gravity-only (sec_balance=0) bit for bit": {
+   "ok": true,
+   "detail": "80 ticks"
+  },
+  "anchor: None path reproduces exp_28 B0 seed-1 marks (1e-6, same platform)": {
+   "ok": false,
+   "detail": "worst 3.20e-03 vs exp_03_sink_arms_proxy_B0_s1_md0.95_20260905_224449.json"
+  },
+  "severance: severed budget frozen over 50 further ticks": {
+   "ok": true,
+   "detail": "376 particles"
+  }
+ },
+ "seconds": 17.6
+}
