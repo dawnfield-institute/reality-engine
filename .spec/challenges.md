@@ -537,6 +537,16 @@ the wrong particles.** The ledger, the severance bookkeeping and the third-law p
 instruments (POC-11); drag stays a control. Journal:
 `proof_of_concepts/v4/poc_11_derived_sink/journals/2026-09-05_the-trigger-selects-the-cores.md`.
 
+**Update 2026-09-06 — option 2 in progress as POC-12 / Milestone R exp_29, in the house's own terms.**
+The design pass found the pressure is *already* a gradient at fixed entropy (its magnitude is
+−dV/dr for `V = sec·(S_i+S_j)/2·r0·e^{−r/r0}`; only the 2 r0 cutoff breaks it) and that the whole
+non-conservation is the entropy ratchet: the pair energy created by entropy growth, booked tick by
+tick, is 689,700 against 667,300 of pressure work (ratio 1.03). SEC is local and free to inject;
+what the substrate lacked is the **ledger**. `.spec/v4-pac-ledger.spec.md`: a per-particle potential
+budget `P_i(0) = κ|U_grav(0)| m_i/Σm` pays for entropy growth at the price the pair energy sets, is
+repaid on decay, and `KE + U + E_SEC + ΣP` is conserved. κ = 0 is gravity-only, κ = ∞ is this
+substrate; the sweep {0.5, 1, 2} brackets the virial threshold (bound below ~½ by arithmetic).
+
 ---
 
 ### C4.2: Per-particle timesteps in the force kick (design B)
