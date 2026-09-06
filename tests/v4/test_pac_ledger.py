@@ -13,8 +13,6 @@ import torch
 
 from ._proxy import P, PROXY_1000
 
-pytestmark = pytest.mark.xfail(strict=True, reason="PAC ledger not implemented yet (spec v4-pac-ledger R1-R9)")
-
 SMALL = dict(n=300, box=25.2, r0=10.0, g=1.5, dims=3, seed=1, sec_balance=0.6541, damping=1.0)
 
 
@@ -29,8 +27,11 @@ def _run(cfg, ticks, pipeline=None):
 def test_pressure_is_gradient_of_shifted_pair_energy():
     """KA-0 / R1: F_i = -dE_SEC/dx_i at fixed entropy, finite difference on a 3-particle state."""
     c = P.ParticleConfig(n=3, box=60.0, r0=10.0, g=0.0, dims=3, sec_balance=0.6541, damping=1.0, pac_kappa=1.0)
-    pos = torch.tensor([[20.0, 20.0, 20.0], [26.0, 21.0, 19.0], [23.0, 27.0, 22.0]])
-    s = P.ParticleState(pos=pos, vel=torch.zeros(3, 3), mass=torch.ones(3), entropy=torch.tensor([5.0, 1.0, 3.0]), box=60.0)
+    # float64 throughout: a central difference of an O(10) energy over 2e-3 is below single
+    # precision (the first run of this test missed by 1.2e-3 relative for that reason alone)
+    pos = torch.tensor([[20.0, 20.0, 20.0], [26.0, 21.0, 19.0], [23.0, 27.0, 22.0]], dtype=torch.float64)
+    s = P.ParticleState(pos=pos, vel=torch.zeros(3, 3, dtype=torch.float64), mass=torch.ones(3, dtype=torch.float64),
+                        entropy=torch.tensor([5.0, 1.0, 3.0], dtype=torch.float64), box=60.0)
     force = P.SECPressure()(s, c).acc_pressure * s.mass.unsqueeze(-1)
     h = 1e-3
     for k in range(3):
@@ -121,8 +122,10 @@ def test_kappa_zero_is_gravity_only():
 
 def test_severed_budget_frozen():
     """R6: a severed particle's budget does not change after severance."""
-    cfg = P.ParticleConfig(**PROXY_1000, pac_kappa=1.0, sev_tau=1.0)
-    eng, rows = _run(cfg, 120, P.CANONICAL_SINK)
+    # with the budget on the entropy stays below ~0.3 (it cannot create more pair energy than
+    # P(0)), so the stress trigger needs tau = 0.1 to fire at all: measured 2026-09-06
+    cfg = P.ParticleConfig(**PROXY_1000, pac_kappa=1.0, sev_tau=0.1)
+    eng, rows = _run(cfg, 200, P.CANONICAL_SINK)
     s = eng.state
     assert s.severed is not None and bool(s.severed.any()), "nothing severed: fixture too short"
     idx = torch.nonzero(s.severed).flatten()
