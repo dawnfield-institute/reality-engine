@@ -452,6 +452,50 @@ def percolation(F, overdensity: float = 2.0) -> float:
 # ======================================================================================
 
 
+def cic_deposit(pos, box: float, res: int) -> np.ndarray:
+    """Cloud-in-cell COUNT deposit of particle positions on a periodic res^d grid.
+
+    Each particle spreads unit weight trilinearly over the 2^d cells around it, so the field is
+    continuous in the positions and carries no mass draw. Compare `density_field` in POC-12's
+    exp_03, which deposits MASS nearest-grid-point: at ~1 particle per cell its 2x-mean threshold
+    sits at a count of two, and a two-particle cell with masses 1 +/- 0.1 lands on either side of
+    it at random — an instrument noise of 0.01-0.05 in percolation on the SAME positions (exp_30
+    post-mortem). This deposit has no such boundary. Sum equals the particle count exactly.
+    """
+    pos = np.asarray(pos, dtype=float); n, d = pos.shape
+    x = (pos / box) % 1.0 * res - 0.5
+    i0 = np.floor(x).astype(int); f = x - i0
+    F = np.zeros((res,) * d)
+    for corner in np.ndindex(*((2,) * d)):
+        w = np.ones(n); idx = []
+        for k, c in enumerate(corner):
+            w = w * (f[:, k] if c else 1.0 - f[:, k]); idx.append((i0[:, k] + c) % res)
+        np.add.at(F, tuple(idx), w)
+    return F
+
+
+def connectivity_at_occupancy(F, q: float) -> float:
+    """Largest connected component of the densest fraction `q` of cells, as a fraction of them.
+
+    The same labeller and face-connectivity as `percolation()`, but the occupied set is chosen
+    by RANK, not by an overdensity threshold, so every field is compared at the same occupied
+    fraction by construction. `percolation()` at a fixed overdensity compares fields at whatever
+    occupancy they happen to have — a fatter overdense set percolates more easily for reasons
+    that have nothing to do with structure (the docstring above says so; exp_30's post-mortem
+    measured it: kappa = 1's overdense set is 60% larger than gravity's). Rank thresholds are
+    wrong for the is_web VERDICT (a quantile makes the filament fraction tautological) and right
+    for comparing CONNECTIVITY across arms. Reported at several q: the densest few percent is the
+    web's spine, the top fifth its body.
+    """
+    m = _as_np(F).astype(float).ravel()
+    k = int(np.floor(q * m.size))
+    if k < 1 or not np.isfinite(m).all():
+        return float("nan")
+    order = np.argsort(-m, kind="stable")[:k]
+    mask = np.zeros(m.size); mask[order] = 1.0
+    return percolation(mask.reshape(_as_np(F).shape), overdensity=0.5)
+
+
 def _smoothed_noise(*shape_and_sigma, sigma: float | None = None,
                     seed: int = 0) -> np.ndarray:
     """White noise convolved with a Gaussian of width `sigma`, periodic on every axis.
