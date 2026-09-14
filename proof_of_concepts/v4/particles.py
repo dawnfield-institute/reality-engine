@@ -100,6 +100,11 @@ class ParticleState:
     budget: Optional[torch.Tensor] = None         # (N,)
     budget0: Optional[float] = None
     sec_dEdS: Optional[torch.Tensor] = None       # (N,) dE_SEC/dS_i at this tick's positions
+    # Instrumentation (2026-09-14, the edge scoping §7): per-particle cumulative work by force —
+    # the integrator's exact discrete kick identity applied row by row. The sums equal
+    # work_gravity_cum / work_pressure_cum; the sign of work_p_i is the LOCAL form of the edge.
+    work_g_i: Optional[torch.Tensor] = None       # (N,)
+    work_p_i: Optional[torch.Tensor] = None       # (N,)
 
     @property
     def n(self) -> int:
@@ -417,6 +422,10 @@ class LocalGravity:
         m = dict(s.metrics)
         m["gravity_force_mean"] = force.norm(dim=-1).mean().item()
         m["potential_int"] = 0.5 * potential_i.sum().item()
+        # Pair-form virial, sum_{i<j} r_ij . f_ij = -sum_{i<j} r_ij |f_ij| for an attractive pair force;
+        # origin-invariant on the torus because sum F = 0 (the edge scoping, 2026-09-14 §4). r is the
+        # physical pair distance; the full (N, N) sum counts each pair twice, hence the 1/2.
+        m["virial_gravity"] = -0.5 * torch.where(within, r * mag, torch.zeros_like(r)).double().sum().item()   # r is inf on the diagonal: mask first
         acc = force / s.mass.unsqueeze(-1)
         return s.replace(acc=acc if s.acc is None else s.acc + acc, acc_gravity=acc,
                          potential_i=potential_i, metrics=m)
@@ -478,6 +487,7 @@ class SECPressure:
         press = (mag.unsqueeze(-1) * unit).sum(dim=1)
         m = dict(s.metrics)
         m["sec_pressure_mean"] = press.norm(dim=-1).mean().item()
+        m["virial_pressure"] = 0.5 * torch.where(within, r * mag, torch.zeros_like(r)).double().sum().item()   # sum_{i<j} r_ij |f_ij|, repulsive: positive; r is inf on the diagonal
         if c.pac_kappa is not None:          # the ledger reads the energy this force is the gradient of
             m["sec_energy_int"], _ = sec_pair_energy(s, c, a)
         acc = press / s.mass.unsqueeze(-1)
@@ -547,6 +557,12 @@ class SECUpdate:
             paid = dEdS * dS_ok
             new_budget = torch.where(alive, budget - paid, budget)
             transfer = paid[alive].double().sum().item()
+            # the two gross legs of the net transfer (P -> A growth paid; A -> P decay credited)
+            growth_paid = paid[alive & (paid > 0)].double().sum().item()
+            decay_credit = -paid[alive & (paid < 0)].double().sum().item()
+            m["transfer_growth"], m["transfer_credit"] = growth_paid, decay_credit
+            m["transfer_growth_cum"] = float(s.metrics.get("transfer_growth_cum", 0.0)) + growth_paid
+            m["transfer_credit_cum"] = float(s.metrics.get("transfer_credit_cum", 0.0)) + decay_credit
             b_prev = budget[alive].double().sum().item(); b_int = new_budget[alive].double().sum().item()
             p0 = s.budget0 if s.budget0 else 0.0
             m["budget_int"] = b_int
@@ -767,6 +783,12 @@ class Integrator:
         def _work(a_x):
             return ((mvec * v0 * a_x).sum() * dt + 0.5 * (mvec * a_x * acc).sum() * dt * dt).item()
         work_g, work_p = _work(a_g), _work(a_p)
+        # the same identity row by row: cumulative per-particle work by force (sums to work_*_cum)
+        def _work_i(a_x):
+            return (mvec * v0 * a_x).sum(-1) * dt + 0.5 * (mvec * a_x * acc).sum(-1) * dt * dt
+        w_g_i, w_p_i = _work_i(a_g), _work_i(a_p)
+        work_g_i = (s.work_g_i if s.work_g_i is not None else torch.zeros_like(w_g_i)) + w_g_i
+        work_p_i = (s.work_p_i if s.work_p_i is not None else torch.zeros_like(w_p_i)) + w_p_i
         ke1 = (0.5 * s.mass * (v1 ** 2).sum(-1)).sum().item()
         ke2 = (0.5 * s.mass * (vel ** 2).sum(-1)).sum().item()
         loss_drag = ke1 - ke2
@@ -805,13 +827,18 @@ class Integrator:
         for key, val in (("work_gravity", work_g), ("work_pressure", work_p),
                          ("loss_drag", loss_drag), ("loss_guard", loss_guard)):
             m[key + "_cum"] = float(m.get(key + "_cum", 0.0)) + val
+        # the local form of the edge: how many retained particles carry POSITIVE cumulative pressure work
+        wpa = work_p_i[alive] if bool(alive.any()) else work_p_i
+        m["work_pressure_pos_frac"] = (wpa > 0).double().mean().item()
+        m["work_pressure_pos_sum"] = wpa.clamp(min=0).double().sum().item()
+        m["work_pressure_neg_sum"] = wpa.clamp(max=0).double().sum().item()
 
         # --- drift ------------------------------------------------------------------------
         a = c.cosmology.a if c.cosmology else 1.0
         dt_i = dt if tau is None else dt * tau
         pos = (s.pos + vel * dt_i / a) % s.box
         return s.replace(pos=pos, vel=vel, acc=None, acc_gravity=None, acc_pressure=None,
-                         dt_last=dt, metrics=m)
+                         dt_last=dt, metrics=m, work_g_i=work_g_i, work_p_i=work_p_i)
 
 
 class LandauerErasure:

@@ -73,8 +73,12 @@ exp_03 therefore also records, per mark, `conn_q05`, `conn_q10`, `conn_q20` =
 connected component of the densest q of cells (face connectivity, the same labeller as
 `percolation`), on a cloud-in-cell COUNT field of the alive set at `matched_res(n)`. Occupancy is
 matched across arms by construction; there is no mass draw and no threshold boundary. exp_04
-floors each on uniform positions and carries their window means into `_summary`. The mass draw
-is now saved in the position sidecar (`mass`) so the legacy marks can be reproduced. `percolation`
+floors each on uniform positions and carries their window means into `_summary`. **Correction
+(2026-09-14, night):** the sentence "the mass draw is now saved in the sidecar" was written for the
+exp_31 runs and was false for them — that one-line change lived uncommitted in another worktree
+(the exploratory κ sweep in `results/full_explore/` does carry `mass`); the exp_31 runs at `5f5d690`
+do not. Masses, entropies, per-particle potential and per-particle cumulative works are saved from
+`feat/v4-ledger-virial` onward. `percolation`
 and `occupancy` stay recorded and reported; `is_web` still uses exp_09's thresholds (a rank
 threshold is wrong for that verdict — `structure.py` says why — and right for comparing
 connectivity across arms). Tests: `tests/v4/test_structure_connectivity.py`.

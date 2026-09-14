@@ -10,8 +10,10 @@ component of the densest fraction `q` of cells, as a fraction of them, using `pe
 labeller on a rank-selected mask. POC-12 `exp_03` records `conn_q05 / conn_q10 / conn_q20` per mark
 on the CIC count field of the alive set at `matched_res(n)`, beside the legacy `percolation` and
 `occupancy` (unchanged, still reported); `exp_04` floors each on uniform positions and carries the
-window means into `_summary` (nan on runs that predate the key). The mass draw is now saved in the
-position sidecar (`mass`). Seven tests in `tests/v4/test_structure_connectivity.py`.
+window means into `_summary` (nan on runs that predate the key). Seven tests in
+`tests/v4/test_structure_connectivity.py`. **Correction (same day):** this entry originally said the
+mass draw was now saved in the sidecar; that change was uncommitted in another worktree and the
+exp_31 runs do not carry it — see `.changelog/20260914_2100*_v4_ledger_virial_instrumentation.md`.
 
 ## Why
 
