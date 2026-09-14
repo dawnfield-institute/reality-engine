@@ -58,6 +58,27 @@ entropy growth creates for free.
   (`milestone-r/scripts/exp_29_pac_ledger.py`).
 - `run_grid.sh proxy | full` — the grid, phase by phase.
 
+## The exp_31 instrument (2026-09-14): connectivity at fixed occupancy, on a count deposit
+
+exp_30's post-mortem found two things wrong with reading `percolation` alone across arms. (1) It
+compares the overdense sets at whatever occupancy each arm happens to have, and the arms differ:
+gravity alone and κ = 0.5 occupy ~0.09 of cells above 2× the mean, κ = 1 ~0.15 — a fatter
+overdense set percolates more easily for reasons that are not structure. (2) `density_field`
+deposits MASS nearest-grid-point, masses are drawn 1 ± 0.1, and at ~1 particle per cell the 2×-mean
+threshold sits at a count of two, so a two-particle cell lands on either side of it at random:
+re-drawing the masses on the SAME positions moves percolation by 0.01 (κ ≤ 0.5) to 0.05 (κ = 1.5).
+
+exp_03 therefore also records, per mark, `conn_q05`, `conn_q10`, `conn_q20` =
+`structure.connectivity_at_occupancy(structure.cic_deposit(pos, box, res), q)`: the largest
+connected component of the densest q of cells (face connectivity, the same labeller as
+`percolation`), on a cloud-in-cell COUNT field of the alive set at `matched_res(n)`. Occupancy is
+matched across arms by construction; there is no mass draw and no threshold boundary. exp_04
+floors each on uniform positions and carries their window means into `_summary`. The mass draw
+is now saved in the position sidecar (`mass`) so the legacy marks can be reproduced. `percolation`
+and `occupancy` stay recorded and reported; `is_web` still uses exp_09's thresholds (a rank
+threshold is wrong for that verdict — `structure.py` says why — and right for comparing
+connectivity across arms). Tests: `tests/v4/test_structure_connectivity.py`.
+
 ## What this POC does not claim
 
 Whether a ledgered substrate holds structure, or at which κ. That is registered, sealed and scored in

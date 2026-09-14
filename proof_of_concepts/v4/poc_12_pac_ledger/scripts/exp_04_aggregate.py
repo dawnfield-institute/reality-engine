@@ -21,7 +21,7 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "proof_of_concepts" / "v4"))
 import numpy as np  # noqa: E402
-from structure import web_metrics  # noqa: E402
+from structure import web_metrics, cic_deposit, connectivity_at_occupancy  # noqa: E402
 from worldmodel import matched_res  # noqa: E402
 
 WINDOW = (10.0, 15.0)
@@ -35,15 +35,22 @@ def field_from(pos, box, res, dims=3):
 
 def random_floor(n, box, res, draws=20, seed=7):
     rng = np.random.RandomState(seed); p, x, o = [], [], []
+    conn = {q: [] for q in (0.05, 0.10, 0.20)}
     for _ in range(draws):
-        w = web_metrics(field_from(rng.uniform(0, box, size=(n, 3)), box, res)); p.append(w["percolation"]); x.append(w["xi_u"]); o.append(w["occupancy"])
-    return dict(percolation_mean=float(np.mean(p)), percolation_std=float(np.std(p, ddof=1)), xi_u_mean=float(np.mean(x)),
-                xi_u_std=float(np.std(x, ddof=1)), occupancy_mean=float(np.mean(o)), draws=draws)
+        u = rng.uniform(0, box, size=(n, 3))
+        w = web_metrics(field_from(u, box, res)); p.append(w["percolation"]); x.append(w["xi_u"]); o.append(w["occupancy"])
+        C = cic_deposit(u, box, res)
+        for q in conn: conn[q].append(connectivity_at_occupancy(C, q))
+    out = dict(percolation_mean=float(np.mean(p)), percolation_std=float(np.std(p, ddof=1)), xi_u_mean=float(np.mean(x)),
+               xi_u_std=float(np.std(x, ddof=1)), occupancy_mean=float(np.mean(o)), draws=draws)
+    for q, v in conn.items():
+        out[f"conn_q{int(q * 100):02d}_mean"] = float(np.mean(v)); out[f"conn_q{int(q * 100):02d}_std"] = float(np.std(v, ddof=1))
+    return out
 
 
 def wmean(marks, key):
-    xs = [m[key] for m in marks if WINDOW[0] <= m["sim_time"] <= WINDOW[1] + 1e-9]
-    return float(np.mean(xs)) if xs else float("nan")
+    xs = [m[key] for m in marks if WINDOW[0] <= m["sim_time"] <= WINDOW[1] + 1e-9 and key in m]
+    return float(np.mean(xs)) if xs else float("nan")   # nan when a run predates the key (exp_29/30 runs lack conn_*)
 
 
 def main():
@@ -69,7 +76,9 @@ def main():
                              work_pressure_over_p0=(mk[-1]["work_pressure_cum"] / d["budget0"] if d.get("budget0") else None),
                              sec_transfer_cum=mk[-1]["sec_transfer_cum"], closure_pac_max=max(m["closure_pac"] for m in mk[1:]),
                              transfer_residual_max=max(m["transfer_residual"] for m in mk), at_cap_max=d["bounds"]["at_cap_frac_max"],
-                             floor_ticks=d["bounds"]["ticks_at_dt_floor"], finite=d["finite"], perc_peak=max(m["percolation"] for m in mk))
+                             floor_ticks=d["bounds"]["ticks_at_dt_floor"], finite=d["finite"], perc_peak=max(m["percolation"] for m in mk),
+                             conn_q05=wmean(mk, "conn_q05"), conn_q10=wmean(mk, "conn_q10"), conn_q20=wmean(mk, "conn_q20"),
+                             cv=wmean(mk, "cv"), void=wmean(mk, "void"))   # window means of the recorded one-point stats (exp_31 T2/T3)
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
     grid = dict(commit=commit, window=WINDOW, n_runs=len(runs), floors=floors,
                 runs=[{k: v for k, v in d.items() if k not in ("marks", "config")} | {"config": d["config"]} for d in runs])

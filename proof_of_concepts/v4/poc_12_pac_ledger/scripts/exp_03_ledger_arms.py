@@ -27,9 +27,10 @@ REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(REPO / "proof_of_concepts" / "v4"))
 import numpy as np, torch  # noqa: E402
 from particles import CANONICAL_SINK, PHI, XI_ANALYTIC, ParticleConfig, ParticleEngine  # noqa: E402
-from structure import web_metrics  # noqa: E402
+from structure import web_metrics, cic_deposit, connectivity_at_occupancy  # noqa: E402
 from worldmodel import matched_res  # noqa: E402
 
+CONN_Q = (0.05, 0.10, 0.20)   # spine, the registered occupancy, the body (exp_31)
 SIZES = {"proxy": dict(n=1000, box=37.8), "full": dict(n=4000, box=60.0)}
 BASE = dict(r0=10.0, g=1.5, dims=3, sec_balance=XI_ANALYTIC / PHI, damping=1.0)
 XI_VARIANT = "XI_ANALYTIC"
@@ -65,6 +66,8 @@ def main():
         s = eng.tick(); m = s.metrics; t = m["sim_time"]
         if t >= next_mark or t >= a.t_end:
             w = web_metrics(density_field(eng, res))
+            C = cic_deposit(s.pos[s.alive()].detach().cpu().numpy(), cfg.box, res)   # count deposit: no mass draw, no threshold boundary
+            conn = {f"conn_q{int(q * 100):02d}": connectivity_at_occupancy(C, q) for q in CONN_Q}
             row = dict(tick=eng.tick_count, sim_time=t, n_alive=int(m["n_alive"]), matched_res=res,
                        kinetic_int=m["kinetic_int"], potential_int=m["potential_int"], total_int=m["total_int"], e_int=m["e_int"],
                        sec_energy_int=m.get("sec_energy_int", 0.0), budget_int=m.get("budget_int", 0.0), budget_frac=m.get("budget_frac", float("nan")),
@@ -77,10 +80,10 @@ def main():
                        work_gravity_cum=m.get("work_gravity_cum", 0.0), work_pressure_cum=m.get("work_pressure_cum", 0.0),
                        loss_guard_cum=m.get("loss_guard_cum", 0.0), closure_residual=m["closure_residual"],
                        percolation=w["percolation"], xi_u=w["xi_u"], occupancy=w["occupancy"], void=w["void"], cv=w["cv"],
-                       filament=w["filament"], is_web=bool(w["is_web"]))
+                       filament=w["filament"], is_web=bool(w["is_web"]), **conn)
             marks.append(row); pos_marks.append(s.pos.cpu().numpy().astype(np.float32))
             print(f"    t={t:6.2f} tick={eng.tick_count:5d} KE/|U|={row['ke_over_u']:7.2f} E_tot={row['total_pac']:9.3g} P/P0={row['budget_frac']:.3f} "
-                  f"bound={row['budget_bound_frac']:.3f} clos={row['closure_pac']:.1e} perc={row['percolation']:.3f} xi_u={row['xi_u']:.3f} occ={row['occupancy']:.3f}", flush=True)
+                  f"bound={row['budget_bound_frac']:.3f} clos={row['closure_pac']:.1e} perc={row['percolation']:.3f} occ={row['occupancy']:.3f} conn05/10/20={row['conn_q05']:.2f}/{row['conn_q10']:.2f}/{row['conn_q20']:.2f}", flush=True)
             next_mark += 1.0
         if t >= a.t_end or not torch.isfinite(s.pos).all():
             break
