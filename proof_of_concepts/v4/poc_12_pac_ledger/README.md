@@ -83,6 +83,19 @@ and `occupancy` stay recorded and reported; `is_web` still uses exp_09's thresho
 threshold is wrong for that verdict — `structure.py` says why — and right for comparing
 connectivity across arms). Tests: `tests/v4/test_structure_connectivity.py`.
 
+## The edge instrumented (2026-09-14, `feat/v4-ledger-virial`)
+
+Per-particle cumulative work by force (`state.work_g_i`, `work_p_i`), pair-form virial terms
+(`virial_gravity`, `virial_pressure`), the gross ledger legs (`transfer_growth`, `transfer_credit`),
+and `mass`, per-mark entropy, per-particle potential and works in the sidecar — every one an
+identity with a test (`tests/v4/test_ledger_virial.py`), no physics change. `exp_03` takes `--g` and
+`--sec-balance` overrides. Exploratory runs in `results/full_virial_explore/` (κ 0.5/1/1.25 × seeds
+1–3) and `results/full_coupling_{g,sec}/` (seed 1). What they showed, exploring: the plateau (κ = 0.5)
+is in steady virial balance with the pair-form terms to ≤ 2 %; the edge (the sign change of the
+pressure's net work between κ = 1 and 1.25) does not move across a fourfold range of g; and the pair
+coupling `sec_balance` cancels **exactly** when growth is budget-clipped (spec R4′). Registered next
+as dawn-field-theory exp_32.
+
 ## What this POC does not claim
 
 Whether a ledgered substrate holds structure, or at which κ. That is registered, sealed and scored in
