@@ -52,13 +52,20 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--t-end", type=float, default=15.0)
     ap.add_argument("--out-dir", type=Path, default=Path(__file__).resolve().parents[1] / "results")
+    # the edge derivation (2026-09-14 §4/§5, D1/D2): the couplings as overrides, defaults unchanged, so the
+    # invariance of the edge under g and sec_balance can be swept. Recorded in config as always.
+    ap.add_argument("--g", type=float, default=None, help="gravity strength override (default BASE g = 1.5)")
+    ap.add_argument("--sec-balance", type=float, default=None, help="pair coupling override (default XI_ANALYTIC / PHI)")
     a = ap.parse_args()
     kappa = None if a.kappa in ("inf", "none", "None") else float(a.kappa)
-    cfg = ParticleConfig(**SIZES[a.size], **BASE, seed=a.seed, pac_kappa=kappa)
+    base = dict(BASE)
+    if a.g is not None: base["g"] = a.g
+    if a.sec_balance is not None: base["sec_balance"] = a.sec_balance
+    cfg = ParticleConfig(**SIZES[a.size], **base, seed=a.seed, pac_kappa=kappa)
     eng = ParticleEngine(cfg, pipeline=CANONICAL_SINK)
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
     klabel = "inf" if kappa is None else f"{kappa:g}"
-    label = f"{a.size}_k{klabel}_s{a.seed}"
+    label = f"{a.size}_k{klabel}_s{a.seed}" + (f"_g{a.g:g}" if a.g is not None else "") + (f"_sec{a.sec_balance:g}" if a.sec_balance is not None else "")
     print(f"  {label}: n={cfg.n} box={cfg.box} pac_kappa={kappa} P0={getattr(eng, 'budget0', None)} xi_variant={XI_VARIANT} commit={commit}", flush=True)
     res = matched_res(cfg.n, cfg.dims)
     marks, pos_marks, side_marks, next_mark, t0 = [], [], [], 1.0, time.time()
