@@ -77,7 +77,8 @@ def main():
                              sec_transfer_cum=mk[-1]["sec_transfer_cum"], closure_pac_max=max(m["closure_pac"] for m in mk[1:]),
                              transfer_residual_max=max(m["transfer_residual"] for m in mk), at_cap_max=d["bounds"]["at_cap_frac_max"],
                              floor_ticks=d["bounds"]["ticks_at_dt_floor"], finite=d["finite"], perc_peak=max(m["percolation"] for m in mk),
-                             conn_q05=wmean(mk, "conn_q05"), conn_q10=wmean(mk, "conn_q10"), conn_q20=wmean(mk, "conn_q20"))
+                             conn_q05=wmean(mk, "conn_q05"), conn_q10=wmean(mk, "conn_q10"), conn_q20=wmean(mk, "conn_q20"),
+                             cv=wmean(mk, "cv"), void=wmean(mk, "void"))   # window means of the recorded one-point stats (exp_31 T2/T3)
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
     grid = dict(commit=commit, window=WINDOW, n_runs=len(runs), floors=floors,
                 runs=[{k: v for k, v in d.items() if k not in ("marks", "config")} | {"config": d["config"]} for d in runs])
