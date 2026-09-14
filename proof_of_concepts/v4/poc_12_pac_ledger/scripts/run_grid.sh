@@ -15,7 +15,9 @@ SEEDS="${SEEDS:-1 2 3}"; KAPPAS="${KAPPAS:-0 0.5 1 2 inf}"
 phase="${1:?phase: proxy | full}"
 case "$phase" in
   proxy|full)
-    OUT="$POC/results/$phase"; mkdir -p "$OUT"
+    # OUT may be overridden so a later registration's runs (e.g. exp_30 R1b, seeds 4-6) land in
+    # their own directory and can never be aggregated with exp_29's seeds 1-3.
+    OUT="${OUT:-$POC/results/$phase}"; mkdir -p "$OUT"
     for s in $SEEDS; do for k in $KAPPAS; do $RUN --size "$phase" --kappa "$k" --seed "$s" --out-dir "$OUT"; done; done
     $AGG --size "$phase" --results-dir "$OUT" ;;
   *) echo "unknown phase $phase" >&2; exit 2 ;;
