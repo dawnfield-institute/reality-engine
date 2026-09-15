@@ -830,6 +830,7 @@ class Integrator:
         # the local form of the edge: how many retained particles carry POSITIVE cumulative pressure work
         wpa = work_p_i[alive] if bool(alive.any()) else work_p_i
         m["work_pressure_pos_frac"] = (wpa > 0).double().mean().item()
+        m["work_pressure_median"] = wpa.double().median().item()          # the local edge: sign of the median particle's work
         m["work_pressure_pos_sum"] = wpa.clamp(min=0).double().sum().item()
         m["work_pressure_neg_sum"] = wpa.clamp(max=0).double().sum().item()
 

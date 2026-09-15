@@ -13,9 +13,9 @@ export PYTHONDONTWRITEBYTECODE=1
 RUN="$PY $HERE/exp_03_ledger_arms.py"; AGG="$PY $HERE/exp_04_aggregate.py"
 SEEDS="${SEEDS:-1 2 3}"; KAPPAS="${KAPPAS:-0 0.5 1 2 inf}"
 EXTRA="${EXTRA:-}"   # e.g. EXTRA="--g 3.0" or EXTRA="--sec-balance 1.308" for the coupling sweeps (the edge derivation D1/D2)
-phase="${1:?phase: proxy | full}"
+phase="${1:?phase: proxy | full | double}"
 case "$phase" in
-  proxy|full)
+  proxy|full|double)
     # OUT may be overridden so a later registration's runs (e.g. exp_30 R1b, seeds 4-6) land in
     # their own directory and can never be aggregated with exp_29's seeds 1-3.
     OUT="${OUT:-$POC/results/$phase}"; mkdir -p "$OUT"

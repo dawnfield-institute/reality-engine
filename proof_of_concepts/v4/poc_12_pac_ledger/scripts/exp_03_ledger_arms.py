@@ -31,7 +31,8 @@ from structure import web_metrics, cic_deposit, connectivity_at_occupancy  # noq
 from worldmodel import matched_res  # noqa: E402
 
 CONN_Q = (0.05, 0.10, 0.20)   # spine, the registered occupancy, the body (exp_31)
-SIZES = {"proxy": dict(n=1000, box=37.8), "full": dict(n=4000, box=60.0)}
+SIZES = {"proxy": dict(n=1000, box=37.8), "full": dict(n=4000, box=60.0),
+         "double": dict(n=8000, box=75.6)}   # exp_32 size arm: same density, box/2r0 = 3.78 (60 * 2^(1/3) = 75.595)
 BASE = dict(r0=10.0, g=1.5, dims=3, sec_balance=XI_ANALYTIC / PHI, damping=1.0)
 XI_VARIANT = "XI_ANALYTIC"
 
@@ -91,7 +92,7 @@ def main():
                        # the edge scoping (2026-09-14 §7): virial terms, gross ledger legs, the local work sign
                        virial_gravity=m.get("virial_gravity", float("nan")), virial_pressure=m.get("virial_pressure", float("nan")),
                        transfer_growth_cum=m.get("transfer_growth_cum", 0.0), transfer_credit_cum=m.get("transfer_credit_cum", 0.0),
-                       work_pressure_pos_frac=m.get("work_pressure_pos_frac", float("nan")),
+                       work_pressure_pos_frac=m.get("work_pressure_pos_frac", float("nan")), work_pressure_median=m.get("work_pressure_median", float("nan")),
                        work_pressure_pos_sum=m.get("work_pressure_pos_sum", 0.0), work_pressure_neg_sum=m.get("work_pressure_neg_sum", 0.0))
             marks.append(row); pos_marks.append(s.pos.cpu().numpy().astype(np.float32))
             side_marks.append({k: (v.detach().cpu().numpy().astype(np.float32) if v is not None else None) for k, v in
