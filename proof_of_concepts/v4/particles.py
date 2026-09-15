@@ -194,7 +194,12 @@ class ParticleConfig:
     # ~80 neighbours and "all edges" fires only on outliers. Declared, not tuned.
     sev_tau: Optional[float] = None
     sev_radius: Optional[float] = None
-    sev_mode: str = "stress"        # "stress" | "random" (the selection control: same bookkeeping)
+    sev_mode: str = "stress"        # "stress" | "random" (the selection control: same bookkeeping) | "local_edge"
+    # "local_edge" (2026-09-15, R2): a retained particle severs the tick its cumulative pressure work
+    # work_p_i first exceeds zero at or after sev_t_arm -- the tick the pressure has, on balance,
+    # pushed it rather than been paid by its collapse. No threshold: the zero is the ledger's. The
+    # arming time is declared (the positive-work set is stable after the first collapse's bounce).
+    sev_t_arm: float = 8.0
     sev_schedule: Optional[list] = None   # random mode: [(sim_time, count), ...], replayed by time
     # --- Landauer erasure (LandauerErasure; inert unless True) ------------------------------
     landauer: bool = False
@@ -911,7 +916,7 @@ class LedgerSeverance:
 
     @torch.no_grad()
     def __call__(self, s: ParticleState, c: ParticleConfig) -> ParticleState:
-        if c.sev_tau is None:
+        if c.sev_tau is None and c.sev_mode != "local_edge":
             return s
         a = c.cosmology.a if c.cosmology else 1.0
         alive = s.alive()
@@ -932,6 +937,11 @@ class LedgerSeverance:
                 gen = torch.Generator(device="cpu").manual_seed(int(c.seed * 1_000_003 + round(sim_time * 1e6)))
                 pick = torch.randperm(int(idx_alive.numel()), generator=gen)[:k]
                 fire[idx_alive[pick.to(idx_alive.device)]] = True
+            min_stress = None
+        elif c.sev_mode == "local_edge":
+            # the local form of the edge: cumulative pressure work on the particle has turned positive
+            wp = s.work_p_i if s.work_p_i is not None else torch.zeros(s.n, device=s.device)
+            fire = alive & (wp > 0) if sim_time >= c.sev_t_arm else torch.zeros(s.n, dtype=torch.bool, device=s.device)
             min_stress = None
         else:
             r, _, _ = pairwise(s, a)
@@ -968,6 +978,9 @@ class LedgerSeverance:
         m["sev_ke_ratio"] = ((ke_i[fire].mean() / ke_ret.mean()).item() if ke_ret.numel() and ke_ret.mean() > 0
                              else float("nan"))
         m["sev_stress_min"] = (min_stress[fire].min().item() if min_stress is not None else float("nan"))
+        e_i = ke_i + u.sum(dim=1)                                   # each fired particle's own energy in the retained frame
+        m["sev_unbound_frac"] = float((e_i[fire] > 0).double().mean().item())
+        m["sev_wp_min"] = (s.work_p_i[fire].min().item() if s.work_p_i is not None else float("nan"))
         for key in ("loss_severance_ke", "loss_severance_u", "loss_severance_energy", "loss_severance_mass"):
             m[key + "_cum"] = float(m.get(key + "_cum", 0.0)) + m[key]
 
