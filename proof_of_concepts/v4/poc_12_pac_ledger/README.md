@@ -73,11 +73,28 @@ exp_03 therefore also records, per mark, `conn_q05`, `conn_q10`, `conn_q20` =
 connected component of the densest q of cells (face connectivity, the same labeller as
 `percolation`), on a cloud-in-cell COUNT field of the alive set at `matched_res(n)`. Occupancy is
 matched across arms by construction; there is no mass draw and no threshold boundary. exp_04
-floors each on uniform positions and carries their window means into `_summary`. The mass draw
-is now saved in the position sidecar (`mass`) so the legacy marks can be reproduced. `percolation`
+floors each on uniform positions and carries their window means into `_summary`. **Correction
+(2026-09-14, night):** the sentence "the mass draw is now saved in the sidecar" was written for the
+exp_31 runs and was false for them — that one-line change lived uncommitted in another worktree
+(the exploratory κ sweep in `results/full_explore/` does carry `mass`); the exp_31 runs at `5f5d690`
+do not. Masses, entropies, per-particle potential and per-particle cumulative works are saved from
+`feat/v4-ledger-virial` onward. `percolation`
 and `occupancy` stay recorded and reported; `is_web` still uses exp_09's thresholds (a rank
 threshold is wrong for that verdict — `structure.py` says why — and right for comparing
 connectivity across arms). Tests: `tests/v4/test_structure_connectivity.py`.
+
+## The edge instrumented (2026-09-14, `feat/v4-ledger-virial`)
+
+Per-particle cumulative work by force (`state.work_g_i`, `work_p_i`), pair-form virial terms
+(`virial_gravity`, `virial_pressure`), the gross ledger legs (`transfer_growth`, `transfer_credit`),
+and `mass`, per-mark entropy, per-particle potential and works in the sidecar — every one an
+identity with a test (`tests/v4/test_ledger_virial.py`), no physics change. `exp_03` takes `--g` and
+`--sec-balance` overrides. Exploratory runs in `results/full_virial_explore/` (κ 0.5/1/1.25 × seeds
+1–3) and `results/full_coupling_{g,sec}/` (seed 1). What they showed, exploring: the plateau (κ = 0.5)
+is in steady virial balance with the pair-form terms to ≤ 2 %; the edge (the sign change of the
+pressure's net work between κ = 1 and 1.25) does not move across a fourfold range of g; and the pair
+coupling `sec_balance` cancels **exactly** when growth is budget-clipped (spec R4′). Registered next
+as dawn-field-theory exp_32.
 
 ## What this POC does not claim
 

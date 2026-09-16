@@ -78,7 +78,12 @@ def main():
                              transfer_residual_max=max(m["transfer_residual"] for m in mk), at_cap_max=d["bounds"]["at_cap_frac_max"],
                              floor_ticks=d["bounds"]["ticks_at_dt_floor"], finite=d["finite"], perc_peak=max(m["percolation"] for m in mk),
                              conn_q05=wmean(mk, "conn_q05"), conn_q10=wmean(mk, "conn_q10"), conn_q20=wmean(mk, "conn_q20"),
-                             cv=wmean(mk, "cv"), void=wmean(mk, "void"))   # window means of the recorded one-point stats (exp_31 T2/T3)
+                             cv=wmean(mk, "cv"), void=wmean(mk, "void"),   # window means of the recorded one-point stats (exp_31 T2/T3)
+                             virial_gravity=wmean(mk, "virial_gravity"), virial_pressure=wmean(mk, "virial_pressure"),
+                             transfer_growth_cum=mk[-1].get("transfer_growth_cum"), transfer_credit_cum=mk[-1].get("transfer_credit_cum"),
+                             work_pressure_pos_frac=wmean(mk, "work_pressure_pos_frac"), loss_guard_cum=mk[-1].get("loss_guard_cum"),
+                             work_pressure_median_end=mk[-1].get("work_pressure_median"), e_sec_end=mk[-1]["sec_energy_int"],
+                             work_pressure_cum=mk[-1]["work_pressure_cum"], u0=abs(mk[0]["potential_int"]))   # exp_32: the edge statistics at the last mark
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
     grid = dict(commit=commit, window=WINDOW, n_runs=len(runs), floors=floors,
                 runs=[{k: v for k, v in d.items() if k not in ("marks", "config")} | {"config": d["config"]} for d in runs])

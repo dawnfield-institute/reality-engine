@@ -31,7 +31,8 @@ from structure import web_metrics, cic_deposit, connectivity_at_occupancy  # noq
 from worldmodel import matched_res  # noqa: E402
 
 CONN_Q = (0.05, 0.10, 0.20)   # spine, the registered occupancy, the body (exp_31)
-SIZES = {"proxy": dict(n=1000, box=37.8), "full": dict(n=4000, box=60.0)}
+SIZES = {"proxy": dict(n=1000, box=37.8), "full": dict(n=4000, box=60.0),
+         "double": dict(n=8000, box=75.6)}   # exp_32 size arm: same density, box/2r0 = 3.78 (60 * 2^(1/3) = 75.595)
 BASE = dict(r0=10.0, g=1.5, dims=3, sec_balance=XI_ANALYTIC / PHI, damping=1.0)
 XI_VARIANT = "XI_ANALYTIC"
 
@@ -52,16 +53,23 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--t-end", type=float, default=15.0)
     ap.add_argument("--out-dir", type=Path, default=Path(__file__).resolve().parents[1] / "results")
+    # the edge derivation (2026-09-14 §4/§5, D1/D2): the couplings as overrides, defaults unchanged, so the
+    # invariance of the edge under g and sec_balance can be swept. Recorded in config as always.
+    ap.add_argument("--g", type=float, default=None, help="gravity strength override (default BASE g = 1.5)")
+    ap.add_argument("--sec-balance", type=float, default=None, help="pair coupling override (default XI_ANALYTIC / PHI)")
     a = ap.parse_args()
     kappa = None if a.kappa in ("inf", "none", "None") else float(a.kappa)
-    cfg = ParticleConfig(**SIZES[a.size], **BASE, seed=a.seed, pac_kappa=kappa)
+    base = dict(BASE)
+    if a.g is not None: base["g"] = a.g
+    if a.sec_balance is not None: base["sec_balance"] = a.sec_balance
+    cfg = ParticleConfig(**SIZES[a.size], **base, seed=a.seed, pac_kappa=kappa)
     eng = ParticleEngine(cfg, pipeline=CANONICAL_SINK)
     commit = subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=REPO, capture_output=True, text=True).stdout.strip()
     klabel = "inf" if kappa is None else f"{kappa:g}"
-    label = f"{a.size}_k{klabel}_s{a.seed}"
+    label = f"{a.size}_k{klabel}_s{a.seed}" + (f"_g{a.g:g}" if a.g is not None else "") + (f"_sec{a.sec_balance:g}" if a.sec_balance is not None else "")
     print(f"  {label}: n={cfg.n} box={cfg.box} pac_kappa={kappa} P0={getattr(eng, 'budget0', None)} xi_variant={XI_VARIANT} commit={commit}", flush=True)
     res = matched_res(cfg.n, cfg.dims)
-    marks, pos_marks, next_mark, t0 = [], [], 1.0, time.time()
+    marks, pos_marks, side_marks, next_mark, t0 = [], [], [], 1.0, time.time()
     while True:
         s = eng.tick(); m = s.metrics; t = m["sim_time"]
         if t >= next_mark or t >= a.t_end:
@@ -80,8 +88,15 @@ def main():
                        work_gravity_cum=m.get("work_gravity_cum", 0.0), work_pressure_cum=m.get("work_pressure_cum", 0.0),
                        loss_guard_cum=m.get("loss_guard_cum", 0.0), closure_residual=m["closure_residual"],
                        percolation=w["percolation"], xi_u=w["xi_u"], occupancy=w["occupancy"], void=w["void"], cv=w["cv"],
-                       filament=w["filament"], is_web=bool(w["is_web"]), **conn)
+                       filament=w["filament"], is_web=bool(w["is_web"]), **conn,
+                       # the edge scoping (2026-09-14 §7): virial terms, gross ledger legs, the local work sign
+                       virial_gravity=m.get("virial_gravity", float("nan")), virial_pressure=m.get("virial_pressure", float("nan")),
+                       transfer_growth_cum=m.get("transfer_growth_cum", 0.0), transfer_credit_cum=m.get("transfer_credit_cum", 0.0),
+                       work_pressure_pos_frac=m.get("work_pressure_pos_frac", float("nan")), work_pressure_median=m.get("work_pressure_median", float("nan")),
+                       work_pressure_pos_sum=m.get("work_pressure_pos_sum", 0.0), work_pressure_neg_sum=m.get("work_pressure_neg_sum", 0.0))
             marks.append(row); pos_marks.append(s.pos.cpu().numpy().astype(np.float32))
+            side_marks.append({k: (v.detach().cpu().numpy().astype(np.float32) if v is not None else None) for k, v in
+                               (("S", s.entropy), ("U", s.potential_i), ("wp", s.work_p_i), ("wg", s.work_g_i))})
             print(f"    t={t:6.2f} tick={eng.tick_count:5d} KE/|U|={row['ke_over_u']:7.2f} E_tot={row['total_pac']:9.3g} P/P0={row['budget_frac']:.3f} "
                   f"bound={row['budget_bound_frac']:.3f} clos={row['closure_pac']:.1e} perc={row['percolation']:.3f} occ={row['occupancy']:.3f} conn05/10/20={row['conn_q05']:.2f}/{row['conn_q10']:.2f}/{row['conn_q20']:.2f}", flush=True)
             next_mark += 1.0
@@ -95,7 +110,9 @@ def main():
                budget0=getattr(eng, "budget0", None), t_end=a.t_end, ticks=eng.tick_count, wall_s=round(time.time() - t0, 1),
                finite=finite, bounds=eng.bounds, config=cfg_rec, marks=marks, pos_sidecar=f"{stem}_pos.npz")
     (a.out_dir / f"{stem}.json").write_text(json.dumps(out, indent=1, default=str), encoding="utf-8")
-    np.savez_compressed(a.out_dir / f"{stem}_pos.npz", **{f"t{i}": p for i, p in enumerate(pos_marks)}, sim_times=np.array([m["sim_time"] for m in marks]))
+    np.savez_compressed(a.out_dir / f"{stem}_pos.npz", **{f"t{i}": p for i, p in enumerate(pos_marks)}, sim_times=np.array([m["sim_time"] for m in marks]),
+                        mass=eng.state.mass.detach().cpu().numpy(),   # the masses (1 +/- 0.1) the density field deposits; without them the marks cannot be reproduced
+                        **{f"{k}{i}": v for i, sm in enumerate(side_marks) for k, v in sm.items() if v is not None})   # entropy, per-particle potential, cumulative works per mark
     print(f"  wrote results/{stem}.json (+ _pos.npz)  [{eng.tick_count} ticks, {time.time()-t0:.0f}s, finite={finite}]")
     return 0
 

@@ -51,6 +51,14 @@ repaid on decay, and the total `KE + U_grav + E_SEC + ΣP` is conserved.
   Consequences that follow from arithmetic and are *predicted*, not fitted: the engine can inject
   at most `κ|U₀|`; net creation `Σ (∂E/∂S) ΔS` over a run is ≤ `ΣP(0)` exactly; `κ = 0` is
   gravity-only (entropy cannot grow) and `κ = ∞` (None) is today's substrate.
+- **R4′ — the pair coupling cancels (measured 2026-09-14).** When every growth is budget-clipped —
+  which it is from the first growth tick at every κ tested, `budget_bound_frac = 1.00` — the
+  entropy bought is `S_i = P_i / (∂E_SEC/∂S_i)` with the price ∝ `sec_balance`, so the pressure
+  `sec_balance · s̄` and the pair energy are exactly independent of `sec_balance`: a run at
+  ½ Ξ/φ reproduces the baseline bit for bit with the entropy doubled (POC-12
+  `results/full_coupling_sec/`). In the ledgered engine κ alone sets the pressure's strength;
+  `sec_balance` is a unit for the entropy, nothing more. Not a requirement; a consequence of R2
+  and R4, recorded so no one sweeps it.
 - **R5 — inert by default.** With `pac_kappa = None` every operator is bit-identical to the
   derived-sink round's code: `budget` stays `None`, no ledger metrics are written, and
   `CANONICAL_SINK` with sinks off remains bit-identical to `CANONICAL`.
